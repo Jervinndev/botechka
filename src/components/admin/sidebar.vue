@@ -118,11 +118,12 @@ onMounted(async () => {
 
 <template>
     <aside :class="[
-        'p-4 bg-white transition-all duration-300 flex flex-col border-r border-gray-200',
-        props.isBeneficiaryLayout ? 'w-full h-auto md:h-screen md:shrink-0' : 'h-screen',
-        !props.isBeneficiaryLayout ? (isCollapsed ? 'w-20' : 'w-95') : (isCollapsed ? 'md:w-20' : 'md:w-95')
+        'bg-white transition-all duration-300 flex flex-col border-r border-gray-200',
+        props.isBeneficiaryLayout ? 'w-full h-16 md:h-screen md:p-4 md:shrink-0' : 'h-screen p-4',
+        !props.isBeneficiaryLayout ? (isCollapsed ? 'w-20' : 'w-95') : (isCollapsed ? 'md:w-20' : 'md:w-80')
     ]">
-        <div v-if="props.isBeneficiaryLayout" class="flex md:hidden items-center justify-between">
+        <div v-if="props.isBeneficiaryLayout"
+            class="fixed inset-x-0 top-0 z-50 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden">
             <img :src="sidebarLogo" alt="Logo" class="w-30">
             <button type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg" :aria-expanded="isMobileMenuOpen"
                 aria-label="Toggle navigation" @click="isMobileMenuOpen = !isMobileMenuOpen">
@@ -130,18 +131,25 @@ onMounted(async () => {
                     :class="['transition-all duration-300', isMobileMenuOpen ? 'rotate-0' : 'rotate-180']" />
             </button>
         </div>
+        <button v-if="props.isBeneficiaryLayout && isMobileMenuOpen" type="button"
+            class="fixed inset-x-0 bottom-0 top-16 z-30 bg-black/30 md:hidden" aria-label="Close navigation"
+            @click="isMobileMenuOpen = false">
+        </button>
         <div :class="[
             'flex flex-col justify-between',
-            props.isBeneficiaryLayout ? 'md:flex md:h-full' : 'h-full',
-            props.isBeneficiaryLayout ? (isMobileMenuOpen ? 'flex' : 'hidden md:flex') : ''
+            props.isBeneficiaryLayout
+                ? [
+                    'fixed bottom-0 left-0 top-10 z-40 w-72 max-w-[85vw] bg-white p-4 shadow-xl transition-transform duration-300 md:static md:z-auto md:h-full md:w-auto md:max-w-none md:p-0 md:shadow-none md:translate-x-0',
+                    isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+                ]
+                : 'h-full'
         ]">
             <div>
                 <div class="hidden md:flex items-center justify-between gap-3">
                     <div v-if="!isCollapsed" class="flex items-center gap-3">
                         <img :src="sidebarLogo" alt="Logo" class="w-30">
                     </div>
-                    <button type="button" @click="toggle"
-                        class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg"
+                    <button type="button" @click="toggle" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg"
                         :aria-expanded="!isCollapsed" aria-label="Toggle sidebar">
                         <ChevronsLeft color="#808080"
                             :class="['transition-all duration-300', isCollapsed ? 'rotate-180' : 'rotate-0']" />
@@ -154,7 +162,7 @@ onMounted(async () => {
                         </h1>
                         <router-link v-for="over in visibleOverview" :key="over.label" :to="over.to"
                             class="flex items-center gap-2 p-2.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-blue-700 transition-all font-medium text-sm"
-                            active-class="!bg-blue-700 !text-white font-medium">
+                            active-class="!bg-blue-700 !text-white font-medium" @click="isMobileMenuOpen = false">
                             <component :is="over.Icon" :size="22" />
                             <h1 v-if="isExpanded" class="text-sm font-poppins">{{ over.label }}</h1>
                         </router-link>
@@ -166,7 +174,7 @@ onMounted(async () => {
                         </h1>
                         <router-link v-for="opera in visibleOperationItems" :key="opera.label" :to="opera.to"
                             class="flex items-center gap-2 p-2.5 rounded-lg text-[#808080] hover:bg-slate-100 hover:text-blue-700 transition-all font-medium text-sm"
-                            active-class="!bg-blue-700 !text-white">
+                            active-class="!bg-blue-700 !text-white" @click="isMobileMenuOpen = false">
                             <component :is="opera.Icon" :size="22" />
                             <h1 v-if="isExpanded" class="font-medium font-poppins">{{ opera.label }}</h1>
                         </router-link>
@@ -177,7 +185,7 @@ onMounted(async () => {
                         </h1>
                         <router-link v-for="ins in visibleInsight" :key="ins.label" :to="ins.to"
                             class="flex items-center gap-2 p-2.5 rounded-lg text-[#808080] hover:bg-slate-100 hover:text-blue-700 transition-all font-medium text-sm"
-                            active-class="!bg-blue-700 !text-white">
+                            active-class="!bg-blue-700 !text-white" @click="isMobileMenuOpen = false">
                             <component :is="ins.Icon" :size="22" />
                             <h1 v-if="isExpanded" class="font-medium font-poppins">{{ ins.label }}</h1>
                         </router-link>
@@ -200,7 +208,7 @@ onMounted(async () => {
                 <div class="flex flex-col gap-2 mt-4">
                     <router-link v-for="sets in settings" :key="sets.label" :to="sets.to"
                         class="flex items-center gap-2 p-2.5 rounded-lg text-[#808080] hover:bg-slate-100 hover:text-blue-700 transition-all font-medium text-sm"
-                        active-class="!bg-blue-700 !text-white">
+                        active-class="!bg-blue-700 !text-white" @click="isMobileMenuOpen = false">
                         <component :is="sets.Icon" :size="22" />
                         <h1 v-if="isExpanded" class="font-medium font-inter">{{ sets.label }}</h1>
                     </router-link>
