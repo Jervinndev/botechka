@@ -172,7 +172,8 @@ const sistemaSteps = ref([
                     </div>
                 </div>
                 <div class="hidden lg:flex flex-1 items-center justify-center [perspective:1000px]">
-                    <img src="/src/dist/Screenshot 2026-10-18 192805.png" alt="Spiral illustration"
+                    <img src="/src/dist/assets/Screenshot 2026-10-18 192805-DnAjIRY2.png"
+                        alt="Botika ng Bayan illustration"
                         class="w-full max-w-[600px] object-cover [transform:rotateX(50deg)_rotateZ(-35deg)] animate-[float_6s_ease-in-out_infinite]" />
                 </div>
             </div>

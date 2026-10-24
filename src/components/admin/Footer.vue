@@ -7,7 +7,7 @@
                     <div class="flex items-center gap-3">
                         <router-link to="/" class="flex items-center gap-3">
                             <div>
-                                <img src="/src/dist/BotikaBLUE.png" alt="" class="w-40">
+                                <img src="/src/dist/assets/BotikaBLUE-CcOSGtx9.png" alt="" class="w-40">
                             </div>
                         </router-link>
                     </div>

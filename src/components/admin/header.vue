@@ -117,7 +117,7 @@ onUnmounted(() => {
         :class="IsScrolled ? 'border-b border-gray-200' : ''">
         <div class="max-w-7xl mx-auto w-full flex items-center justify-between 2xl:px-0 px-4 py-2.5">
             <router-link to="/" class="flex items-center gap-2">
-                <img src="/src/dist/BotikaBLUE.png" alt="RHUBoTechka logo" class="w-30 h-12 object-contain">
+                <img src="/src/dist/assets/BotikaBLUE-CcOSGtx9.png" alt="RHUBoTechka logo" class="w-30 h-12 object-contain">
             </router-link>
 
             <nav class="2xl:flex hidden items-center justify-center gap-8 py-3 font-outfit text-sm text-gray-500">

@@ -85,13 +85,13 @@ onMounted(() => {
             <p class="text-sm font-medium">Connecting to Google...</p>
         </div>
     </div>
-    <section class="grid 2xl:grid-cols-2 grid-cols-1 2xl:p-0" style="background-image: url('/src/dist/BotikaBLUE.png')">
+    <section class="grid 2xl:grid-cols-2 grid-cols-1 2xl:p-0" style="background-image: url('/src/assets/Botikangbayan.jpg')">
         <div
             class="w-full 2xl:h-screen h-fit bg-blue-700/88 backdrop-blur-xl 2xl:flex hidden flex-col justify-between items-start 2xl:p-10 p-4">
             <div class="text-white w-full flex flex-col justify-start gap-6 h-full">
                 <router-link to="/">
                     <div class="flex flex-col items-start justify-start">
-                        <img src="/src/dist/BotikaWHITE.png" alt="" class="w-40">
+                        <img src="/src/assets/Botikangbayan.jpg" alt="" class="w-40">
                     </div>
                 </router-link>
                 <!-- <div class="mt-8">
@@ -167,7 +167,7 @@ onMounted(() => {
                             class="w-full py-2 rounded-lg flex items-center justify-center gap-2 font-inter text-sm">
                             <span>{{ Isloading ? 'Connecting to Google...' : 'Continue with Google' }}</span>
                         </button>
-                        <img src="/src/dist/google.png" alt="" class="h-10 absolute">
+                        <img src="/src/assets/Botikangbayan.jpg" alt="" class="h-10 absolute">
                     </div> -->
                 </form>
             </div>
