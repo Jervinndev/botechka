@@ -1,5 +1,7 @@
 <script setup>
 import { Check, Eye, EyeOff, Pill } from '@lucide/vue'
+import botikaLogo from '../../assets/BotikaWHITE-B0wYbg7D.png'
+import botikaBackground from '../../assets/Botikangbayan.jpg'
 import { loginUser } from '../../services/Authservices';
 import { useRouter } from 'vue-router';
 import { onMounted, ref } from 'vue';
@@ -88,14 +90,14 @@ onMounted(() => {
     <section class="grid 2xl:grid-cols-2 grid-cols-1 2xl:p-0">
         <div class="grid relative 2xl:flex hidden">
             <div class="relative w-full 2xl:flex hidden">
-                <img src="/src/assets/Botikangbayan.jpg" alt="" class="h-full">
+                <img :src="botikaBackground" alt="" class="h-full">
             </div>
             <div
                 class="w-full absolute 2xl:h-screen h-fit bg-blue-800/88 backdrop-blur-xl 2xl:flex hidden flex-col justify-between items-center 2xl:p-10 p-4">
                 <div class="text-white w-full flex flex-col justify-center items-center gap-6 h-full">
                     <router-link to="/">
                         <div class="flex flex-col items-start justify-start">
-                            <img src="/src/dist/assets/BotikaWHITE-B0wYbg7D.png" alt="" class="w-60">
+                            <img :src="botikaLogo" alt="" class="w-60">
                         </div>
                     </router-link>
                     <!-- <div class="mt-8">

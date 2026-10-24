@@ -1,3 +1,7 @@
+<script setup>
+import botikaLogo from '../../assets/BotikaBLUE-CcOSGtx9.png'
+</script>
+
 <template>
     <footer class="bg-white text-gray-400 border-t border-slate-800/10 font-outfit">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
@@ -7,7 +11,7 @@
                     <div class="flex items-center gap-3">
                         <router-link to="/" class="flex items-center gap-3">
                             <div>
-                                <img src="/src/dist/assets/BotikaBLUE-CcOSGtx9.png" alt="" class="w-40">
+                                <img :src="botikaLogo" alt="" class="w-40">
                             </div>
                         </router-link>
                     </div>

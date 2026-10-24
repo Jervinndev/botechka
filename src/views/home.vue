@@ -1,4 +1,5 @@
 <script setup>
+import homeIllustration from '../assets/Screenshot 2026-10-18 192805-DnAjIRY2.png'
 import {
     ShieldCheck, NotebookPen, Activity, CalendarClock, Pill, Van, TrendingUp
     , Mail, Stethoscope, CircleUser, ShoppingBag, CalendarCheck2, MessageSquare
@@ -172,7 +173,7 @@ const sistemaSteps = ref([
                     </div>
                 </div>
                 <div class="hidden lg:flex flex-1 items-center justify-center [perspective:1000px]">
-                    <img src="/src/dist/assets/Screenshot 2026-10-18 192805-DnAjIRY2.png"
+                    <img :src="homeIllustration"
                         alt="Botika ng Bayan illustration"
                         class="w-full max-w-[600px] object-cover [transform:rotateX(50deg)_rotateZ(-35deg)] animate-[float_6s_ease-in-out_infinite]" />
                 </div>
