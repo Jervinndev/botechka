@@ -85,35 +85,43 @@ onMounted(() => {
             <p class="text-sm font-medium">Connecting to Google...</p>
         </div>
     </div>
-    <section class="grid 2xl:grid-cols-2 grid-cols-1 2xl:p-0" style="background-image: url('/src/assets/Botikangbayan.jpg')">
-        <div
-            class="w-full 2xl:h-screen h-fit bg-blue-700/88 backdrop-blur-xl 2xl:flex hidden flex-col justify-between items-start 2xl:p-10 p-4">
-            <div class="text-white w-full flex flex-col justify-start gap-6 h-full">
-                <router-link to="/">
-                    <div class="flex flex-col items-start justify-start">
-                        <img src="/src/assets/Botikangbayan.jpg" alt="" class="w-40">
-                    </div>
-                </router-link>
-                <!-- <div class="mt-8">
+    <section class="grid 2xl:grid-cols-2 grid-cols-1 2xl:p-0">
+        <div class="grid relative 2xl:flex hidden">
+            <div class="relative w-full 2xl:flex hidden">
+                <img src="/src/assets/Botikangbayan.jpg" alt="" class="h-full">
+            </div>
+            <div
+                class="w-full absolute 2xl:h-screen h-fit bg-blue-800/88 backdrop-blur-xl 2xl:flex hidden flex-col justify-between items-center 2xl:p-10 p-4">
+                <div class="text-white w-full flex flex-col justify-center items-center gap-6 h-full">
+                    <router-link to="/">
+                        <div class="flex flex-col items-start justify-start">
+                            <img src="/src/dist/assets/BotikaWHITE-B0wYbg7D.png" alt="" class="w-60">
+                        </div>
+                    </router-link>
+                    <!-- <div class="mt-8">
                     <img src="/src/assets/Laboratory research Illustration.png" alt="" class="w-100">
                 </div> -->
-                <div class="mt-8">
-                    <h1 class="2xl:text-4xl text-3xl text-gray-200 font-bold 2xl:w-2xl w-sm font-inter leading-10">
-                        "Keeping Medicines
-                        Available,
-                        Keeping
-                        Communities Healthy."
-                    </h1>
-                    <p class="text-gray-300 2xl:w-xl w-sm mt-3 font-inter ">Walang Bayad, Para sa Kalusugan ng Lahat.
-                        syempre
-                        ganon yun
-                        eh
-                        pilipino
-                        tayo mabilis kasi pag libre try nyo kainin gamot sabay sabay.
-                    </p>
+                    <div class="flex flex-col items-center justify-center">
+                        <h1
+                            class="2xl:text-4xl text-center text-3xl text-gray-200 font-bold 2xl:w-2xl font-inter leading-10">
+                            "Keeping Medicines
+                            Available,
+                            Keeping
+                            Communities Healthy."
+                        </h1>
+                        <p class="text-gray-300 2xl:w-xl mt-3 font-inter text-center">Walang Bayad, Para sa
+                            Kalusugan ng
+                            Lahat.
+                            syempre
+                            ganon yun
+                            eh
+                            pilipino
+                            tayo mabilis kasi pag libre try nyo kainin gamot sabay sabay.
+                        </p>
+                    </div>
                 </div>
+                <p class="text-gray-300 font-inter pt-5 ">&copy; 2026 RHU-BoTechKa. All rights reserved.</p>
             </div>
-            <p class="text-gray-300 font-inter pt-5 ">&copy; 2026 RHU-BoTechKa. All rights reserved.</p>
         </div>
         <div class="w-full h-screen bg-gray-100 flex items-center justify-center p-4">
             <div class="p-6 bg-white rounded-xl w-100">
