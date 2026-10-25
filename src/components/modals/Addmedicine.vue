@@ -150,63 +150,55 @@ async function saveMedicine() {
         enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
         leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
         <section v-if="IsOpen"
-            class="fixed inset-0 z-30 bg-black/40 w-full h-full flex items-center justify-center p-4 overflow-y-auto">
-            <div class="p-6 bg-white max-w-2xl w-full rounded-xl shadow-xl my-8 font-inter">
+            class="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-black/40 p-4">
+            <div class="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 font-inter shadow-xl">
                 <form @submit.prevent="saveMedicine">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h1 class="font-black text-[#404040] font-inter text-lg">ADD NEW MEDICINE</h1>
-                            <p class="text-sm text-[#808080] font-inter">insert ka muna pare</p>
+                            <h1 class="mt-2 font-inter text-2xl font-bold text-[#404040]">Add New Medicine</h1>
+                            <p class="font-inter text-sm font-medium text-[#808080]">Add a new medicine to your inventory.</p>
                         </div>
-                        <X class="cursor-pointer text-gray-500 hover:text-black" @click="closeModal" />
+                        <X class="cursor-pointer text-gray-400 hover:text-[#404040]" @click="closeModal" />
                     </div>
 
                     <div v-if="errorMessage"
-                        class="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                        class="mt-4 rounded-lg bg-red-50 p-2 text-sm text-red-600">
                         {{ errorMessage }}
                     </div>
 
-                    <div class="grid grid-cols-1 gap-4 mt-8">
+                    <div class="mt-6 grid grid-cols-1 gap-6">
                         <div class="flex items-center gap-2">
                             <img src="/src/assets/download (12).jpg" alt="" class="w-20 rounded-lg object-cover">
-                            <div class="flex flex-col items-start gap-2">
-                                <div>
-                                    <label for="imageInput"
-                                        class="cursor-pointer bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
-                                        Upload Image
-                                    </label>
-                                    <input type="file" class="hidden" id="imageInput">
-                                </div>
-                                <div>
-                                    <button type="button" @click="closeModal"
-                                        class="bg-gray-100 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400">
-                                        Cancel
-                                    </button>
-                                </div>
+                            <div>
+                                <label for="imageInput"
+                                    class="cursor-pointer rounded-xl bg-blue-700 px-4 py-2 text-white hover:bg-blue-800">
+                                    Upload Image
+                                </label>
+                                <input type="file" class="hidden" id="imageInput">
                             </div>
                         </div>
                         <div class="grid gap-2">
                             <div>
-                                <h1 class="text-lg text-blue-700 font-bold">Identity</h1>
+                                <h1 class="font-inter text-lg font-semibold text-[#404040]">Identity</h1>
                             </div>
-                            <div class="grid grid-cols-2 gap-2 mt-1">
+                            <div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div class="grid gap-1">
-                                    <label class="font-medium text-sm text-slate-600">Medicine name <span
-                                            class="text-red-700">*</span></label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Medicine name <span
+                                            class="text-red-500">*</span></label>
                                     <input type="text" v-model="formData.medicine_name"
-                                        class="p-2 w-full border border-gray-300 rounded-lg placeholder:opacity-50 focus:outline-blue-600"
+                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 placeholder:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                         placeholder="e.g. Biogesic" required>
                                 </div>
                                 <div class="grid gap-1">
-                                    <label class="font-medium text-sm text-slate-600">Medicine ID (Auto) </label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Medicine ID (Auto) </label>
                                     <input type="text" v-model="formData.medicine_id" readonly
-                                        class="p-2 border w-full border-gray-300 rounded-lg bg-gray-100 text-slate-600 cursor-not-allowed">
+                                        class="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-100 p-2 text-slate-600">
                                 </div>
-                                <div class="grid gap-1 col-span-2">
-                                    <label class="font-medium text-sm text-slate-600">Category <span
-                                            class="text-red-700">*</span></label>
+                                <div class="grid gap-1 sm:col-span-2">
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Category <span
+                                            class="text-red-500">*</span></label>
                                     <select v-model="formData.category"
-                                        class="p-2 border border-gray-300 rounded-lg bg-white cursor-pointer focus:outline-blue-600"
+                                        class="w-full cursor-pointer rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                         required>
                                         <option value="">-- Select Category --</option>
                                         <option v-for="category in categories" :key="category.id"
@@ -222,21 +214,21 @@ async function saveMedicine() {
                         </div>
                         <div class="grid gap-2">
                             <div>
-                                <h1 class="text-lg text-blue-700 font-bold">Stock</h1>
+                                <h1 class="font-inter text-lg font-semibold text-[#404040]">Stock</h1>
                             </div>
-                            <div class="grid grid-cols-3 gap-2 mt-1">
+                            <div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-3">
                                 <div class="grid gap-1">
-                                    <label class="font-medium text-sm text-slate-600">Quantity <span
-                                            class="text-red-700">*</span></label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Quantity <span
+                                            class="text-red-500">*</span></label>
                                     <input type="number" v-model="formData.quantity"
-                                        class="p-2 w-full border border-gray-300 rounded-lg placeholder:opacity-50 focus:outline-blue-600"
+                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 placeholder:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                         placeholder="e.g. 100" min="0" required>
                                 </div>
                                 <div class="grid gap-1">
-                                    <label class="font-medium text-sm text-slate-600">Dosage <span
-                                            class="text-red-700">*</span></label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Dosage <span
+                                            class="text-red-500">*</span></label>
                                     <select v-model="formData.dosage"
-                                        class="p-2 w-full border border-gray-300 rounded-lg bg-white cursor-pointer focus:outline-blue-600"
+                                        class="w-full cursor-pointer rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                         required>
                                         <option v-for="dosage in dosages" :key="dosage.id" :value="dosage.dosage_name">
                                             {{ dosage.dosage_name }}
@@ -244,10 +236,10 @@ async function saveMedicine() {
                                     </select>
                                 </div>
                                 <div class="grid gap-1">
-                                    <label class="font-medium text-sm text-slate-600">Unit <span
-                                            class="text-red-700">*</span></label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Unit <span
+                                            class="text-red-500">*</span></label>
                                     <select v-model="formData.unit"
-                                        class="p-2 w-full border border-gray-300 rounded-lg bg-white cursor-pointer focus:outline-blue-600"
+                                        class="w-full cursor-pointer rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                         required>
                                         <option value="">-- Select Unit --</option>
                                         <option v-for="unit in units" :key="unit.id" :value="unit.unit_name">
@@ -259,54 +251,54 @@ async function saveMedicine() {
                         </div>
                         <div class="grid gap-2">
                             <div>
-                                <h1 class="text-lg text-blue-700 font-bold">Batch and Supplier</h1>
+                                <h1 class="font-inter text-lg font-semibold text-[#404040]">Batch and Supplier</h1>
                             </div>
-                            <div class="grid grid-cols-2 gap-2 mt-1">
+                            <div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div class="grid gap-1">
-                                    <label class="font-medium text-sm text-slate-600">Batch number <span
-                                            class="text-red-700">*</span></label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Batch number <span
+                                            class="text-red-500">*</span></label>
                                     <input type="text" v-model="formData.batch_number"
-                                        class="p-2 w-full uppercase border border-gray-300 rounded-lg placeholder:opacity-50 focus:outline-blue-600"
+                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 uppercase placeholder:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                         placeholder="e.g. BATCH-A1" required>
                                 </div>
                                 <div class="grid gap-1">
-                                    <label class="font-medium text-sm text-slate-600">Supplier name <span
-                                            class="text-red-700">*</span></label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Supplier name <span
+                                            class="text-red-500">*</span></label>
                                     <input type="text" v-model="formData.supplier"
-                                        class="p-2 w-full border border-gray-300 rounded-lg placeholder:opacity-50 focus:outline-blue-600"
+                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 placeholder:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                         placeholder="e.g. Metro Drug" required>
                                 </div>
                             </div>
                         </div>
                         <div class="grid gap-2">
                             <div>
-                                <h1 class="text-lg text-blue-700 font-bold">Batch and Supplier</h1>
+                                <h1 class="font-inter text-lg font-semibold text-[#404040]">Dates</h1>
                             </div>
-                            <div class="grid grid-cols-2 gap-2 mt-1">
+                            <div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div class="grid gap-1">
-                                    <label class="font-medium text-sm text-slate-600">Manufacturing Date
-                                        <span class="text-red-700">*</span></label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Manufacturing Date
+                                        <span class="text-red-500">*</span></label>
                                     <input type="date" v-model="formData.manufacturing_date"
                                         :max="manufacturingDateMax"
-                                        class="p-2 w-full border border-gray-300 rounded-lg focus:outline-blue-600"
+                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                         required>
                                 </div>
                                 <div class="grid gap-1">
-                                    <label class="font-medium text-sm text-slate-600">Expiration date <span
-                                            class="text-red-700">*</span></label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Expiration date <span
+                                            class="text-red-500">*</span></label>
                                     <input type="date" v-model="formData.expiration_date"
                                         :min="expirationDateMin"
-                                        class="p-2 w-full border border-gray-300 rounded-lg focus:outline-blue-600"
+                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                         required>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-6 flex gap-2 items-center justify-end">
+                    <div class="mt-6 flex items-center justify-end gap-2">
                         <button type="button" @click="closeModal"
-                            class="px-4 py-2.5 bg-white rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</button>
+                            class="cursor-pointer rounded-xl bg-gray-100 p-2 px-4 text-[#404040] transition hover:bg-gray-200">Cancel</button>
                         <button type="submit"
-                            class="px-5 py-2.5  text-white rounded-lg border bg-blue-700 hover:bg-blue-800 transition"
+                            class="cursor-pointer rounded-xl bg-blue-700 p-2 px-5 text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
                             :disabled="Isloading">
                             <span v-if="Isloading">Saving...</span>
                             <span v-else>Save Medicine</span>

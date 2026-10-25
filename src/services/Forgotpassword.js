@@ -4,7 +4,7 @@ export async function forgotPassword(email) {
     const { error } = await supabase.auth.resetPasswordForEmail(
         email,
         {
-            redirectTo: 'https://botechka.vercel.app/reset-password'
+            redirectTo: `${window.location.origin}/reset-password`
         }
     )
 

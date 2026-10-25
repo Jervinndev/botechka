@@ -174,37 +174,37 @@ watch(() => props.IsOpen, isOpen => {
         leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
         <section v-if="IsOpen"
             class="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-black/40 p-4">
-            <div class="my-8 w-full max-w-2xl rounded-xl bg-white p-6 font-inter shadow-xl">
+            <div class="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 font-inter shadow-xl">
                 <form @submit.prevent="saveStock">
                     <div class="flex items-start justify-between">
                         <div>
-                            <h1 class="text-lg font-black text-[#404040]">ADD NEW STOCK</h1>
-                            <p class="text-sm text-[#808080]">Select an existing medicine and add to its quantity.</p>
+                            <h1 class="mt-2 font-inter text-2xl font-bold text-[#404040]">Add New Stock</h1>
+                            <p class="font-inter text-sm font-medium text-[#808080]">Select an existing medicine and add to its quantity.</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <button type="button" @click="toggleNewBatch" :disabled="!selectedMedicine"
-                                class="flex items-center gap-1 rounded-lg bg-blue-700 px-3 py-2 text-sm text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50">
+                                class="flex items-center gap-1 rounded-xl bg-blue-700 p-2 px-3 text-sm text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50">
                                 <Plus :size="16" />
                                 {{ isNewBatch ? 'Cancel New Batch' : 'New Batch' }}
                             </button>
                             <button type="button" @click="closeModal"
-                                class="cursor-pointer text-gray-500 transition hover:text-black">
+                                class="cursor-pointer rounded-xl p-1 text-gray-400 transition hover:bg-gray-100 hover:text-[#404040]">
                                 <X :size="22" />
                             </button>
                         </div>
                     </div>
 
                     <div v-if="errorMessage"
-                        class="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                        class="mt-4 rounded-lg bg-red-50 p-2 text-sm text-red-600">
                         {{ errorMessage }}
                     </div>
 
-                    <div class="mt-8 grid grid-cols-1 gap-5">
+                    <div class="mt-6 grid grid-cols-1 gap-6">
                         <div class="grid gap-1">
-                            <label class="text-sm font-medium text-slate-600">Medicine <span
-                                    class="text-red-700">*</span></label>
+                            <label class="font-inter text-sm font-medium text-[#404040]">Medicine <span
+                                    class="text-red-500">*</span></label>
                             <select v-model="formData.selectedMedicine" @change="selectMedicine"
-                                class="w-full cursor-pointer rounded-lg border border-gray-300 bg-white p-2.5 focus:outline-blue-600"
+                                class="w-full cursor-pointer rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                 required>
                                 <option value="">-- Select Medicine --</option>
                                 <option v-for="medicine in medicines" :key="medicine.id" :value="medicine.id">
@@ -216,82 +216,82 @@ watch(() => props.IsOpen, isOpen => {
                         </div>
 
                         <div class="grid gap-2">
-                            <h2 class="text-lg font-bold text-blue-700">Identity</h2>
-                            <div class="mt-1 grid grid-cols-2 gap-2">
+                            <h2 class="font-inter text-lg font-semibold text-[#404040]">Identity</h2>
+                            <div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div class="grid gap-1">
-                                    <label class="text-sm font-medium text-slate-600">Medicine name</label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Medicine name</label>
                                     <input :value="selectedMedicine?.medicine_name || ''" type="text" disabled
-                                        class="w-full rounded-lg border border-gray-300 bg-gray-100 p-2 text-slate-600 disabled:cursor-not-allowed">
+                                        class="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-100 p-2 text-slate-600">
                                 </div>
                                 <div class="grid gap-1">
-                                    <label class="text-sm font-medium text-slate-600">Medicine ID</label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Medicine ID</label>
                                     <input :value="selectedMedicine?.medicine_id || ''" type="text" disabled
-                                        class="w-full rounded-lg border border-gray-300 bg-gray-100 p-2 text-slate-600 disabled:cursor-not-allowed">
+                                        class="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-100 p-2 text-slate-600">
                                 </div>
-                                <div class="col-span-2 grid gap-1">
-                                    <label class="text-sm font-medium text-slate-600">Category</label>
+                                <div class="grid gap-1 sm:col-span-2">
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Category</label>
                                     <input :value="selectedMedicine?.category || ''" type="text" disabled
-                                        class="w-full rounded-lg border border-gray-300 bg-gray-100 p-2 text-slate-600 disabled:cursor-not-allowed">
+                                        class="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-100 p-2 text-slate-600">
                                 </div>
                             </div>
                         </div>
 
                         <div class="grid gap-2">
-                            <h2 class="text-lg font-bold text-blue-700">Stock</h2>
-                            <div class="mt-1 grid grid-cols-3 gap-2">
+                            <h2 class="font-inter text-lg font-semibold text-[#404040]">Stock</h2>
+                            <div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-3">
                                 <div class="grid gap-1">
-                                    <label class="text-sm font-medium text-slate-600">Quantity to Add <span
-                                            class="text-red-700">*</span></label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Quantity to Add <span
+                                            class="text-red-500">*</span></label>
                                     <input v-model.number="formData.quantity" type="number" min="1"
                                         placeholder="e.g. 100"
-                                        class="w-full rounded-lg border border-gray-300 p-2 focus:outline-blue-600"
+                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                         required>
                                 </div>
                                 <div class="grid gap-1">
-                                    <label class="text-sm font-medium text-slate-600">Dosage</label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Dosage</label>
                                     <input :value="selectedMedicine?.dosage || ''" type="text" disabled
-                                        class="w-full rounded-lg border border-gray-300 bg-gray-100 p-2 text-slate-600 disabled:cursor-not-allowed">
+                                        class="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-100 p-2 text-slate-600">
                                 </div>
                                 <div class="grid gap-1">
-                                    <label class="text-sm font-medium text-slate-600">Unit</label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Unit</label>
                                     <input :value="selectedMedicine?.unit || ''" type="text" disabled
-                                        class="w-full rounded-lg border border-gray-300 bg-gray-100 p-2 text-slate-600 disabled:cursor-not-allowed">
+                                        class="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-100 p-2 text-slate-600">
                                 </div>
                             </div>
-                            <p v-if="selectedMedicine" class="text-sm text-slate-600">
+                            <p v-if="selectedMedicine" class="font-inter text-sm font-medium text-[#808080]">
                                 Current stock: {{ selectedMedicine.quantity ?? 0 }} {{ selectedMedicine.unit }}
                             </p>
                         </div>
 
                         <div class="grid gap-2">
-                            <h2 class="text-lg font-bold text-blue-700">Batch and Supplier</h2>
-                            <div class="mt-1 grid grid-cols-2 gap-2">
+                            <h2 class="font-inter text-lg font-semibold text-[#404040]">Batch and Supplier</h2>
+                            <div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div class="grid gap-1">
-                                    <label class="text-sm font-medium text-slate-600">Batch number</label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Batch number</label>
                                     <input v-model="formData.batch_number" type="text" placeholder="e.g. BATCH-A1"
                                         :disabled="!isNewBatch"
-                                        class="w-full rounded-lg border border-gray-300 p-2 uppercase focus:outline-blue-600 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-slate-600"
+                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 uppercase focus:outline-none focus:ring-2 focus:ring-blue-700 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-slate-600"
                                         :required="isNewBatch">
                                 </div>
                                 <div class="grid gap-1">
-                                    <label class="text-sm font-medium text-slate-600">Supplier name</label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Supplier name</label>
                                     <input v-model="formData.supplier" type="text" placeholder="e.g. Metro Drug"
                                         :disabled="!isNewBatch"
-                                        class="w-full rounded-lg border border-gray-300 p-2 focus:outline-blue-600 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-slate-600"
+                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-slate-600"
                                         :required="isNewBatch">
                                 </div>
                                 <div class="grid gap-1">
-                                    <label class="text-sm font-medium text-slate-600">Manufacturing Date</label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Manufacturing Date</label>
                                     <input v-model="formData.manufacturing_date" type="date"
                                         :max="manufacturingDateMax" :disabled="!isNewBatch"
-                                        class="w-full rounded-lg border border-gray-300 p-2 focus:outline-blue-600 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-slate-600"
+                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-slate-600"
                                         :required="isNewBatch">
                                 </div>
                                 <div class="grid gap-1">
-                                    <label class="text-sm font-medium text-slate-600">Expiration date</label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Expiration date</label>
                                     <input v-model="formData.expiration_date" type="date"
                                         :min="expirationDateMin" :disabled="!isNewBatch"
-                                        class="w-full rounded-lg border border-gray-300 p-2 focus:outline-blue-600 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-slate-600"
+                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-slate-600"
                                         :required="isNewBatch">
                                 </div>
                             </div>
@@ -300,9 +300,9 @@ watch(() => props.IsOpen, isOpen => {
 
                     <div class="mt-6 flex items-center justify-end gap-2">
                         <button type="button" @click="closeModal"
-                            class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 transition hover:bg-gray-50">Cancel</button>
+                            class="cursor-pointer rounded-xl bg-gray-100 p-2 px-4 text-[#404040] transition hover:bg-gray-200">Cancel</button>
                         <button type="submit" :disabled="Isloading || medicines.length === 0"
-                            class="rounded-lg border border-blue-700 bg-blue-700 px-5 py-2.5 text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60">
+                            class="cursor-pointer rounded-xl bg-blue-700 p-2 px-5 text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60">
                             <span v-if="Isloading">Adding Stock...</span>
                             <span v-else>Add Stock</span>
                         </button>

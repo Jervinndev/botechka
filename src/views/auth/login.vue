@@ -60,7 +60,6 @@ async function handlesubmit() {
             } else if (rawError.includes('invalid clones') || rawError.includes('invalid credentials')) {
                 Errormessage.value = 'Invalid credentials'
             } else {
-                // Fallback para sa iba pang random errors (gaya ng internet connection issue)
                 Errormessage.value = result.error || 'Error'
             }
         }

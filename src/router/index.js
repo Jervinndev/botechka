@@ -215,12 +215,6 @@ router.beforeEach(async (to, from, next) => {
         }
     }
 
-    if (to.name === 'reset-password') {
-        if (from.name !== 'forgot-password') {
-            return next('/forgot-password')
-        }
-    }
-
     if ((to.name === 'login' || to.name === 'register') && session) {
         return next('beneficiary-dashboard')
     }
