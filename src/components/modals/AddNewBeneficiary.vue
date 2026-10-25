@@ -1,5 +1,12 @@
+<script setup>
+const props = defineProps({
+  IsOpen: Boolean
+})
+const emit = defineEmits(['close'])
+</script>
+
 <template>
-  <section class="fixed inset-0 w-full h-screen flex items-center justify-center z-50 bg-black/40">
+  <section v-if="IsOpen" class="fixed inset-0 w-full h-screen flex items-center justify-center z-50 bg-black/40">
     <div class="mx-auto w-full max-w-[800px] overflow-hidden rounded-xl bg-white font-sans text-slate-800">
 
       <!-- Header -->

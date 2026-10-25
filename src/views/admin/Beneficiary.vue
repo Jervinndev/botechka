@@ -1,6 +1,9 @@
 <script setup>
+import { ref } from 'vue';
 import { Bell, Plus, ChevronDown, Pencil, Trash, Eye } from '@lucide/vue'
 import Addnewbeneficiary from '../../components/modals/AddNewBeneficiary.vue'
+
+const Ismodalopen = ref(false)
 </script>
 
 <template>
@@ -15,7 +18,7 @@ import Addnewbeneficiary from '../../components/modals/AddNewBeneficiary.vue'
                     class="p-2 bg-gray-100 2xl:max-w-5xl max-w-full w-full rounded-md">
                 <div class="flex gap-2 font-inter">
                     <!-- Button para buksan ang Add Medicine Modal -->
-                    <button
+                    <button @click="Ismodalopen = true"
                         class="flex items-center justify-center bg-blue-700 text-white p-2 px-4 gap-2 rounded-md hover:bg-blue-800 transition">
                         <span class="2xl:text-md text-sm">Add New Beneficiary</span>
                     </button>
@@ -100,5 +103,5 @@ import Addnewbeneficiary from '../../components/modals/AddNewBeneficiary.vue'
         </div>
     </section>
 
-    <Addnewbeneficiary />
+    <Addnewbeneficiary :IsOpen="Ismodalopen" @close="Ismodalopen = false" />
 </template>
