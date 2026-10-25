@@ -1,5 +1,12 @@
+<script setup>
+const props = defineProps({
+  IsOpen: Boolean
+})
+const emit = defineEmits(['close'])
+</script>
+
 <template>
-  <section class="fixed inset-0 w-full h-screen flex items-center justify-center z-50 bg-black/40">
+  <section v-if="IsOpen" class="fixed inset-0 w-full h-screen flex items-center justify-center z-50 bg-black/40">
     <div class="mx-auto w-full max-w-[800px] overflow-hidden rounded-xl bg-white font-sans text-slate-800">
 
       <!-- Header -->
@@ -170,7 +177,7 @@
 
         <!-- Footer -->
         <div class="mt-5 flex justify-end gap-3">
-          <button type="button"
+          <button type="button" @click="emit('close')"
             class="h-10 w-[134px] rounded-[11px] border border-gray-200 bg-white text-[15px] text-gray-700 transition hover:bg-gray-50">
             Cancel
           </button>
