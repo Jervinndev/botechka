@@ -1,7 +1,6 @@
 <template>
-  <section class="fixed w-full h-full flex items-center justify-center z-50">
-    <div
-      class="fixed mx-auto w-full max-w-[800px] overflow-hidden rounded-xl bg-white font-sans text-slate-800 shadow-lg">
+  <section class="fixed inset-0 w-full h-screen flex items-center justify-center z-50 bg-black/40">
+    <div class="mx-auto w-full max-w-[800px] overflow-hidden rounded-xl bg-white font-sans text-slate-800">
 
       <!-- Header -->
       <div class="flex items-start justify-between px-[30px] pt-7 pb-4">
