@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue';
 import {
     Bell,
     Search,
@@ -12,6 +13,9 @@ import {
     X,
     ChevronDown,
 } from '@lucide/vue'
+import Selectmedicines from '../../components/modals/Selectmedicines.vue'
+
+const IsmodalOpen = ref(false)
 </script>
 
 <template>
@@ -78,7 +82,7 @@ import {
                     <div class="mt-4 p-4 border border-black/10 rounded-xl">
                         <div class="flex justify-between items-center gap-2">
                             <h2 class="text-sm font-medium text-gray-700">Medicines</h2>
-                            <button
+                            <button @click="IsmodalOpen = true"
                                 class="flex items-center gap-1.5 px-3 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 transition text-xs whitespace-nowrap">
                                 <PackagePlus :size="15" />
                                 Add Item
@@ -429,4 +433,7 @@ import {
             </div>
         </div>
     </section>
+
+
+    <Selectmedicines :IsOpen="IsmodalOpen" @close="IsmodalOpen = false" />
 </template>
