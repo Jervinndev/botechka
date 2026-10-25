@@ -177,7 +177,7 @@ const emit = defineEmits(['close'])
 
         <!-- Footer -->
         <div class="mt-5 flex justify-end gap-3">
-          <button type="button"
+          <button type="button" @click="emit('close')"
             class="h-10 w-[134px] rounded-[11px] border border-gray-200 bg-white text-[15px] text-gray-700 transition hover:bg-gray-50">
             Cancel
           </button>
