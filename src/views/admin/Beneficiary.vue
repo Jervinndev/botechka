@@ -1,5 +1,6 @@
 <script setup>
 import { Bell, Plus, ChevronDown, Pencil, Trash, Eye } from '@lucide/vue'
+import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue'
 </script>
 
 <template>
