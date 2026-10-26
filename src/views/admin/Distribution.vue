@@ -14,8 +14,12 @@ import {
     ChevronDown,
 } from '@lucide/vue'
 import Selectmedicines from '../../components/modals/Selectmedicines.vue'
+import Addnewpurpose from '../../components/modals/Addnewpurpose.vue'
+import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue';
 
 const IsmodalOpen = ref(false)
+const Isaddpurposeopen = ref(false)
+const IsbeneficiaryOpen = ref(false)
 </script>
 
 <template>
@@ -45,7 +49,7 @@ const IsmodalOpen = ref(false)
                     <div class="mt-4 p-4 border border-black/10 rounded-xl">
                         <div class="flex justify-between items-center gap-2">
                             <h2 class="text-sm font-medium text-gray-700">Beneficiary </h2>
-                            <button type="button"
+                            <button type="button" @click="IsbeneficiaryOpen = true"
                                 class="flex items-center justify-center gap-2 rounded-md bg-blue-700 p-2 px-4 text-sm text-white transition hover:bg-blue-800 whitespace-nowrap">
                                 Add New Beneficiaries
                             </button>
@@ -62,7 +66,7 @@ const IsmodalOpen = ref(false)
                     <div class="mt-4 p-4 border border-black/10 rounded-xl">
                         <div class="flex justify-between items-center gap-2">
                             <h2 class="text-sm font-medium text-gray-700">Purpose (Ailment)</h2>
-                            <button type="button"
+                            <button type="button" @click="Isaddpurposeopen = true"
                                 class="flex items-center justify-center gap-2 rounded-md bg-blue-700 p-2 px-4 text-sm text-white transition hover:bg-blue-800 whitespace-nowrap">
                                 Add New Purpose
                             </button>
@@ -263,4 +267,6 @@ const IsmodalOpen = ref(false)
 
 
     <Selectmedicines :IsOpen="IsmodalOpen" @close="IsmodalOpen = false" />
+    <Addnewpurpose :IsOpen="Isaddpurposeopen" @close="Isaddpurposeopen = false" />
+    <AddNewBeneficiary :IsOpen="IsbeneficiaryOpen" @close="IsbeneficiaryOpen = false" />
 </template>
