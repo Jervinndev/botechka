@@ -28,7 +28,6 @@ const emit = defineEmits(['close'])
                         <X :size="22" />
                     </button>
                 </div>
-
                 <div class="mt-6 grid grid-cols-1 gap-4">
                     <div class="grid gap-1">
                         <label for="purpose-name" class="font-inter text-sm font-medium text-[#404040]">
@@ -37,7 +36,6 @@ const emit = defineEmits(['close'])
                         <input id="purpose-name" type="text" placeholder="e.g. Fever"
                             class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
                     </div>
-
                     <div class="grid gap-1">
                         <label for="purpose-desc" class="font-inter text-sm font-medium text-[#404040]">
                             Short description
@@ -46,7 +44,6 @@ const emit = defineEmits(['close'])
                             class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
                     </div>
                 </div>
-
                 <div class="mt-6 flex flex-col-reverse justify-end gap-2 border-t border-gray-100 pt-4 sm:flex-row">
                     <button type="button" @click="emit('close')"
                         class="cursor-pointer rounded-xl bg-gray-100 p-2 px-4 text-[#404040] transition hover:bg-gray-200">
