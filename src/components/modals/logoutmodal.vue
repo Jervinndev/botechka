@@ -29,7 +29,7 @@ const emit = defineEmits(['close'])
 
 <template>
     <section v-if="IsOpen"
-        class="w-full fixed h-screen flex items-center justify-center absolute top-0 left-0 bg-black/40 z-50 p-4">
+        class="w-full fixed h-screen flex items-center justify-center absolute top-0 left-0 bg-black/40 backdrop-blur-xs z-50 p-4">
         <div class="bg-white p-4 rounded-xl shadow-md w-sm">
             <h1 class="text-xl font-bold"> Sign out </h1>
             <p class="text-gray-600 mt-2"> Are you sure you want to logout? </p>

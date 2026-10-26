@@ -113,9 +113,10 @@ function viewInInventory() {
 
 <template>
     <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
-        enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in"
-        leave-from-class="opacity-100" leave-to-class="opacity-0">
-        <div v-if="IsOpen && category" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+        enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100"
+        leave-to-class="opacity-0">
+        <div v-if="IsOpen && category"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4"
             @click.self="emit('close')" @keydown.esc="emit('close')">
             <section class="flex max-h-[90vh] w-full max-w-md flex-col rounded-2xl bg-white p-4 shadow-xl font-inter"
                 role="dialog" aria-modal="true" :aria-label="`${category.category_name} category medicines`">
@@ -149,9 +150,9 @@ function viewInInventory() {
                     {{ medicines.length ? 'No medicines match your search.' : 'No medicines in this category.' }}
                 </div>
                 <ul v-else class="mt-2 min-h-0 flex-1 divide-y divide-gray-100 overflow-y-auto">
-                    <li v-for="medicine in filteredMedicines" :key="medicine.id"
-                        class="flex items-center gap-3 py-2.5">
-                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                    <li v-for="medicine in filteredMedicines" :key="medicine.id" class="flex items-center gap-3 py-2.5">
+                        <div
+                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
                             <Pill :size="20" />
                         </div>
                         <div class="min-w-0 flex-1">
