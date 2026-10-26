@@ -96,11 +96,10 @@ import {
                     </div>
 
                     <div>
-                        <p class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">Role</p>
                         <label
-                            class="relative flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-600">
+                            class="relative flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500">
                             <Package :size="15" />
-                            <select class="appearance-none bg-transparent pr-6 outline-none">
+                            <select class="settings-filter-select appearance-none bg-transparent pr-6 outline-none">
                                 <option>All roles</option>
                                 <option>Admin</option>
                                 <option>Personnel</option>
@@ -111,11 +110,10 @@ import {
                     </div>
 
                     <div>
-                        <p class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">Status</p>
                         <label
-                            class="relative flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-600">
+                            class="relative flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500">
                             <Package :size="15" />
-                            <select class="appearance-none bg-transparent pr-6 outline-none">
+                            <select class="settings-filter-select appearance-none bg-transparent pr-6 outline-none">
                                 <option>All statuses</option>
                                 <option>Active</option>
                                 <option>Inactive</option>
