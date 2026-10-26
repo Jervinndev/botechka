@@ -17,6 +17,12 @@ import Reports from '../views/admin/Report.vue'
 import Categories from '../views/admin/Categories.vue'
 import Beneficiary from '../views/admin/Beneficiary.vue'
 import Settings from '../views/admin/Settings.vue'
+import SettingsAppearance from '../views/Settings/Appearance.vue'
+import SettingsAccountManagement from '../views/Settings/AccountManagement.vue'
+import SettingsBackupRecovery from '../views/Settings/BackupRecovery.vue'
+import SettingsArchive from '../views/Settings/Archive.vue'
+import SettingsConfiguration from '../views/Settings/Configuration.vue'
+import SettingsSuppliers from '../views/Settings/Suppliers.vue'
 import Verification from '../views/Verification/Verification.vue'
 import Notification from '../views/admin/Notification.vue'
 import Forgotpassword from '../views/auth/Forgotpassword.vue'
@@ -165,6 +171,39 @@ const router = createRouter({
                     path: '/settings',
                     name: 'settings',
                     component: Settings,
+                    redirect: { name: 'settings-appearance' },
+                    children: [
+                        {
+                            path: 'appearance',
+                            name: 'settings-appearance',
+                            component: SettingsAppearance
+                        },
+                        {
+                            path: 'account-management',
+                            name: 'settings-account-management',
+                            component: SettingsAccountManagement
+                        },
+                        {
+                            path: 'backup-recovery',
+                            name: 'settings-backup-recovery',
+                            component: SettingsBackupRecovery
+                        },
+                        {
+                            path: 'archive',
+                            name: 'settings-archive',
+                            component: SettingsArchive
+                        },
+                        {
+                            path: 'configuration',
+                            name: 'settings-configuration',
+                            component: SettingsConfiguration
+                        },
+                        {
+                            path: 'suppliers',
+                            name: 'settings-suppliers',
+                            component: SettingsSuppliers
+                        }
+                    ]
                 }
             ]
         }
