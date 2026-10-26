@@ -30,14 +30,6 @@ import Beneficiarylayout from '../components/layout/Beneficiarylayout.vue'
 import Notificationbene from '../views/beneficiary/Notificationbene.vue'
 import Requestmedicines from '../views/beneficiary/Requestmedicines.vue'
 
-// Settings
-import Appearance from '../views/Settings/Appearance.vue'
-import AccountManagement from '../views/Settings/AccountManagement.vue'
-import BackupRecovery from '../views/Settings/BackupRecovery.vue'
-import Archive from '../views/Settings/Archive.vue'
-import Configuration from '../views/Settings/Configuration.vue'
-import Suppliers from '../views/Settings/Suppliers.vue'
-
 // eto mga routes naman to
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -173,39 +165,6 @@ const router = createRouter({
                     path: '/settings',
                     name: 'settings',
                     component: Settings,
-                    redirect: { name: 'settings-appearance' },
-                    children: [
-                        {
-                            path: 'appearance',
-                            name: 'settings-appearance',
-                            component: Appearance,
-                        },
-                        {
-                            path: 'account-management',
-                            name: 'settings-account-management',
-                            component: AccountManagement,
-                        },
-                        {
-                            path: 'backup-recovery',
-                            name: 'settings-backup-recovery',
-                            component: BackupRecovery,
-                        },
-                        {
-                            path: 'archive',
-                            name: 'settings-archive',
-                            component: Archive,
-                        },
-                        {
-                            path: 'configuration',
-                            name: 'settings-configuration',
-                            component: Configuration,
-                        },
-                        {
-                            path: 'suppliers',
-                            name: 'settings-suppliers',
-                            component: Suppliers,
-                        }
-                    ]
                 }
             ]
         }
