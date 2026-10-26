@@ -1,9 +1,22 @@
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-slate-900/40"></div>
-    <div class="relative w-full max-w-lg rounded-2xl bg-white p-7 shadow-xl" role="dialog" aria-modal="true">
-      <h3 class="text-xl font-semibold">Add Purpose</h3>
-      <p class="mb-5 text-sm text-slate-400">Add a purpose for dispensing</p>
+    <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2"
+        enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
+        <section v-if="IsOpen"
+            class="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-black/40 backdrop-blur-xs p-4">
+            <div class="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 font-inter shadow-xl">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h1 class="font-inter text-2xl font-bold text-[#404040]">Add Purpose</h1>
+                        <p class="font-inter text-sm font-medium text-[#808080]">
+                            Add a purpose for dispensing.
+                        </p>
+                    </div>
+                    <button type="button" aria-label="Close"
+                        class="text-gray-400 transition hover:text-[#404040]" @click="emit('close')">
+                        <X :size="22" />
+                    </button>
+                </div>
 
       <label class="mb-2 block text-lg font-semibold text-slate-700" for="purpose-name">Purpose Name</label>
       <input

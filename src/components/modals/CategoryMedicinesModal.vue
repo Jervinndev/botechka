@@ -115,7 +115,7 @@ function viewInInventory() {
     <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
         enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in"
         leave-from-class="opacity-100" leave-to-class="opacity-0">
-        <div v-if="IsOpen && category" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+        <div v-if="IsOpen && category" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4"
             @click.self="emit('close')" @keydown.esc="emit('close')">
             <section class="flex max-h-[90vh] w-full max-w-md flex-col rounded-2xl bg-white p-4 shadow-xl font-inter"
                 role="dialog" aria-modal="true" :aria-label="`${category.category_name} category medicines`">

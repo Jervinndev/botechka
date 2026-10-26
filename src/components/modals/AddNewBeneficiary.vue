@@ -19,7 +19,7 @@ const emit = defineEmits(['close'])
   >
     <section
       v-if="IsOpen"
-      class="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-black/40 p-4"
+      class="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-black/40 backdrop-blur-xs p-4"
     >
       <div class="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 font-inter shadow-xl">
         <div class="flex items-start justify-between">
