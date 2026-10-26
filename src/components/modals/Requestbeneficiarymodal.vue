@@ -30,7 +30,7 @@ function removeFile() {
 </script>
 
 <template>
-    <div v-if="IsOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 font-inter">
+    <div v-if="IsOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 font-inter">
         <div
             class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl relative overflow-hidden flex flex-col max-h-[90vh]">
 

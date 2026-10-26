@@ -150,20 +150,19 @@ async function saveMedicine() {
         enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
         leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
         <section v-if="IsOpen"
-            class="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-black/40 backdrop-blur-xs p-4">
-            <div
-                class="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 font-inter shadow-xl">
+            class="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-black/40 p-4">
+            <div class="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 font-inter shadow-xl">
                 <form @submit.prevent="saveMedicine">
                     <div class="flex justify-between items-start">
                         <div>
                             <h1 class="mt-2 font-inter text-2xl font-bold text-[#404040]">Add New Medicine</h1>
-                            <p class="font-inter text-sm font-medium text-[#808080]">Add a new medicine to your
-                                inventory.</p>
+                            <p class="font-inter text-sm font-medium text-[#808080]">Add a new medicine to your inventory.</p>
                         </div>
                         <X class="cursor-pointer text-gray-400 hover:text-[#404040]" @click="closeModal" />
                     </div>
 
-                    <div v-if="errorMessage" class="mt-4 rounded-lg bg-red-50 p-2 text-sm text-red-600">
+                    <div v-if="errorMessage"
+                        class="mt-4 rounded-lg bg-red-50 p-2 text-sm text-red-600">
                         {{ errorMessage }}
                     </div>
 
@@ -191,8 +190,7 @@ async function saveMedicine() {
                                         placeholder="e.g. Biogesic" required>
                                 </div>
                                 <div class="grid gap-1">
-                                    <label class="font-inter text-sm font-medium text-[#404040]">Medicine ID (Auto)
-                                    </label>
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Medicine ID (Auto) </label>
                                     <input type="text" v-model="formData.medicine_id" readonly
                                         class="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-100 p-2 text-slate-600">
                                 </div>
@@ -280,14 +278,16 @@ async function saveMedicine() {
                                 <div class="grid gap-1">
                                     <label class="font-inter text-sm font-medium text-[#404040]">Manufacturing Date
                                         <span class="text-red-500">*</span></label>
-                                    <input type="date" v-model="formData.manufacturing_date" :max="manufacturingDateMax"
+                                    <input type="date" v-model="formData.manufacturing_date"
+                                        :max="manufacturingDateMax"
                                         class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                         required>
                                 </div>
                                 <div class="grid gap-1">
                                     <label class="font-inter text-sm font-medium text-[#404040]">Expiration date <span
                                             class="text-red-500">*</span></label>
-                                    <input type="date" v-model="formData.expiration_date" :min="expirationDateMin"
+                                    <input type="date" v-model="formData.expiration_date"
+                                        :min="expirationDateMin"
                                         class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                         required>
                                 </div>
