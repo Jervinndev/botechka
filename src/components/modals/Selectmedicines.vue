@@ -8,9 +8,13 @@ const emit = defineEmits(['close'])
 
 
 <template>
-    <div v-if="IsOpen" class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
-        <div
-            class="flex max-h-[calc(100vh-2rem)] w-full max-w-6xl flex-col overflow-hidden rounded-xl border border-gray-100 bg-white font-inter shadow-xl">
+    <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2"
+        enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
+        <section v-if="IsOpen"
+            class="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-black/40 p-4">
+            <div
+                class="flex max-h-[calc(100vh-2rem)] w-full max-w-6xl flex-col overflow-hidden rounded-xl border border-gray-100 bg-white font-inter shadow-xl">
 
             <!-- Header -->
             <div class="flex items-center justify-between border-b border-gray-100 px-5 py-5 sm:px-8">
@@ -46,7 +50,7 @@ const emit = defineEmits(['close'])
             </div>
 
             <!-- Search and Filters -->
-            <div class="flex flex-col gap-3 px-5 pt-4 sm:px-8 md:flex-row">
+            <div class="flex flex-col gap-4 px-5 pt-5 sm:px-8 md:flex-row md:items-center">
                 <div class="relative flex-1">
                     <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
                         xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -59,7 +63,7 @@ const emit = defineEmits(['close'])
                         class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-700" />
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex flex-wrap items-center gap-3">
                     <button type="button"
                         class="flex h-10 shrink-0 items-center gap-2 rounded-md border border-gray-200 px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -91,7 +95,7 @@ const emit = defineEmits(['close'])
             </div>
 
             <!-- Medicine Table -->
-            <div class="min-h-0 flex-1 overflow-auto px-5 pb-3 pt-4 sm:px-8">
+            <div class="min-h-0 flex-1 overflow-auto px-5 pb-5 pt-5 sm:px-8">
                 <table class="w-full min-w-[760px] border-collapse bg-white text-left">
                     <thead class="sticky top-0 z-10 bg-blue-700 text-white">
                         <tr class="text-left text-sm font-semibold">
@@ -313,7 +317,7 @@ const emit = defineEmits(['close'])
 
             <!-- Footer -->
             <div
-                class="flex flex-col gap-3 border-t border-gray-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+                class="flex flex-col gap-4 border-t border-gray-100 bg-white px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
                 <p class="text-sm text-slate-500">0 medicine(s) selected</p>
 
                 <div class="flex items-center justify-end gap-3">
@@ -329,6 +333,7 @@ const emit = defineEmits(['close'])
                 </div>
             </div>
 
-        </div>
-    </div>
+            </div>
+        </section>
+    </Transition>
 </template>
