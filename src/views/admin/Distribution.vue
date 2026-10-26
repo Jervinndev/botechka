@@ -13,13 +13,9 @@ import {
     X,
     ChevronDown,
 } from '@lucide/vue'
-<<<<<<< HEAD
-import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue'
-=======
 import Selectmedicines from '../../components/modals/Selectmedicines.vue'
 
 const IsmodalOpen = ref(false)
->>>>>>> origin/main
 </script>
 
 <template>
