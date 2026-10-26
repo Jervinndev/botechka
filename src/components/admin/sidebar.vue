@@ -33,7 +33,7 @@ const isBeneficiary = ref(false)
 const isCollapsed = ref(localStorage.getItem('sidebar_collapsed') === 'true')
 const isLogoutModalOpen = ref(false)
 const isMobileMenuOpen = ref(false)
-const isExpanded = computed(() => !isCollapsed.value || (props.isBeneficiaryLayout && isMobileMenuOpen.value))
+const isExpanded = computed(() => !isCollapsed.value || isMobileMenuOpen.value)
 
 
 const overview = [
@@ -119,10 +119,10 @@ onMounted(async () => {
 <template>
     <aside :class="[
         'bg-white transition-all duration-300 flex flex-col border-r border-gray-200',
-        props.isBeneficiaryLayout ? 'w-full h-16 md:h-screen md:p-4 md:shrink-0' : 'h-screen p-4',
-        !props.isBeneficiaryLayout ? (isCollapsed ? 'w-20' : 'w-95') : (isCollapsed ? 'md:w-20' : 'md:w-80')
+        'w-full h-16 md:h-screen md:p-4 md:shrink-0',
+        isCollapsed ? 'md:w-20' : (props.isBeneficiaryLayout ? 'md:w-80' : 'md:w-80')
     ]">
-        <div v-if="props.isBeneficiaryLayout"
+        <div
             class="fixed inset-x-0 top-0 z-50 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden">
             <img :src="sidebarLogo" alt="Logo" class="w-30">
             <button type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg" :aria-expanded="isMobileMenuOpen"
@@ -131,18 +131,12 @@ onMounted(async () => {
                     :class="['transition-all duration-300', isMobileMenuOpen ? 'rotate-0' : 'rotate-180']" />
             </button>
         </div>
-        <button v-if="props.isBeneficiaryLayout && isMobileMenuOpen" type="button"
-            class="fixed inset-x-0 bottom-0 top-16 z-30 bg-black/30 md:hidden" aria-label="Close navigation"
-            @click="isMobileMenuOpen = false">
+        <button v-if="isMobileMenuOpen" type="button" class="fixed inset-x-0 bottom-0 top-16 z-30 bg-black/30 md:hidden"
+            aria-label="Close navigation" @click="isMobileMenuOpen = false">
         </button>
         <div :class="[
-            'flex flex-col justify-between',
-            props.isBeneficiaryLayout
-                ? [
-                    'fixed bottom-0 left-0 top-10 z-40 w-72 max-w-[85vw] bg-white p-4 shadow-xl transition-transform duration-300 md:static md:z-auto md:h-full md:w-auto md:max-w-none md:p-0 md:shadow-none md:translate-x-0',
-                    isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-                ]
-                : 'h-full'
+            'fixed bottom-0 left-0 top-16 z-40 flex w-72 max-w-[85vw] flex-col justify-between overflow-y-auto bg-white p-4 shadow-xl transition-transform duration-300 md:static md:z-auto md:h-full md:w-auto md:max-w-none md:overflow-visible md:p-0 md:shadow-none md:translate-x-0',
+            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         ]">
             <div>
                 <div class="hidden md:flex items-center justify-between gap-3">
@@ -156,7 +150,7 @@ onMounted(async () => {
                     </button>
                 </div>
                 <div>
-                    <div class="flex flex-col gap-2 mt-6">
+                    <div class="flex flex-col gap-2 2xl:mt-6 mt-0">
                         <h1 v-if="isExpanded" class="text-[14px] text-[#808080]">
                             {{ isBeneficiary ? 'My account' : 'Operation' }}
                         </h1>
