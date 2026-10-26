@@ -1,13 +1,3 @@
-<script setup>
-import { X } from '@lucide/vue'
-
-defineProps({
-    IsOpen: Boolean
-})
-
-const emit = defineEmits(['close'])
-</script>
-
 <template>
     <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2"
         enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
@@ -28,35 +18,27 @@ const emit = defineEmits(['close'])
                     </button>
                 </div>
 
-                <div class="mt-6 grid grid-cols-1 gap-4">
-                    <div class="grid gap-1">
-                        <label for="purpose-name" class="font-inter text-sm font-medium text-[#404040]">
-                            Purpose name
-                        </label>
-                        <input id="purpose-name" type="text" placeholder="e.g. Fever"
-                            class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
-                    </div>
+      <label class="mb-2 block text-lg font-semibold text-slate-700" for="purpose-name">Purpose Name</label>
+      <input
+        id="purpose-name"
+        type="text"
+        placeholder="e.g. FEVER"
+        class="mb-4 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-blue-500"
+      />
 
-                    <div class="grid gap-1">
-                        <label for="purpose-desc" class="font-inter text-sm font-medium text-[#404040]">
-                            Short description
-                        </label>
-                        <input id="purpose-desc" type="text" placeholder="e.g. For reducing fever"
-                            class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
-                    </div>
-                </div>
+      <label class="mb-2 block text-lg font-semibold text-slate-700" for="purpose-desc">Short description</label>
+      <input
+        id="purpose-desc"
+        type="text"
+        placeholder="e.g. For reducing fever"
+        class="mb-6 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-blue-500"
+      />
 
-                <div class="mt-6 flex flex-col-reverse justify-end gap-2 border-t border-gray-100 pt-4 sm:flex-row">
-                    <button type="button" @click="emit('close')"
-                        class="cursor-pointer rounded-xl bg-gray-100 p-2 px-4 text-[#404040] transition hover:bg-gray-200">
-                        Cancel
-                    </button>
-                    <button type="button"
-                        class="cursor-pointer rounded-xl bg-blue-700 p-2 px-5 text-white transition hover:bg-blue-800">
-                        Save Purpose
-                    </button>
-                </div>
-            </div>
-        </section>
-    </Transition>
+      <div class="flex justify-end gap-3">
+        <button class="rounded-lg border border-slate-200 px-6 py-2.5 text-sm font-medium hover:bg-slate-50">Cancel</button>
+        <button class="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700">Save</button>
+      </div>
+    </div>
+  </div>
+  <AddNewPurpose/>
 </template>
