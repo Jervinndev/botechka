@@ -11,7 +11,7 @@ import SettingsSidebar from '../../components/admin/SettingsSidebar.vue'
 
         <div class="mt-4 flex min-w-0 flex-col gap-4 md:flex-row">
             <SettingsSidebar />
-            <main class="min-w-0 flex-1 rounded-xl border border-gray-100 bg-white p-4 sm:p-6">
+            <main class="min-w-0 h-fit flex-1 rounded-xl border overflow-auto border-gray-100 bg-white p-4 sm:p-6">
                 <router-view />
             </main>
         </div>
