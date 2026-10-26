@@ -1,6 +1,9 @@
 <script setup>
+import { ref } from 'vue';
 import { Bell, Plus, ChevronDown, Pencil, Trash, Eye } from '@lucide/vue'
-import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue'
+import Addnewbeneficiary from '../../components/modals/AddNewBeneficiary.vue'
+
+const Ismodalopen = ref(false)
 </script>
 
 <template>
@@ -15,7 +18,7 @@ import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue'
                     class="p-2 bg-gray-100 2xl:max-w-5xl max-w-full w-full rounded-md">
                 <div class="flex gap-2 font-inter">
                     <!-- Button para buksan ang Add Medicine Modal -->
-                    <button
+                    <button @click="Ismodalopen = true"
                         class="flex items-center justify-center bg-blue-700 text-white p-2 px-4 gap-2 rounded-md hover:bg-blue-800 transition">
                         <span class="2xl:text-md text-sm">Add New Beneficiary</span>
                     </button>
@@ -35,49 +38,48 @@ import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue'
                 <button
                     class="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm text-gray-500 transition hover:bg-gray-100">Indigent</button>
             </div>
-            <div class="w-full overflow-x-auto rounded-t-lg">
-                <table class="w-full min-w-[750px] border-collapse text-left">
-                    <thead class="w-full">
-                        <tr class="grid grid-cols-8 w-full bg-blue-700 text-white">
-                            <th class="rounded-tl-lg px-4 py-3 text-md font-semibold">Beneficiary Name</th>
-                            <th class="px-4 py-3 text-md font-semibold">ID</th>
-                            <th class="px-4 py-3 text-md font-semibold">Barangay</th>
-                            <th class="px-4 py-3 text-md font-semibold">Beneficiary Type</th>
-                            <th class="px-4 py-3 text-md font-semibold">Age</th>
-                            <th class="px-4 py-3 text-md font-semibold">Last Visit</th>
-                            <th class="px-4 py-3 text-md font-semibold">Eligibility</th>
-                            <th class="px-4 py-3 text-md font-semibold">Action</th>
+            <div class="w-full overflow-x-auto rounded-xl border border-gray-100 bg-white">
+                <table class="w-full min-w-[1000px] border-collapse text-left">
+                    <thead class="bg-blue-700 text-white">
+                        <tr>
+                            <th class="p-3 font-semibold text-gray-50">Beneficiary Name</th>
+                            <th class="p-3 font-semibold text-gray-50">ID</th>
+                            <th class="p-3 font-semibold text-gray-50">Barangay</th>
+                            <th class="p-3 font-semibold text-gray-50">Beneficiary Type</th>
+                            <th class="p-3 font-semibold text-gray-50">Age</th>
+                            <th class="p-3 font-semibold text-gray-50">Last Visit</th>
+                            <th class="p-3 font-semibold text-gray-50">Eligibility</th>
+                            <th class="p-3 font-semibold text-gray-50">Action</th>
                         </tr>
                     </thead>
 
                     <tbody class="divide-y divide-gray-100">
-                        <tr
-                            class="grid grid-cols-8 text-start transition-colors odd:bg-white even:bg-gray-50 hover:bg-blue-50 border-b border-black/10">
-                            <td class="flex items-center justify-start px-4 py-3 text-sm font-medium text-gray-600">Juan
-                                Dela Cruz</td>
-                            <td class="flex items-center justify-start px-4 py-3 text-sm text-gray-500">45237645</td>
-                            <td class="flex items-center justify-start px-4 py-3 text-sm text-gray-600">Tagpos</td>
-                            <td class="flex items-center justify-start px-4 py-3 text-sm text-gray-600">Indigent</td>
-                            <td class="flex items-center justify-start px-4 py-3 text-sm text-gray-600">21</td>
-                            <td
-                                class="flex items-center justify-start whitespace-nowrap px-4 py-3 text-sm text-gray-500">
+                        <tr class="transition-colors odd:bg-white even:bg-gray-50 hover:bg-blue-50">
+                            <td class="p-3 text-sm font-medium text-gray-700">Juan Dela Cruz</td>
+                            <td class="p-3 text-sm text-gray-500">45237645</td>
+                            <td class="p-3 text-sm text-gray-600">Tagpos</td>
+                            <td class="p-3 text-sm text-gray-600">Indigent</td>
+                            <td class="p-3 text-sm text-gray-600">21</td>
+                            <td class="whitespace-nowrap p-3 text-sm text-gray-500">
                                 Aug 25, 2004</td>
-                            <td class="px-4 py-3"><span
-                                    class="inline-flex whitespace-nowrap rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-semibold text-emerald-800">Eligible</span>
+                            <td class="p-3"><span
+                                    class="inline-flex whitespace-nowrap rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Eligible</span>
                             </td>
-                            <td class="p-3 flex items-center gap-2">
+                            <td class="p-3">
+                                <div class="flex items-center gap-2">
                                 <button title="View"
-                                    class="p-1.5 text-gray-500 border border-gray-300 hover:bg-blue-50 rounded-lg transition">
-                                    <Pencil size="22" />
+                                    class="rounded-lg border border-gray-300 p-1.5 text-gray-500 transition hover:bg-blue-50">
+                                    <Pencil size="18" />
                                 </button>
                                 <button title="Edit"
-                                    class="p-1.5 text-gray-500 border border-gray-300 hover:bg-amber-50 rounded-lg transition">
-                                    <Trash size="22" />
+                                    class="rounded-lg border border-gray-300 p-1.5 text-gray-500 transition hover:bg-amber-50">
+                                    <Trash size="18" />
                                 </button>
                                 <button title="Archive"
-                                    class="p-1.5 text-gray-500 border border-gray-300 hover:bg-gray-100 rounded-lg transition">
-                                    <Eye size="22" />
+                                    class="rounded-lg border border-gray-300 p-1.5 text-gray-500 transition hover:bg-gray-100">
+                                    <Eye size="18" />
                                 </button>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -99,4 +101,6 @@ import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue'
             </div>
         </div>
     </section>
+
+    <Addnewbeneficiary :IsOpen="Ismodalopen" @close="Ismodalopen = false" />
 </template>

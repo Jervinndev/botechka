@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue';
 import {
     Bell,
     Search,
@@ -12,7 +13,13 @@ import {
     X,
     ChevronDown,
 } from '@lucide/vue'
+<<<<<<< HEAD
 import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue'
+=======
+import Selectmedicines from '../../components/modals/Selectmedicines.vue'
+
+const IsmodalOpen = ref(false)
+>>>>>>> origin/main
 </script>
 
 <template>
@@ -42,10 +49,9 @@ import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue'
                     <div class="mt-4 p-4 border border-black/10 rounded-xl">
                         <div class="flex justify-between items-center gap-2">
                             <h2 class="text-sm font-medium text-gray-700">Beneficiary </h2>
-                            <button
-                                class="flex items-center gap-1.5 px-3 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 transition text-xs whitespace-nowrap">
-                                <UserRoundPlus :size="15" />
-                                Add New
+                            <button type="button"
+                                class="flex items-center justify-center gap-2 rounded-md bg-blue-700 p-2 px-4 text-sm text-white transition hover:bg-blue-800 whitespace-nowrap">
+                                Add New Beneficiaries
                             </button>
                         </div>
                         <div class="relative mt-3">
@@ -60,10 +66,9 @@ import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue'
                     <div class="mt-4 p-4 border border-black/10 rounded-xl">
                         <div class="flex justify-between items-center gap-2">
                             <h2 class="text-sm font-medium text-gray-700">Purpose (Ailment)</h2>
-                            <button
-                                class="flex items-center gap-1.5 px-3 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 transition text-xs whitespace-nowrap">
-                                <Plus :size="15" />
-                                Add New
+                            <button type="button"
+                                class="flex items-center justify-center gap-2 rounded-md bg-blue-700 p-2 px-4 text-sm text-white transition hover:bg-blue-800 whitespace-nowrap">
+                                Add New Purpose
                             </button>
                         </div>
                         <div class="relative mt-3">
@@ -79,9 +84,8 @@ import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue'
                     <div class="mt-4 p-4 border border-black/10 rounded-xl">
                         <div class="flex justify-between items-center gap-2">
                             <h2 class="text-sm font-medium text-gray-700">Medicines</h2>
-                            <button
-                                class="flex items-center gap-1.5 px-3 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 transition text-xs whitespace-nowrap">
-                                <PackagePlus :size="15" />
+                            <button type="button" @click="IsmodalOpen = true"
+                                class="flex items-center justify-center gap-2 rounded-md bg-blue-700 p-2 px-4 text-sm text-white transition hover:bg-blue-800 whitespace-nowrap">
                                 Add Item
                             </button>
                         </div>
@@ -97,30 +101,29 @@ import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue'
                             <div
                                 class="flex items-center justify-between gap-3 border border-black/10 rounded-xl px-2 py-2 shrink-0">
                                 <button type="button" aria-label="Decrease quantity"
-                                    class="text-gray-500 hover:text-blue-700 transition">
+                                    class="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 text-gray-600 transition hover:bg-blue-50 hover:text-blue-700">
                                     <Minus :size="15" />
                                 </button>
                                 <span class="text-sm font-medium text-gray-700 min-w-4 text-center">10</span>
                                 <button type="button" aria-label="Increase quantity"
-                                    class="text-gray-500 hover:text-blue-700 transition">
+                                    class="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 text-gray-600 transition hover:bg-blue-50 hover:text-blue-700">
                                     <Plus :size="15" />
                                 </button>
                             </div>
                             <button type="button" aria-label="Remove medicine"
-                                class="flex items-center justify-center h-9 w-9 border border-red-100 rounded-xl text-red-500 hover:bg-red-50 transition shrink-0">
+                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-red-200 text-red-500 transition hover:bg-red-50">
                                 <X :size="16" />
                             </button>
                         </div>
                     </div>
                     <div class="flex items-center justify-end gap-2 mt-5">
-                        <button
-                            class="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm hover:bg-gray-50 transition">
+                        <button type="button"
+                            class="rounded-md border border-gray-200 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50">
                             Clear
                         </button>
 
-                        <button
-                            class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-700 text-white text-sm hover:bg-blue-600 transition">
-                            <ClipboardList :size="16" />
+                        <button type="button"
+                            class="flex items-center justify-center gap-2 rounded-md bg-blue-700 px-4 py-2 text-sm text-white transition hover:bg-blue-800">
                             Record Distribution
                         </button>
                     </div>
@@ -161,8 +164,8 @@ import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue'
                             <input type="text" placeholder="Search..."
                                 class="border border-black/10 rounded-xl py-2 pl-9 pr-3 w-full outline-none focus:border-blue-500 text-sm" />
                         </div>
-                        <button
-                            class="flex items-center justify-center gap-2 px-4 py-2 bg-blue-700 text-white rounded-xl hover:bg-blue-600 transition text-sm whitespace-nowrap">
+                        <button type="button"
+                            class="flex items-center justify-center gap-2 rounded-md bg-blue-700 p-2 px-4 text-sm text-white transition hover:bg-blue-800 whitespace-nowrap">
                             <RotateCcw :size="16" />Return Medicines
                         </button>
                     </div>
@@ -208,226 +211,60 @@ import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue'
                     </div>
                 </div>
                 <div class="w-full overflow-x-auto border border-gray-100 rounded-lg">
-
                     <table class="w-full min-w-[700px] border-collapse text-left">
-
                         <thead>
                             <tr class="bg-[#2638FF] text-white">
-
-                                <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">
-                                    Transaction #
-                                </th>
-
-                                <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">
-                                    Beneficiary
-                                </th>
-
-                                <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">
-                                    Medicine (Per Reseta)
-                                </th>
-
-                                <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">
-                                    Quantity
-                                </th>
-
-                                <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">
-                                    Purpose
-                                </th>
-
+                                <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">Transaction</th>
+                                <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">Beneficiary</th>
+                                <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">Medicine
+                                    (PerReseta)</th>
+                                <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">Quantity</th>
+                                <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">Purpose</th>
                                 <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide text-center">
-                                    Action
-                                </th>
-
+                                    Action</th>
                             </tr>
                         </thead>
-
                         <tbody class="divide-y divide-gray-100">
-
-                            <!-- ROW 1 -->
                             <tr class="hover:bg-gray-50 transition-colors">
-
-                                <td class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
-                                    DIST-0001
-                                </td>
-
+                                <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">DIST-0003</td>
                                 <td class="px-4 py-3">
-                                    <p class="text-xs font-medium text-gray-700">
-                                        Marites Ocampo
-                                    </p>
-                                    <p class="text-[12px] text-gray-400 mt-1">
-                                        Senior Citizen
-                                    </p>
+                                    <p class="text-sm font-medium text-gray-700">Ana Santos</p>
+                                    <p class="text-[12px] text-gray-400 mt-1">Senior Citizen</p>
                                 </td>
-
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center gap-2">
-                                        <div
-                                            class="w-7 h-7 rounded-lg bg-pink-50 text-pink-500 flex items-center justify-center shrink-0">
-                                            <Pill :size="15" />
-                                        </div>
-
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-700">
-                                                Paracetamol
-                                            </p>
-                                            <p class="text-[12px] text-gray-400">
-                                                Tablet
-                                            </p>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
-                                    60 pcs
-                                </td>
-
-                                <td class="px-4 py-3 text-sm text-gray-500">
-                                    Ubo
-                                </td>
-
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center justify-center gap-2">
-
-                                        <button type="button" title="View transaction"
-                                            class="table-action hover:text-blue-600 hover:bg-blue-50">
-                                            <Eye :size="16" />
-                                        </button>
-
-                                        <button type="button" title="Return medicine"
-                                            class="table-action hover:text-red-500 hover:bg-red-50">
-                                            <RotateCcw :size="15" />
-                                        </button>
-
-                                    </div>
-                                </td>
-
-                            </tr>
-
-                            <!-- ROW 2 -->
-                            <tr class="hover:bg-gray-50 transition-colors">
-
-                                <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
-                                    DIST-0002
-                                </td>
-
-                                <td class="px-4 py-3">
-                                    <p class="text-sm font-medium text-gray-700">
-                                        Juan Dela Cruz
-                                    </p>
-                                    <p class="text-[12px] text-gray-400 mt-1">
-                                        Regular Beneficiary
-                                    </p>
-                                </td>
-
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center gap-2">
-                                        <div
-                                            class="w-7 h-7 rounded-lg bg-pink-50 text-pink-500 flex items-center justify-center shrink-0">
-                                            <Pill :size="15" />
-                                        </div>
-
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-700">
-                                                Paracetamol
-                                            </p>
-                                            <p class="text-[12px] text-gray-400">
-                                                Tablet
-                                            </p>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
-                                    10 pcs
-                                </td>
-
-                                <td class="px-4 py-3 text-sm text-gray-500">
-                                    Lagnat
-                                </td>
-
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center justify-center gap-2">
-
-                                        <button type="button" title="View transaction"
-                                            class="table-action hover:text-blue-600 hover:bg-blue-50">
-                                            <Eye :size="16" />
-                                        </button>
-
-                                        <button type="button" title="Return medicine"
-                                            class="table-action hover:text-red-500 hover:bg-red-50">
-                                            <RotateCcw :size="15" />
-                                        </button>
-
-                                    </div>
-                                </td>
-
-                            </tr>
-
-                            <!-- ROW 3 -->
-                            <tr class="hover:bg-gray-50 transition-colors">
-
-                                <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
-                                    DIST-0003
-                                </td>
-
-                                <td class="px-4 py-3">
-                                    <p class="text-sm font-medium text-gray-700">
-                                        Ana Santos
-                                    </p>
-                                    <p class="text-[12px] text-gray-400 mt-1">
-                                        Senior Citizen
-                                    </p>
-                                </td>
-
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-2">
                                         <div
                                             class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                                             <Pill :size="15" />
                                         </div>
-
                                         <div>
-                                            <p class="text-sm font-medium text-gray-700">
-                                                Amlodipine
-                                            </p>
-                                            <p class="text-[12px] text-gray-400">
-                                                Tablet
-                                            </p>
+                                            <p class="text-sm font-medium text-gray-700">Amlodipine</p>
+                                            <p class="text-[12px] text-gray-400">Tablet</p>
                                         </div>
                                     </div>
                                 </td>
-
-                                <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
-                                    30 pcs
-                                </td>
-
-                                <td class="px-4 py-3 text-sm text-gray-500">
-                                    High Blood Pressure
-                                </td>
-
+                                <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">30 pcs</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">High Blood Pressure</td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center justify-center gap-2">
-
                                         <button type="button" title="View transaction"
-                                            class="table-action hover:text-blue-600 hover:bg-blue-50">
+                                            class="flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 text-gray-500 transition hover:bg-blue-50 hover:text-blue-700">
                                             <Eye :size="16" />
                                         </button>
-
                                         <button type="button" title="Return medicine"
-                                            class="table-action hover:text-red-500 hover:bg-red-50">
+                                            class="flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 text-gray-500 transition hover:bg-red-50 hover:text-red-500">
                                             <RotateCcw :size="15" />
                                         </button>
-
                                     </div>
                                 </td>
-
                             </tr>
-
                         </tbody>
-
                     </table>
                 </div>
             </div>
         </div>
     </section>
+
+
+    <Selectmedicines :IsOpen="IsmodalOpen" @close="IsmodalOpen = false" />
 </template>
