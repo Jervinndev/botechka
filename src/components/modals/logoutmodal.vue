@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Signoutuser } from '../../services/Authservices'
+import { signOutUser } from '../../services/Authservices'
 
 const Isloading = ref(false)
 const router = useRouter()
@@ -10,7 +10,7 @@ async function Logout() {
     Isloading.value = true
 
     try {
-        const result = await Signoutuser()
+        const result = await signOutUser()
         if (!result.success) throw new Error(result.error)
         localStorage.removeItem('sidebar_collapsed')
         router.push('/')
