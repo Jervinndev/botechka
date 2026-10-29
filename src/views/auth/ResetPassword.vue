@@ -49,7 +49,7 @@ async function handleResetPassword() {
 
 <template>
     <div class="min-h-screen flex items-center justify-center p-6 bg-gray-100">
-        <form @submit.prevent="handleResetPassword" class="w-full max-w-md space-y-4 bg-white p-6 rounded-lg">
+        <form @submit.prevent="handleResetPassword" class="w-full max-w-md space-y-3 bg-white p-4 rounded-lg">
             <h1 class="text-2xl font-bold">Reset Password</h1>
 
             <input v-model="password" type="password" placeholder="New password" minlength="8" required
@@ -58,7 +58,7 @@ async function handleResetPassword() {
             <input v-model="confirmPassword" type="password" placeholder="Confirm new password" minlength="8" required
                 class="w-full rounded-lg border p-3" />
 
-            <p v-if="message" class="text-green-600">
+            <p v-if="message" class="text-green-600 bg-gray-50 p-2 rounded-lg">
                 {{ message }}
             </p>
 

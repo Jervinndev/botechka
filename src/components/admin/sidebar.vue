@@ -59,13 +59,7 @@ const overview = [
     }
 ]
 
-const beneficiaryOverview = [
-    {
-        label: 'Dashboard',
-        to: { name: 'beneficiary-dashboard' },
-        Icon: LayoutGrid
-    }
-]
+const beneficiaryOverview = [{ label: 'Dashboard', to: { name: 'beneficiary-dashboard' }, Icon: LayoutGrid }]
 
 const operationItems = [
     {
@@ -253,7 +247,9 @@ function closeMobileMenu() {
 }
 
 onMounted(() => {
-    loadProfile()
+    if (!cachedProfile) {
+        loadProfile()
+    }
 })
 </script>
 

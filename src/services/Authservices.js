@@ -2,7 +2,11 @@ import { supabase } from '../supabase/supabase.js'
 
 let cachedMyProfile = null
 
-export function getCachedMyProfile() {
+export function getCachedMyProfile(userId) {
+    if (userId && cachedMyProfile?.id !== userId) {
+        return null
+    }
+
     return cachedMyProfile
 }
 

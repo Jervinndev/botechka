@@ -15,8 +15,7 @@ async function handleForgotPassword() {
     try {
         await forgotPassword(email.value.trim())
 
-        message.value =
-            'Kung registered ang email mo, tingnan ang inbox para sa password reset link.'
+        message.value = 'Checkyour inbox to reset your password.'
     } catch (error) {
         errorMessage.value = error.message
     } finally {
@@ -27,17 +26,17 @@ async function handleForgotPassword() {
 
 <template>
     <div class="min-h-screen flex items-center justify-center p-6 bg-gray-100">
-        <form @submit.prevent="handleForgotPassword" class="w-full max-w-md space-y-4 p-6 rounded-lg bg-white">
+        <form @submit.prevent="handleForgotPassword" class="w-full max-w-md space-y-3 p-4 rounded-lg bg-white">
             <h1 class="text-2xl font-bold">Forgot Password?</h1>
 
             <p class="text-gray-500">
-                Enter your email to receive a password reset link.
+                Enter your email
             </p>
 
             <input v-model="email" type="email" placeholder="Enter your email" required
                 class="w-full rounded-lg border p-3" />
 
-            <p v-if="message" class="text-green-600">
+            <p v-if="message" class="text-green-600 bg-green-50 p-2 rounded-lg">
                 {{ message }}
             </p>
 
