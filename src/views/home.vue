@@ -173,13 +173,13 @@ const sistemaSteps = ref([
                     </div>
                 </div>
                 <div class="hidden lg:flex flex-1 items-center justify-center [perspective:1000px]">
-                    <img :src="homeIllustration"
-                        alt="Botika ng Bayan illustration"
+                    <img :src="homeIllustration" alt="Botika ng Bayan illustration"
                         class="w-full max-w-[600px] object-cover [transform:rotateX(50deg)_rotateZ(-35deg)] animate-[float_6s_ease-in-out_infinite]" />
                 </div>
             </div>
         </div>
     </section>
+
 
     <!-- SERVICES -->
     <section ref="services" id="services"
@@ -209,6 +209,11 @@ const sistemaSteps = ref([
             </div>
         </div>
     </section>
+
+    <!-- <section class="bg-blue-700 h-100 w-full">
+
+    </section>
+ -->
 
     <!-- FOR WHOM + FAQ -->
     <section ref="built"

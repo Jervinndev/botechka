@@ -5,11 +5,9 @@ import Overlay from './components/layout/overlay.vue';
 import Progressbarloader from './Skelitonloader/Progressbarloader.vue';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { supabaseConfigError } from './supabase/supabase.js';
 
 const route = useRoute()
 const router = useRouter()
-const configurationError = supabaseConfigError
 const startupLoaderKey = 'botechka-startup-loader-shown'
 const Isloading = ref(localStorage.getItem(startupLoaderKey) !== 'true')
 const isRouterReady = ref(false)
@@ -28,17 +26,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="configurationError" class="flex min-h-screen items-center justify-center bg-gray-100 p-6">
-    <div class="max-w-lg rounded-xl bg-white p-8 text-center shadow">
-      <h1 class="text-xl font-bold text-gray-900">Hindi ma-load ang BOTECHKA</h1>
-      <p class="mt-3 text-gray-600">
-        Hindi naka-configure ang Supabase para sa deployment na ito.
-        Idagdag ang <code>VITE_SUPABASE_URL</code> at <code>VITE_SUPABASE_ANON_KEY</code>
-        sa Vercel Project Settings → Environment Variables, pagkatapos ay mag-deploy ulit.
-      </p>
-    </div>
-  </div>
-  <div v-else>
+  <div>
     <div v-if="!isRouterReady" class="fixed inset-0 z-100 bg-gray-100"></div>
     <div v-else-if="Isloading" class="fixed inset-0 z-100">
       <Progressbarloader @complete="finishLoading" />
