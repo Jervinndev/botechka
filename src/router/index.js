@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { getSessionUser } from '../services/Authservices.js'
+import { getCachedMyProfile, getMyProfile, getSessionUser } from '../services/Authservices.js'
 
 // Home page
 import Register from '../views/auth/register.vue'
@@ -233,8 +233,6 @@ router.beforeEach(async (to, from) => {
     const session = sessionResult.data
     const user = session?.user
     const isAuthenticated = Boolean(user)
-    const isGoogleUser = user?.app_metadata?.providers?.includes('google')
-    const role = user?.user_metadata?.role?.toLowerCase() || (isGoogleUser ? 'beneficiary' : '')
 
     if (to.name === 'Verification' && from.name !== 'register') {
         return { name: 'register' }
@@ -244,8 +242,25 @@ router.beforeEach(async (to, from) => {
         return { name: 'login' }
     }
 
+    let role = ''
+    if (isAuthenticated && (to.meta.requiresAuth || to.name === 'login' || to.name === 'register')) {
+        let profile = getCachedMyProfile(user.id)
+        if (!profile) {
+            const profileResult = await getMyProfile()
+            if (!profileResult.success) {
+                console.error('Unable to load the current user profile:', profileResult.error)
+                if (to.meta.requiresAuth) {
+                    return { name: 'login' }
+                }
+            } else {
+                profile = profileResult.data
+            }
+        }
+        role = profile?.role?.toLowerCase() || ''
+    }
+
     if (to.meta.beneficiaryOnly && role !== 'beneficiary') {
-        return { name: 'dashboard' }
+        return { name: role ? 'dashboard' : 'login' }
     }
 
     if (isAuthenticated && role === 'beneficiary' && to.meta.requiresAuth && !to.meta.beneficiaryOnly) {
