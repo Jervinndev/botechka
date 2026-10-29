@@ -2,7 +2,7 @@
 import botikaLogo from '../../assets/BotikaBLUE-CcOSGtx9.png'
 import { LaptopMinimal, Menu, X, Globe, ChevronDown, Home, Info, Wrench, FileText, HelpCircle, Mail, LogIn, LayoutGrid } from '@lucide/vue'
 import { ref, onMounted, onUnmounted } from 'vue'
-import { Signoutuser, Gesstsessionuser, Getuserprofile } from '../../services/Authservices'
+import { signOutUser, getSessionUser } from '../../services/Authservices'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
@@ -58,7 +58,7 @@ async function handleAuthAction() {
         Isloading.value = true
 
         try {
-            const result = await Signoutuser()
+            const result = await signOutUser()
             if (!result.success) throw new Error(result.error)
             isLoggedIn.value = false
             userRole.value = ''
@@ -74,7 +74,7 @@ async function handleAuthAction() {
 
 onMounted(async () => {
     try {
-        const sessionResult = await Gesstsessionuser()
+        const sessionResult = await getSessionUser()
         if (!sessionResult.success) throw new Error(sessionResult.error)
 
         const session = sessionResult.data
@@ -92,10 +92,6 @@ onMounted(async () => {
             userRole.value = metadataRole
             return
         }
-
-        const profileResult = await Getuserprofile()
-        if (!profileResult.success) throw new Error(profileResult.error)
-        userRole.value = profileResult.data?.role?.toLowerCase() || ''
     } catch (error) {
         console.error('Error resolving signed-in user role:', error)
     }

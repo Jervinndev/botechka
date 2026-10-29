@@ -27,7 +27,7 @@ const settingsLinks = [
                 class="flex shrink-0 items-center gap-2 rounded-lg p-2.5 text-sm font-medium text-[#808080] transition hover:bg-slate-100 hover:text-blue-700"
                 active-class="!bg-blue-50 !text-blue-700">
                 <component :is="item.Icon" :size="18" />
-                <span>{{ item.label }}</span>
+                <span class="font-inter">{{ item.label }}</span>
             </router-link>
         </div>
     </nav>

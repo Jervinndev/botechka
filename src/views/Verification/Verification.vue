@@ -1,32 +1,18 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { Gesstsessionuser, Signoutuser, syncUserProfile } from '../../services/Authservices.js';
+import { signOutUser } from '../../services/Authservices.js';
 
 const router = useRouter();
 const profileError = ref('');
 const isSigningOut = ref(false);
-
-onMounted(async () => {
-    const sessionResult = await Gesstsessionuser();
-
-    if (!sessionResult.success) {
-        profileError.value = sessionResult.error;
-        return;
-    }
-
-    if (sessionResult.data?.user) {
-        const result = await syncUserProfile(sessionResult.data.user);
-        if (!result.success) profileError.value = result.error;
-    }
-});
 
 const goToLogin = async () => {
     isSigningOut.value = true;
     profileError.value = '';
 
     try {
-        const result = await Signoutuser();
+        const result = await signOutUser();
         if (!result.success) {
             profileError.value = result.error || 'Unable to return to login. Please try again.';
             return;

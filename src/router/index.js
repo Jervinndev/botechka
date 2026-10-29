@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { Gesstsessionuser, Getuserprofile } from '../services/Authservices.js'
+import { getSessionUser } from '../services/Authservices.js'
 
 // Home page
 import Register from '../views/auth/register.vue'
@@ -223,42 +223,40 @@ const router = createRouter({
 })
 
 
-router.beforeEach(async (to, from, next) => {
-
-    const sessionResult = await Gesstsessionuser()
-    const session = sessionResult.success ? sessionResult.data : null
-    let role = session?.user_metadata?.role?.toLowerCase()
-    const isGoogleUser = session?.user?.app_metadata?.providers?.includes('google')
-
-    if (session && !role) {
-        const profileResult = await Getuserprofile()
-        role = profileResult.success ? profileResult.data?.role?.toLowerCase() : ''
+router.beforeEach(async (to, from) => {
+    const sessionResult = await getSessionUser()
+    if (!sessionResult.success) {
+        console.error('Unable to check the current session:', sessionResult.error)
+        return to.meta.requiresAuth ? { name: 'login' } : true
     }
 
-    if (to.meta.requiresAuth && !session) {
+    const session = sessionResult.data
+    const user = session?.user
+    const isAuthenticated = Boolean(user)
+    const isGoogleUser = user?.app_metadata?.providers?.includes('google')
+    const role = user?.user_metadata?.role?.toLowerCase() || (isGoogleUser ? 'beneficiary' : '')
 
-        return next('/register')
+    if (to.name === 'Verification' && from.name !== 'register') {
+        return { name: 'register' }
     }
 
-    if (session && (role === 'beneficiary' || isGoogleUser) && to.meta.requiresAuth && !to.meta.beneficiaryOnly) {
-        return next('/benefeciarylayout')
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        return { name: 'login' }
     }
 
-    if (to.meta.beneficiaryOnly && role !== 'beneficiary' && !isGoogleUser) {
-        return next('/beneficiary-dashboard')
+    if (to.meta.beneficiaryOnly && role !== 'beneficiary') {
+        return { name: 'dashboard' }
     }
 
-    if (to.name === 'Verification') {
-        if (from.name !== 'register') {
-            return next('/register')
-        }
+    if (isAuthenticated && role === 'beneficiary' && to.meta.requiresAuth && !to.meta.beneficiaryOnly) {
+        return { name: 'beneficiary-dashboard' }
     }
 
-    if ((to.name === 'login' || to.name === 'register') && session) {
-        return next('beneficiary-dashboard')
+    if (isAuthenticated && (to.name === 'login' || to.name === 'register')) {
+        return { name: role === 'beneficiary' ? 'beneficiary-dashboard' : 'dashboard' }
     }
 
-    next()
+    return true
 })
 
 export default router   

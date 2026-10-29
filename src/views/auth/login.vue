@@ -1,8 +1,8 @@
 <script setup>
-import { Check, Eye, EyeOff, Pill } from '@lucide/vue'
+import { Eye, EyeOff } from '@lucide/vue'
 import botikaLogo from '../../assets/BotikaWHITE-B0wYbg7D.png'
 import botikaBackground from '../../assets/Botikangbayan.jpg'
-import { loginUser } from '../../services/Authservices';
+import { loginUser, getMyProfile } from '../../services/Authservices';
 import { useRouter } from 'vue-router';
 import { onMounted, ref } from 'vue';
 
@@ -10,9 +10,8 @@ const router = useRouter()
 
 const email = ref('')
 const password = ref('')
-const Isloading = ref(false)
-const isGoogleLoading = ref(false)
-const Errormessage = ref('')
+const isLoading = ref(false)
+const errorMessage = ref('')
 const showPassword = ref(false)
 const rememberMe = ref(false)
 
@@ -20,25 +19,9 @@ function togglePassword() {
     showPassword.value = !showPassword.value
 }
 
-// async function handleGoogleLogin() {
-//     Isloading.value = true
-//     isGoogleLoading.value = true
-//     Errormessage.value = ''
-//     sessionStorage.setItem('botechka-oauth-loading', 'true')
-//     window.dispatchEvent(new Event('botechka-oauth-start'))
-
-//     const result = await signInWithProvider('google')
-//     if (!result.success) {
-//         Errormessage.value = result.error || 'Google login failed.'
-//         Isloading.value = false
-//         isGoogleLoading.value = false
-//         sessionStorage.removeItem('botechka-oauth-loading')
-//     }
-// }
-
-async function handlesubmit() {
-    Isloading.value = true
-    Errormessage.value = ''
+async function handleSubmit() {
+    isLoading.value = true
+    errorMessage.value = ''
 
     try {
         const result = await loginUser({
@@ -46,27 +29,57 @@ async function handlesubmit() {
             password: password.value
         })
 
-        if (result.success) {
-            email.value = ''
-            password.value = ''
+        if (!result.success) {
+            const errorText = result.error?.toLowerCase() || ''
 
-            const role = result.data?.user?.user_metadata?.role?.toLowerCase()
-            router.push(role === 'beneficiary' ? '/beneficiary-dashboard' : '/dashboard')
-        } else {
-            const rawError = result.error ? result.error.toLowerCase() : ''
-
-            if (rawError.includes('confirmed') || rawError.includes('confirmation')) {
-                Errormessage.value = 'Please comfirm verification in your inbox pare ko!'
-            } else if (rawError.includes('invalid clones') || rawError.includes('invalid credentials')) {
-                Errormessage.value = 'Invalid credentials'
-            } else {
-                Errormessage.value = result.error || 'Error'
+            if (errorText.includes('confirmed') || errorText.includes('confirmation')) {
+                errorMessage.value = 'Please verify your email before logging in.'
             }
+            else if (errorText.includes('invalid login credentials')) {
+                errorMessage.value = 'Invalid email or password.'
+            }
+            else {
+                errorMessage.value = result.error || 'Unable to sign in.'
+            }
+
+            return
         }
+
+        const profileResult = await getMyProfile()
+
+        if (!profileResult.success) {
+            errorMessage.value = 'Unable to load your profile. Please contact the administrator.'
+            return
+        }
+
+        const role = profileResult.data.role?.toLowerCase()
+
+        if (!['beneficiary', 'personnel', 'admin', 'super_admin'].includes(role)) {
+            errorMessage.value = 'Your account role is not authorized.'
+            return
+        }
+        if (rememberMe.value) {
+            localStorage.setItem('remembered_email', email.value)
+        } else {
+            localStorage.removeItem('remembered_email')
+        }
+
+        email.value = ''
+        password.value = ''
+
+        const dashboardRoutes = {
+            beneficiary: '/beneficiary-dashboard',
+            personnel: '/dashboard',
+            admin: '/dashboard',
+            super_admin: '/dashboard'
+        }
+
+        await router.replace(dashboardRoutes[role])
     } catch (error) {
-        Errormessage.value = error instanceof Error ? error.message : 'Error'
+        errorMessage.value =
+            error instanceof Error ? error.message : 'Unable to sign in. Please try again.'
     } finally {
-        Isloading.value = false
+        isLoading.value = false
     }
 }
 
@@ -80,12 +93,6 @@ onMounted(() => {
 </script>
 
 <template>
-    <div v-if="isGoogleLoading" class="fixed inset-0 z-100 flex min-h-screen items-center justify-center bg-gray-100">
-        <div class="flex flex-col items-center gap-4 text-blue-700">
-            <div class="h-10 w-10 animate-spin rounded-full border-4 border-blue-200 border-t-blue-700"></div>
-            <p class="text-sm font-medium">Connecting to Google...</p>
-        </div>
-    </div>
     <section class="grid 2xl:grid-cols-2 grid-cols-1 2xl:p-0">
         <div class="grid relative 2xl:flex hidden">
             <div class="relative w-full 2xl:flex hidden">
@@ -130,9 +137,9 @@ onMounted(() => {
                     <h1 class="text-2xl font-bold text-[#404040] text-[24px]">Welcome back Master!</h1>
                     <p class="text-[#808080] text-[14px]">Login to create yout account</p>
                 </div>
-                <form @submit.prevent="handlesubmit" class="grid gap-4 mt-10">
-                    <div v-if="Errormessage" class="bg-red-50 text-red-600 p-2 rounded-lg text-sm">
-                        {{ Errormessage }}
+                <form @submit.prevent="handleSubmit" class="grid gap-4 mt-10">
+                    <div v-if="errorMessage" class="bg-red-50 text-red-600 p-2 rounded-lg text-sm">
+                        {{ errorMessage }}
                     </div>
                     <div class="grid gap-1">
                         <label for="email" class="text-[#404040] text-[14px] font-medium">Email</label>
@@ -160,9 +167,9 @@ onMounted(() => {
                         <router-link to="/forgot-password" class="text-blue-700">Forgot password?</router-link>
                     </div>
                     <div class="flex items-center justify-center p-2 bg-blue-700 rounded-xl text-white"
-                        :class="{ 'opacity-60 cursor-not-allowed': Isloading }">
-                        <button type="submit" :disabled="Isloading" class="w-full">
-                            {{ Isloading ? 'Signing....' : 'Sign in' }}
+                        :class="{ 'opacity-60 cursor-not-allowed': isLoading }">
+                        <button type="submit" :disabled="isLoading" class="w-full">
+                            {{ isLoading ? 'Signing in...' : 'Sign in' }}
                         </button>
                     </div>
 
@@ -171,13 +178,6 @@ onMounted(() => {
                                 class="text-blue-700">Register here</router-link></p>
                     </div>
 
-                    <!-- <div class="flex gap-4 mt-6 border border-gray-200 p-2 hover:bg-gray-50 relative rounded-lg">
-                        <button @click="handleGoogleLogin" :disabled="Isloading"
-                            class="w-full py-2 rounded-lg flex items-center justify-center gap-2 font-inter text-sm">
-                            <span>{{ Isloading ? 'Connecting to Google...' : 'Continue with Google' }}</span>
-                        </button>
-                        <img src="/src/assets/Botikangbayan.jpg" alt="" class="h-10 absolute">
-                    </div> -->
                 </form>
             </div>
         </div>

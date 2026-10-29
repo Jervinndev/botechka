@@ -1,5 +1,5 @@
 <script setup>
-import { Check, Pill, Eye, EyeOff } from '@lucide/vue'
+import { Eye, EyeOff } from '@lucide/vue'
 import botikaLogo from '../../assets/BotikaWHITE-B0wYbg7D.png'
 import botikaBackground from '../../assets/Botikangbayan.jpg'
 import { registerUser } from '../../services/Authservices';
@@ -10,78 +10,58 @@ const router = useRouter()
 
 const email = ref('')
 const password = ref('')
-const fname = ref('')
-const mname = ref('')
-const lname = ref('')
-const contactNumber = ref('') // Binago mula cont para tugma sa v-model
-const barangay = ref('')      // Binago mula barangs para tugma sa v-model
+const firstName = ref('')
+const middleName = ref('')
+const lastName = ref('')
+const contactNumber = ref('')
+const barangay = ref('')
 const agree = ref(false)
-const Isloading = ref(false)
-const Errormessage = ref('')
-const comfirmpass = ref('')
+const isLoading = ref(false)
+const errorMessage = ref('')
+const confirmPassword = ref('')
 const showPassword = ref(false)
 
 function togglePassword() {
     showPassword.value = !showPassword.value
 }
 
-
-async function handlesubmit() {
+async function handleSubmit() {
+    errorMessage.value = ''
     if (!agree.value) {
-        Errormessage.value = 'Please agree to the terms and policy before creating your account.'
+        errorMessage.value = 'Please agree to the terms and policy before creating your account.'
         return
     }
 
-    if (password.value !== comfirmpass.value) {
-        Errormessage.value = 'Passwords do not match. Please re-enter your password.'
+    if (password.value !== confirmPassword.value) {
+        errorMessage.value = 'Passwords do not match.'
         return
     }
 
-    Isloading.value = true
-    Errormessage.value = ''
+    isLoading.value = true
 
     try {
         const result = await registerUser({
             email: email.value,
             password: password.value,
-            firstname: fname.value,
-            middlename: mname.value,
-            lastname: lname.value,
-            contact: contactNumber.value, // Itinugma sa variable
-            barangays: barangay.value      // Itinugma sa variable
+            firstName: firstName.value,
+            middleName: middleName.value,
+            lastName: lastName.value,
+            contactNumber: contactNumber.value,
+            barangay: barangay.value
         })
 
-        if (result.success) {
-            email.value = ''
-            password.value = ''
-            fname.value = ''
-            mname.value = ''
-            lname.value = ''
-            contactNumber.value = ''
-            barangay.value = ''
-
-            Isloading.value = false
-
-            router.push('/verification')
-        } else {
-            Errormessage.value = result.error || 'Registration failed. Please try again.'
+        if (!result.success) {
+            errorMessage.value = result.error || 'Registration failed. Please try again.'
+            return
         }
+
+        await router.push('/verification')
     } catch (error) {
-        Errormessage.value = error.message || 'Registration failed. Please try again.'
+        errorMessage.value = error instanceof Error ? error.message : 'Registration failed. Please try again.'
     } finally {
-        Isloading.value = false // Siniguro na laging mag-false ang loading kahit mag-error
+        isLoading.value = false
     }
 }
-
-// async function handleSocialLogin(provider) {
-//     sessionStorage.setItem('botechka-oauth-loading', 'true')
-//     window.dispatchEvent(new Event('botechka-oauth-start'))
-//     const result = await signInWithProvider(provider);
-//     if (!result.success) {
-//         Errormessage.value = result.error;
-//         sessionStorage.removeItem('botechka-oauth-loading')
-//     }
-// }
 </script>
 
 <template>
@@ -127,30 +107,30 @@ async function handlesubmit() {
                     <h1 class="text-2xl font-bold font-inter text-[#404040] text-[24px]">Register now!</h1>
                     <p class="text-[#808080] font-inter font-medium text-sm">Register to create yout account</p>
                 </div>
-                <form @submit.prevent="handlesubmit" class="flex flex-col gap-4 mt-10">
-                    <div v-if="Errormessage" class="bg-red-50 text-red-600 p-2 rounded-lg text-sm">
-                        {{ Errormessage }}
+                <form @submit.prevent="handleSubmit" class="flex flex-col gap-4 mt-10">
+                    <div v-if="errorMessage" class="bg-red-50 text-red-600 p-2 rounded-lg text-sm">
+                        {{ errorMessage }}
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="flex flex-col gap-1">
-                            <label for="firtsname" class="text-[#404040] font-inter text-sm font-medium">First
+                            <label for="firstName" class="text-[#404040] font-inter text-sm font-medium">First
                                 name <span class="text-red-500">*</span></label>
-                            <input v-model="fname" type="text" id="firtsname"
+                            <input v-model="firstName" type="text" id="firstName"
                                 class="bg-gray-50 w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:border-none focus:ring-2 focus:ring-blue-700"
                                 placeholder="John Juan" required>
                         </div>
                         <div class="flex flex-col gap-1">
-                            <label for="Middlename" class="text-[#404040] font-inter text-sm font-medium">Middle
+                            <label for="middleName" class="text-[#404040] font-inter text-sm font-medium">Middle
                                 name <span class="text-red-500">*</span></label>
-                            <input v-model="mname" type="text" id="Middlename"
+                            <input v-model="middleName" type="text" id="middleName"
                                 class="bg-gray-50 w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:border-none focus:ring-2 focus:ring-blue-700"
                                 placeholder="Anain">
                         </div>
                     </div>
                     <div class="flex flex-col gap-1 col-span-2 2xl:col-span-1">
-                        <label for="Lastname" class="text-[#404040] font-inter text-sm font-medium">Last
+                        <label for="lastName" class="text-[#404040] font-inter text-sm font-medium">Last
                             name <span class="text-red-500">*</span></label>
-                        <input v-model="lname" type="text" id="Lastname"
+                        <input v-model="lastName" type="text" id="lastName"
                             class="bg-gray-50 w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:border-none focus:ring-2 focus:ring-blue-700"
                             placeholder="Dela Cruz" required>
                     </div>
@@ -179,7 +159,7 @@ async function handlesubmit() {
                         <label for="pass" class="text-[#404040] text-[14px] font-medium">Password <span
                                 class="text-red-500">*</span></label>
                         <div class="relative">
-                            <input v-model="password" :type="showPassword ? 'text' : 'password'" id="pass"
+                            <input v-model="password" :type="showPassword ? 'text' : 'password'" id="pass" required
                                 class="bg-gray-50 border border-gray-200 rounded-lg p-2 pr-10 w-full focus:outline-none focus:border-none focus:ring-2 focus:ring-blue-700"
                                 placeholder="•••••••">
                             <button type="button" @click="togglePassword"
@@ -192,7 +172,7 @@ async function handlesubmit() {
                     <div class=" flex flex-col gap-1">
                         <label for="comfirm" class="text-[#404040] font-inter text-sm font-medium">Confirm
                             Password <span class="text-red-500">*</span></label>
-                        <input v-model="comfirmpass" type="password" id="comfirm"
+                        <input v-model="confirmPassword" type="password" id="confirmPassword"
                             class="bg-gray-50 border border-gray-200 rounded-lg p-2 focus:outline-none focus:border-none focus:ring-2 focus:ring-blue-700"
                             placeholder="•••••••" required>
                     </div>
@@ -201,9 +181,9 @@ async function handlesubmit() {
                         <label for="agree" class="text-[#404040] text-sm">Agree to the terms &amp; policy</label>
                     </div>
                     <div class="flex items-center justify-center p-2 bg-blue-700 rounded-xl text-white"
-                        :class="{ 'opacity-60 cursor-not-allowed': Isloading }">
-                        <button type="submit" :disabled="Isloading" class="w-full">
-                            {{ Isloading ? 'Creating....' : 'Create account' }}
+                        :class="{ 'opacity-60 cursor-not-allowed': isLoading }">
+                        <button type="submit" :disabled="isLoading" class="w-full">
+                            {{ isLoading ? 'Creating...' : 'Create account' }}
                         </button>
                     </div>
                     <div class="flex items-center justify-center">
