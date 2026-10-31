@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { Image as ImageIcon, X } from '@lucide/vue'
-import { AddMedicineWithImage } from '../../services/Medicines'
 import { getCategories } from '../../services/Fetches'
 import { addDaysToDate, getEarlierDate, getLaterDate, getLocalDateString } from '../../utils/dates'
 
