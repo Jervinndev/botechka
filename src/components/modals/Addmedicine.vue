@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { X } from '@lucide/vue'
-import { Addmedicines } from '../../services/Medicines'
+import { Image as ImageIcon, X } from '@lucide/vue'
+import { AddMedicineWithImage } from '../../services/Medicines'
 import { getCategories } from '../../services/Fetches'
 import { addDaysToDate, getEarlierDate, getLaterDate, getLocalDateString } from '../../utils/dates'
 
@@ -13,6 +13,8 @@ const emit = defineEmits(['close', 'saved'])
 const Isloading = ref(false)
 const errorMessage = ref('')
 const categories = ref([])
+const selectedImage = ref(null)
+const imagePreviewUrl = ref('')
 
 const dosages = ref([
     { id: 1, dosage_name: 'Tablet' },
@@ -67,6 +69,31 @@ async function fetchCategories() {
 
 function resetForm() {
     formData.value = createDefaultForm()
+    selectedImage.value = null
+    if (imagePreviewUrl.value) URL.revokeObjectURL(imagePreviewUrl.value)
+    imagePreviewUrl.value = ''
+    errorMessage.value = ''
+}
+
+function handleImageSelected(event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const supportedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!supportedTypes.includes(file.type)) {
+        errorMessage.value = 'Choose a JPG, PNG, or WebP image.'
+        event.target.value = ''
+        return
+    }
+    if (file.size > 2 * 1024 * 1024) {
+        errorMessage.value = 'Image must be 2 MB or smaller.'
+        event.target.value = ''
+        return
+    }
+
+    if (imagePreviewUrl.value) URL.revokeObjectURL(imagePreviewUrl.value)
+    selectedImage.value = file
+    imagePreviewUrl.value = URL.createObjectURL(file)
     errorMessage.value = ''
 }
 
@@ -112,7 +139,7 @@ async function saveMedicine() {
             throw new Error('Expiration date must be after the manufacturing date.')
         }
 
-        const response = await Addmedicines(payload)
+        const response = await AddMedicineWithImage(payload, selectedImage.value)
 
         if (response.error) {
             throw response.error
@@ -150,7 +177,7 @@ async function saveMedicine() {
         enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
         leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
         <section v-if="IsOpen"
-            class="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-black/40 backdrop-blur-xs p-4">
+            class="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-black/40 p-4">
             <div
                 class="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 font-inter shadow-xl">
                 <form @submit.prevent="saveMedicine">
@@ -168,14 +195,21 @@ async function saveMedicine() {
                     </div>
 
                     <div class="mt-6 grid grid-cols-1 gap-6">
-                        <div class="flex items-center gap-2">
-                            <img src="/src/assets/download (12).jpg" alt="" class="w-20 rounded-lg object-cover">
+                        <div class="flex items-center gap-3">
+                            <img v-if="imagePreviewUrl" :src="imagePreviewUrl" alt="Medicine image preview"
+                                class="h-20 w-20 rounded-lg object-cover">
+                            <div v-else
+                                class="flex h-20 w-20 items-center justify-center rounded-lg bg-gray-100 text-gray-400">
+                                <ImageIcon :size="28" />
+                            </div>
                             <div>
                                 <label for="imageInput"
                                     class="cursor-pointer rounded-xl bg-blue-700 px-4 py-2 text-white hover:bg-blue-800">
-                                    Upload Image
+                                    {{ selectedImage ? 'Change Image' : 'Upload Image' }}
                                 </label>
-                                <input type="file" class="hidden" id="imageInput">
+                                <input type="file" class="hidden" id="imageInput"
+                                    accept="image/jpeg,image/png,image/webp" @change="handleImageSelected">
+                                <p class="mt-2 text-xs text-gray-500">JPG, PNG, or WebP · max 2 MB</p>
                             </div>
                         </div>
                         <div class="grid gap-2">

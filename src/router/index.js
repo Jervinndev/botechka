@@ -8,7 +8,7 @@ import Home from '../views/home.vue'
 import About from '../views/About.vue'
 import Pagenotfound from '../views/pagenotfound/Pagenotfound.vue'
 
-//Admin dashboard inamo
+//Admin dashboard inamo puro sumbat
 import Adminlayout from '../components/layout/Adminlayout.vue'
 import Dashboard from '../views/admin/Dashboard.vue'
 import Inventory from '../views/admin/Inventory.vue'
@@ -16,6 +16,13 @@ import Distribution from '../views/admin/Distribution.vue'
 import Reports from '../views/admin/Report.vue'
 import Categories from '../views/admin/Categories.vue'
 import Beneficiary from '../views/admin/Beneficiary.vue'
+import Verification from '../views/Verification/Verification.vue'
+import Notification from '../views/admin/Notification.vue'
+import Forgotpassword from '../views/auth/Forgotpassword.vue'
+import Resetpassword from '../views/auth/ResetPassword.vue'
+import Beneficiaryrequest from '../views/admin/BeneficiaryRequest.vue'
+
+// Settings
 import Settings from '../views/admin/Settings.vue'
 import SettingsAppearance from '../views/Settings/Appearance.vue'
 import SettingsAccountManagement from '../views/Settings/AccountManagement.vue'
@@ -23,11 +30,6 @@ import SettingsBackupRecovery from '../views/Settings/BackupRecovery.vue'
 import SettingsArchive from '../views/Settings/Archive.vue'
 import SettingsConfiguration from '../views/Settings/Configuration.vue'
 import SettingsSuppliers from '../views/Settings/Suppliers.vue'
-import Verification from '../views/Verification/Verification.vue'
-import Notification from '../views/admin/Notification.vue'
-import Forgotpassword from '../views/auth/Forgotpassword.vue'
-import Resetpassword from '../views/auth/ResetPassword.vue'
-import Beneficiaryrequest from '../views/admin/BeneficiaryRequest.vue'
 
 // Beneficiary pages
 import BeneficiaryDashboard from '../views/beneficiary/BeneficiaryDashboard.vue'
@@ -36,7 +38,7 @@ import Beneficiarylayout from '../components/layout/Beneficiarylayout.vue'
 import Notificationbene from '../views/beneficiary/Notificationbene.vue'
 import Requestmedicines from '../views/beneficiary/Requestmedicines.vue'
 
-// eto mga routes naman to
+// eto mga routes naman to tanginanyo
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [

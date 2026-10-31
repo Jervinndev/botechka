@@ -94,11 +94,12 @@ onMounted(() => {
                 <h1 class="text-sm">Filter by category</h1>
             </div>
             <div class="flex">
-                <button class="flex gap-2 p-2 px-4 bg-blue-700 text-white rounded-md">
+                <button class="flex gap-2 p-1.5 px-3 bg-blue-700 text-white rounded-md">
                     All
                     <ChevronDown />
                 </button>
             </div>
+            <VueDatePicker v-model="date"></VueDatePicker>
         </div>
 
         <div
@@ -121,7 +122,7 @@ onMounted(() => {
                 <InventorySkeleton v-if="isLoading" />
                 <tbody v-else-if="searchfilter.length === 0">
                     <tr>
-                        <td colspan="8" class="text-center p-6 text-gray-500 text-sm">
+                        <td colspan="9" class="text-center p-6 text-gray-500 text-sm">
                             Walang nakitang gamot na tumutugma sa iyong hinahanap.
                         </td>
                     </tr>
@@ -129,7 +130,12 @@ onMounted(() => {
                 <tbody v-else class="divide-y divide-gray-100">
                     <tr v-for="med in searchfilter" :key="med.id"
                         class="grid grid-cols-8 items-center hover:bg-gray-50">
-                        <td class="p-3 text-gray-700">{{ med.medicine_name }}</td>
+                        <td class="flex item-center justify-start text-center gap-3 p-3 text-gray-700">
+                            <img v-if="med.image_url" :src="med.image_url" :alt="`${med.medicine_name} image`"
+                                class="h-10 w-10 rounded-lg object-cover">
+                            <span v-else class="text-xs text-gray-400">No image</span>
+                            <div class="flex items-center">{{ med.medicine_name }}</div>
+                        </td>
                         <td class="p-3 text-gray-500">{{ med.medicine_id || 'N/A' }}</td>
                         <td class="p-3 text-gray-600">{{ med.category }}</td>
                         <td class="p-3 text-gray-700 font-medium">{{ med.quantity }}</td>

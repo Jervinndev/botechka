@@ -143,7 +143,7 @@ const sistemaSteps = ref([
     <!-- HERO — real Botika ng Bayan photo as background, dark overlay for readability -->
     <section class="box-bg relative bg-center bg-cover">
         <div class="relative w-full flex items-center justify-center pt-25 2xl:pt-44 pb-6 transition-all duration-100">
-            <div class="mx-auto max-w-7xl w-full flex">
+            <div class="mx-auto max-w-7xl w-full grid 2xl:grid-cols-2 grid-cols-1">
                 <div class="flex flex-col items-start gap-5 font-outfit max-w-xl 2xl:px-0 px-4">
                     <div class="flex items-center gap-2 px-3 py-1 rounded-full w-fit bg-white border border-black/10">
                         <div class="h-2 w-2 bg-blue-500 rounded-full">
@@ -172,9 +172,9 @@ const sistemaSteps = ref([
                         </router-link>
                     </div>
                 </div>
-                <div class="hidden lg:flex flex-1 items-center justify-center [perspective:1000px]">
+                <div class="flex flex-1 items-center justify-center [perspective:1000px] 2xl:pt-0 pt-8 p-4">
                     <img :src="homeIllustration" alt="Botika ng Bayan illustration"
-                        class="w-full max-w-[600px] object-cover [transform:rotateX(50deg)_rotateZ(-35deg)] animate-[float_6s_ease-in-out_infinite]" />
+                        class="hero-image w-full max-w-[600px] object-cover" />
                 </div>
             </div>
         </div>
@@ -289,6 +289,28 @@ const sistemaSteps = ref([
 
     50% {
         transform: rotateX(55deg) rotateZ(-20deg) translateY(-10px);
+    }
+}
+
+.hero-image {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float-mobile {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@media (max-width: 767px) {
+    .hero-image {
+        animation: float-mobile 6s ease-in-out infinite;
     }
 }
 </style>

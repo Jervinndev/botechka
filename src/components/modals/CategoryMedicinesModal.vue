@@ -2,8 +2,6 @@
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Pill, Search, X } from '@lucide/vue'
-import { getMedicinesByCategory } from '../../services/Fetches'
-import { updateCategoryStatus } from '../../services/Medicines'
 import { getLocalDateString } from '../../utils/dates'
 
 const props = defineProps({
@@ -11,29 +9,28 @@ const props = defineProps({
     category: {
         type: Object,
         default: null
+    },
+    medicines: {
+        type: Array,
+        default: () => []
     }
 })
 
-const emit = defineEmits(['close', 'status-changed'])
+const emit = defineEmits(['close'])
 const router = useRouter()
-const medicines = ref([])
 const searchQuery = ref('')
-const isLoading = ref(false)
-const isSaving = ref(false)
-const errorMessage = ref('')
-let requestId = 0
 
 const stockedCount = computed(() =>
-    medicines.value.filter(medicine => Number(medicine.quantity) > 0).length
+    props.medicines.filter(medicine => Number(medicine.quantity) > 0).length
 )
 const stockPercentage = computed(() =>
-    medicines.value.length ? Math.round((stockedCount.value / medicines.value.length) * 100) : 0
+    props.medicines.length ? Math.round((stockedCount.value / props.medicines.length) * 100) : 0
 )
 const filteredMedicines = computed(() => {
     const query = searchQuery.value.trim().toLowerCase()
-    if (!query) return medicines.value
+    if (!query) return props.medicines
 
-    return medicines.value.filter(medicine =>
+    return props.medicines.filter(medicine =>
         medicine.medicine_name?.toLowerCase().includes(query) ||
         medicine.dosage?.toLowerCase().includes(query) ||
         medicine.unit?.toLowerCase().includes(query)
@@ -49,56 +46,13 @@ function medicineStatus(medicine) {
     return 'Stock in'
 }
 
-async function fetchCategoryMedicines(categoryName) {
-    const currentRequest = ++requestId
-    isLoading.value = true
-    errorMessage.value = ''
-    medicines.value = []
-    searchQuery.value = ''
-
-    try {
-        const data = await getMedicinesByCategory(categoryName)
-        if (currentRequest === requestId) medicines.value = data || []
-    } catch (error) {
-        if (currentRequest === requestId) {
-            console.error('Failed to fetch medicines for category:', error)
-            errorMessage.value = 'Failed to load medicines for this category.'
-        }
-    } finally {
-        if (currentRequest === requestId) isLoading.value = false
-    }
-}
-
 watch(
     () => [props.IsOpen, props.category?.category_name],
-    ([isOpen, categoryName]) => {
-        if (isOpen && categoryName) {
-            fetchCategoryMedicines(categoryName)
-        } else {
-            requestId += 1
-            medicines.value = []
-            errorMessage.value = ''
-        }
+    ([isOpen]) => {
+        if (isOpen) searchQuery.value = ''
     },
     { immediate: true }
 )
-
-async function changeCategoryStatus(status) {
-    if (!props.category || isSaving.value) return
-
-    isSaving.value = true
-    errorMessage.value = ''
-
-    try {
-        await updateCategoryStatus(props.category.id, status)
-        emit('status-changed')
-    } catch (error) {
-        console.error('Failed to update category status:', error)
-        errorMessage.value = 'Failed to update this category. Please try again.'
-    } finally {
-        isSaving.value = false
-    }
-}
 
 function viewInInventory() {
     if (!props.category) return
@@ -113,9 +67,9 @@ function viewInInventory() {
 
 <template>
     <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
-        enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in"
-        leave-from-class="opacity-100" leave-to-class="opacity-0">
-        <div v-if="IsOpen && category" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4"
+        enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100"
+        leave-to-class="opacity-0">
+        <div v-if="IsOpen && category" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
             @click.self="emit('close')" @keydown.esc="emit('close')">
             <section class="flex max-h-[90vh] w-full max-w-md flex-col rounded-2xl bg-white p-4 shadow-xl font-inter"
                 role="dialog" aria-modal="true" :aria-label="`${category.category_name} category medicines`">
@@ -138,21 +92,17 @@ function viewInInventory() {
                         class="w-full bg-transparent py-2 text-sm outline-none">
                 </label>
 
-                <p v-if="errorMessage" class="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-                    {{ errorMessage }}
-                </p>
-                <div v-else-if="isLoading" class="flex min-h-40 items-center justify-center text-sm text-gray-500">
-                    Loading category medicines...
-                </div>
-                <div v-else-if="filteredMedicines.length === 0"
+                <div v-if="filteredMedicines.length === 0"
                     class="flex min-h-40 items-center justify-center text-sm text-gray-500">
-                    {{ medicines.length ? 'No medicines match your search.' : 'No medicines in this category.' }}
+                    {{ props.medicines.length ? 'No medicines match your search.' : 'No medicines in this category.' }}
                 </div>
                 <ul v-else class="mt-2 min-h-0 flex-1 divide-y divide-gray-100 overflow-y-auto">
-                    <li v-for="medicine in filteredMedicines" :key="medicine.id"
-                        class="flex items-center gap-3 py-2.5">
-                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
-                            <Pill :size="20" />
+                    <li v-for="medicine in filteredMedicines" :key="medicine.id" class="flex items-center gap-3 py-2.5">
+                        <div
+                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                            <img v-if="medicine.image_url" :src="medicine.image_url"
+                                :alt="`${medicine.medicine_name} image`" class="h-10 w-10 rounded-lg object-cover">
+                            <span v-else class="text-xs text-gray-400">No image</span>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-sm font-semibold text-gray-900">{{ medicine.medicine_name }}</p>
@@ -168,18 +118,10 @@ function viewInInventory() {
                     </li>
                 </ul>
 
-                <footer class="mt-3 grid grid-cols-2 gap-3 border-t border-gray-100 pt-3">
+                <footer class="mt-3 border-t border-gray-100 pt-3">
                     <button type="button" @click="viewInInventory"
-                        class="rounded-lg bg-blue-700 px-3 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
+                        class="w-full rounded-lg bg-blue-700 px-3 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
                         View in Inventory
-                    </button>
-                    <button type="button" :disabled="isSaving" @click="changeCategoryStatus(
-                        category.status === 'archived' ? 'active' : 'archived'
-                    )" :class="category.status === 'archived'
-                        ? 'border border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
-                        : 'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100'"
-                        class="rounded-lg px-3 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60">
-                        {{ isSaving ? 'Saving...' : category.status === 'archived' ? 'Restore' : 'Archive' }}
                     </button>
                 </footer>
             </section>
