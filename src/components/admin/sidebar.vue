@@ -279,7 +279,7 @@ onMounted(() => {
 
         <!-- Sidebar content -->
         <div :class="[
-            'fixed bottom-0 left-0 top-16 z-40 flex w-72 max-w-[85vw] flex-col justify-between overflow-y-auto bg-white p-4 transition-transform duration-300 md:static md:z-auto md:h-full md:w-auto md:max-w-none md:overflow-visible md:p-0 md:translate-x-0',
+            'fixed bottom-0 left-0 top-10 z-40 flex w-72 max-w-[85vw] flex-col justify-between overflow-y-auto bg-white p-4 transition-transform duration-300 md:static md:z-auto md:h-full md:w-auto md:max-w-none md:overflow-visible md:p-0 md:translate-x-0',
             isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         ]">
             <div>

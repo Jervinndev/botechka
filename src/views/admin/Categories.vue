@@ -11,7 +11,6 @@ const medicines = ref([]);
 const Isflex = ref(true)
 const isCategoryModalOpen = ref(false);
 const selectedCategory = ref(null)
-const showArchived = ref(false)
 const categorySearch = ref('')
 const isLoading = ref(true);
 const errorMessage = ref('');
@@ -39,7 +38,7 @@ const categoriesWithStock = computed(() => {
     const query = categorySearch.value.trim().toLowerCase()
 
     return categories.value
-        .filter(category => (category.status === 'archived') === showArchived.value)
+        .filter(category => category.status !== 'archived')
         .filter(category => !query || category.category_name?.toLowerCase().includes(query))
         .map(category => {
         const categoryMedicines = medicines.value.filter(
@@ -62,6 +61,15 @@ const categoriesWithStock = computed(() => {
     });
 });
 
+const selectedCategoryMedicines = computed(() => {
+    const categoryName = selectedCategory.value?.category_name?.trim().toLowerCase()
+    if (!categoryName) return []
+
+    return medicines.value.filter(
+        medicine => medicine.category?.trim().toLowerCase() === categoryName
+    )
+})
+
 const totalMedicineCount = computed(() => medicines.value.length);
 const outOfStockCount = computed(() =>
     medicines.value.filter(medicine => Number(medicine.quantity) <= 0).length
@@ -79,11 +87,6 @@ function openCategory(category) {
 
 function closeCategoryModal() {
     selectedCategory.value = null
-}
-
-async function handleCategoryStatusChanged() {
-    closeCategoryModal()
-    await fetchCategories()
 }
 
 onMounted(() => {
@@ -149,10 +152,6 @@ onMounted(() => {
 
             </div>
             <div class="flex justify-between items-center gap-3">
-                <button @click="showArchived = !showArchived"
-                    class="p-2 border border-gray-200 text-gray-700 rounded-xl px-4 font-inter hover:bg-gray-50">
-                    {{ showArchived ? 'View active' : 'View archived' }}
-                </button>
                 <div>
                     <button @click="isCategoryModalOpen = true"
                         class="p-2 bg-blue-700 text-white rounded-xl px-4 font-inter">Add
@@ -171,7 +170,7 @@ onMounted(() => {
         </p>
         <CategorySkeliton v-if="isLoading" />
         <div v-else-if="categoriesWithStock.length === 0" class="mt-4 rounded-xl bg-white p-6 text-center text-sm text-gray-500">
-            {{ showArchived ? 'No archived categories found.' : 'No categories found. Add a category to get started.' }}
+            No categories found. Add a category to get started.
         </div>
         <div v-else class="grid gap-4 mt-4 rounded-xl transition-all duration-100"
             :class="Isflex ? 'grid grid-cols-3' : 'flex'">
@@ -192,12 +191,6 @@ onMounted(() => {
                 </div>
                 <div class="flex justify-between items-center">
                     <h1>{{ cat.medicineCount }} items · {{ cat.stockPercentage }}% stocked</h1>
-                    <div :class="cat.status === 'archived' ? 'bg-gray-100' : 'bg-green-100'"
-                        class="p-1 px-3 rounded-full">
-                        <h1 :class="cat.status === 'archived' ? 'text-gray-600' : 'text-green-600'">
-                            {{ cat.status || 'active' }}
-                        </h1>
-                    </div>
                 </div>
             </div>
         </div>
@@ -206,5 +199,5 @@ onMounted(() => {
     <Categorymodal :IsOpen="isCategoryModalOpen" @close="isCategoryModalOpen = false"
         @category-added="fetchCategories" />
     <CategoryMedicinesModal :IsOpen="Boolean(selectedCategory)" :category="selectedCategory"
-        @close="closeCategoryModal" @status-changed="handleCategoryStatusChanged" />
+        :medicines="selectedCategoryMedicines" @close="closeCategoryModal" />
 </template>

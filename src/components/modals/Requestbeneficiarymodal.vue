@@ -30,7 +30,7 @@ function removeFile() {
 </script>
 
 <template>
-    <div v-if="IsOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 font-inter">
+    <div v-if="IsOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 font-inter">
         <div
             class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl relative overflow-hidden flex flex-col max-h-[90vh]">
 
@@ -131,7 +131,7 @@ function removeFile() {
                                 <p class="text-xs font-bold text-gray-800 truncate max-w-[200px]">{{
                                     prescriptionFile.name }}</p>
                                 <p class="text-[10px] text-gray-500">{{ (prescriptionFile.size / 1024 / 1024).toFixed(2)
-                                    }} MB</p>
+                                }} MB</p>
                             </div>
                         </div>
 

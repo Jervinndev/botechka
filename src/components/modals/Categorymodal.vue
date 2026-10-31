@@ -50,7 +50,7 @@ async function handleSave() {
         enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-100 ease-in"
         leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
         <section v-if="IsOpen"
-            class="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-black/40 backdrop-blur-xs p-4 font-inter">
+            class="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-black/40 p-4 font-inter">
             <div class="max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-xl bg-white p-6">
                 <div>
                     <h1 class="mt-2 font-inter text-2xl font-bold text-[#404040]">Add Categories</h1>
