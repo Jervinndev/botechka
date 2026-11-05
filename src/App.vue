@@ -27,13 +27,13 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div v-if="!isRouterReady" class="fixed inset-0 z-100 bg-gray-100"></div>
+    <div v-if="!isRouterReady" class="fixed inset-0 z-100 bg-white"></div>
     <div v-else-if="Isloading" class="fixed inset-0 z-100">
       <Progressbarloader @complete="finishLoading" />
     </div>
     <template v-else-if="isRouterReady">
       <Header v-if="showcomponents" />
-      <div class="bg-gray-100">
+      <div class="bg-white">
         <router-view />
       </div>
       <Footer v-if="showcomponents" />

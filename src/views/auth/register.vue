@@ -1,5 +1,5 @@
 <script setup>
-import { Eye, EyeOff } from '@lucide/vue'
+import { Eye, EyeOff, MoveLeft } from '@lucide/vue'
 import botikaLogo from '../../assets/BotikaWHITE-B0wYbg7D.png'
 import botikaBackground from '../../assets/Botikangbayan.jpg'
 import { registerUser } from '../../services/Authservices';
@@ -104,7 +104,15 @@ async function handleSubmit() {
         <div class="w-full min-h-screen bg-gray-100 flex items-start 2xl:items-center justify-center p-4">
             <div class="p-6 bg-white rounded-xl w-full max-w-110">
                 <div>
-                    <h1 class="text-2xl font-bold font-inter text-[#404040] text-[24px]">Register now!</h1>
+                    <router-link to="/">
+                        <div class="flex items-center justify-start text-gray-400 hover:text-gray-600">
+                            <MoveLeft size="18" class="mr-2" />
+                            <h1>Back to home</h1>
+                        </div>
+                    </router-link>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold font-inter text-[#404040] text-[24px] pt-6">Register now!</h1>
                     <p class="text-[#808080] font-inter font-medium text-sm">Register to create yout account</p>
                 </div>
                 <form @submit.prevent="handleSubmit" class="flex flex-col gap-4 mt-10">

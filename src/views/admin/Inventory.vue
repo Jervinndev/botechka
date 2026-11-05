@@ -1,13 +1,14 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { Bell, Plus, ChevronDown, Pencil, Trash, Eye } from '@lucide/vue'
+import { Bell, Plus, ChevronDown, Pencil, Trash, Eye, RotateCcw } from '@lucide/vue'
 import { getMedicines } from '../../services/Fetches'
 import AddMedicineModal from '../../components/modals/Addmedicine.vue'
 import Addnewstocks from '../../components/modals/Addnewstocks.vue'
 import InventorySkeleton from '../../Skelitonloader/inventoryskeliton.vue'
 
 const medicines = ref([])
+const date = ref(null)
 const route = useRoute()
 const isLoading = ref(false)
 const isAddModalOpen = ref(false)
@@ -89,21 +90,31 @@ onMounted(() => {
             </div>
         </div>
 
-        <div class="flex items-center gap-4 mt-4 p-2 rounded-md bg-white w-fit font-inter">
-            <div>
-                <h1 class="text-sm">Filter by category</h1>
+        <div class="flex items-center justify-between mt-4">
+            <div class="flex items-center gap-4 mt-4 p-2 rounded-md bg-white w-fit font-inter">
+                <div>
+                    <h1 class="text-sm">Filter by category</h1>
+                </div>
+                <div class="flex">
+                    <button class="flex gap-2 p-1.5 px-3 bg-blue-700 text-white rounded-md">
+                        All
+                        <ChevronDown />
+                    </button>
+                </div>
+                <VueDatePicker v-model="date" placeholder="Select date"></VueDatePicker>
             </div>
-            <div class="flex">
-                <button class="flex gap-2 p-1.5 px-3 bg-blue-700 text-white rounded-md">
-                    All
-                    <ChevronDown />
+            <div class="flex items-center gap-4 mt-4 p-2 rounded-md bg-white w-fit font-inter text-sm">
+                <span>{{ searchfilter.length }} Medicines found</span>
+                <button type="button" @click="fetchInventory" :disabled="isLoading" aria-label="Reload beneficiaries"
+                    title="Reload beneficiaries"
+                    class="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-100 disabled:opacity-50">
+                    <RotateCcw :size="16" :class="{ 'animate-spin': isLoading }" />
                 </button>
             </div>
-            <VueDatePicker v-model="date"></VueDatePicker>
         </div>
 
         <div
-            class="w-full h-150 overflow-x-scroll overflow-y-scroll pr-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] mt-4">
+            class="w-full h-150 overflow-x-scroll overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] mt-4">
             <!-- Table para sa Dynamic Data galing Supabase -->
             <table class="2xl:w-full w-200 bg-white border border-gray-100 rounded-xl border-collapse overflow-hidden">
                 <thead class="bg-blue-700 text-white">

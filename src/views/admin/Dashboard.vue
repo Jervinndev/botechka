@@ -16,12 +16,17 @@ import {
 import { Bar, Line } from 'vue-chartjs'
 import Dashboardskeliton from '../../Skelitonloader/Dashboardskeliton.vue'
 import { getMedicines } from '../../services/Fetches'
+import { getDistributionTransactions } from '../../services/Distribution'
 import { getLocalDateString } from '../../utils/dates'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, LineElement, PointElement, CategoryScale, LinearScale, ArcElement)
 
 const loading = ref(true)
 const medicines = ref([])
+const distributionTransactions = ref([])
+const totalDistributionCount = ref(0)
+const distributionPeriod = ref('daily')
+const distributionError = ref('')
 
 const barChartData = ref({
     labels: [],
@@ -33,6 +38,17 @@ const barChartOptions = {
     maintainAspectRatio: false,
     plugins: {
         legend: { display: false }
+    },
+    scales: {
+        y: {
+            beginAtZero: true,
+            max: 200,
+            ticks: {
+                precision: 0,
+                stepSize: 20,
+                callback: (value) => Number(value).toLocaleString()
+            }
+        }
     }
 }
 
@@ -51,37 +67,115 @@ const lineChartOptions = {
 
 async function fetchDashboardData() {
     try {
-        await new Promise(resolve => setTimeout(resolve, 1500))
-
-        barChartData.value = {
-            labels: ['Maintenance', 'Cough & Colds', 'Pain Reliever', 'Cancer Treatment', 'Diabetes'],
-            datasets: [
-                {
-                    label: 'Purpose Count',
-                    backgroundColor: '#2563eb',
-                    borderColor: '#2563eb',
-                    borderWidth: 1,
-                    borderRadius: 6,
-                    data: [48.8, 39.3, 30.3, 42.6, 36.9]
-                }
-            ]
-        }
-
-        lineChartData.value = {
-            labels: ['1 Dec', '8 Dec', '16 Dec', '31 Dec', '1 Jan'],
-            datasets: [
-                {
-                    label: 'Total Distribution',
-                    backgroundColor: '#2563eb',
-                    borderColor: '#2563eb',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    data: [50, 165, 140, 146, 200]
-                }
-            ]
-        }
+        distributionError.value = ''
+        distributionTransactions.value = await getDistributionTransactions()
+        totalDistributionCount.value = distributionTransactions.value.length
+        updateDistributionCharts()
     } catch (error) {
         console.error('Error fetching dashboard data:', error)
+        distributionTransactions.value = []
+        totalDistributionCount.value = 0
+        distributionError.value = 'Unable to load distribution statistics.'
+        updateDistributionCharts()
+    }
+}
+
+function getLocalDateKey(date) {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+}
+
+function updateDistributionCharts() {
+    const purposeCounts = new Map()
+    for (const transaction of distributionTransactions.value) {
+        const purpose = transaction.purpose?.trim() || 'Unspecified'
+        const quantity = (transaction.distribution_items || []).reduce(
+            (total, item) => total + Math.max(0, Number(item.quantity) || 0),
+            0
+        )
+        purposeCounts.set(purpose, (purposeCounts.get(purpose) || 0) + quantity)
+    }
+
+    const topPurposes = [...purposeCounts.entries()]
+        .sort((first, second) => second[1] - first[1] || first[0].localeCompare(second[0]))
+        .slice(0, 5)
+
+    barChartData.value = {
+        labels: topPurposes.map(([purpose]) => purpose),
+        datasets: [{
+            label: 'Medicine units dispensed',
+            backgroundColor: '#2563eb',
+            borderColor: '#2563eb',
+            borderWidth: 1,
+            borderRadius: 6,
+            data: topPurposes.map(([, count]) => count)
+        }]
+    }
+
+    const now = new Date()
+    const periods = []
+
+    if (distributionPeriod.value === 'monthly') {
+        for (let offset = 5; offset >= 0; offset -= 1) {
+            const date = new Date(now.getFullYear(), now.getMonth() - offset, 1)
+            periods.push({
+                key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
+                label: date.toLocaleDateString(undefined, { month: 'short', year: '2-digit' })
+            })
+        }
+    } else if (distributionPeriod.value === 'weekly') {
+        for (let offset = 5; offset >= 0; offset -= 1) {
+            const date = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+            const daysSinceMonday = (date.getDay() + 6) % 7
+            date.setDate(date.getDate() - daysSinceMonday - offset * 7)
+            periods.push({
+                key: getLocalDateKey(date),
+                label: date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+            })
+        }
+    } else {
+        for (let offset = 6; offset >= 0; offset -= 1) {
+            const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - offset)
+            periods.push({
+                key: getLocalDateKey(date),
+                label: date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+            })
+        }
+    }
+
+    const periodCounts = new Map(periods.map((period) => [period.key, 0]))
+    for (const transaction of distributionTransactions.value) {
+        const date = new Date(transaction.distribution_date)
+        if (Number.isNaN(date.getTime())) continue
+
+        let periodKey
+        if (distributionPeriod.value === 'monthly') {
+            periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        } else if (distributionPeriod.value === 'weekly') {
+            const daysSinceMonday = (date.getDay() + 6) % 7
+            date.setDate(date.getDate() - daysSinceMonday)
+            periodKey = getLocalDateKey(date)
+        } else {
+            periodKey = getLocalDateKey(date)
+        }
+
+        if (periodCounts.has(periodKey)) {
+            periodCounts.set(periodKey, periodCounts.get(periodKey) + 1)
+        }
+    }
+
+    lineChartData.value = {
+        labels: periods.map(({ label }) => label),
+        datasets: [{
+            label: 'Total Distribution',
+            backgroundColor: '#2563eb',
+            borderColor: '#2563eb',
+            borderWidth: 2,
+            tension: 0.3,
+            data: periods.map(({ key }) => periodCounts.get(key))
+        }]
     }
 }
 
@@ -225,9 +319,9 @@ onMounted(async () => {
                     <div class="p-2 bg-blue-100/70 rounded-lg">
                         <AlignVerticalSpaceAround size="22" class="text-blue-700" />
                     </div>
-                    <p class="text-sm font-medium">Dispense</p>
+                    <p class="text-sm font-medium">Total Distributions</p>
                 </div>
-                <h1 class="text-2xl font-black text-gray-700 mt-2">2,000</h1>
+                <h1 class="text-2xl font-black text-gray-700 mt-2">{{ totalDistributionCount.toLocaleString() }}</h1>
                 <div class="flex items-center justify-between gap-2 mt-6">
                     <p class="text-sm">View detailed report</p>
                     <router-link to="/admin/reports" class="p-2 bg-blue-700 text-white rounded-full">
@@ -265,14 +359,18 @@ onMounted(async () => {
                         </h2>
                     </div>
                     <div class="h-64 relative flex items-center justify-center">
-                        <Bar :data="barChartData" :options="barChartOptions" />
+                        <p v-if="distributionError" class="text-sm text-red-600">{{ distributionError }}</p>
+                        <p v-else-if="barChartData.labels.length === 0" class="text-sm text-gray-500">
+                            No distribution purposes recorded yet.
+                        </p>
+                        <Bar v-else :data="barChartData" :options="barChartOptions" />
                     </div>
                 </div>
 
                 <div class="bg-white p-6 rounded-2xl border border-gray-100 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
                         <h2 class="text-base font-inter font-bold text-gray-800 mb-4">Total Distribution</h2>
-                        <select
+                        <select v-model="distributionPeriod" @change="updateDistributionCharts"
                             class="text-xs font-inter bg-gray-50 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
                             <option value="daily">Daily</option>
                             <option value="weekly">Weekly</option>
@@ -280,7 +378,8 @@ onMounted(async () => {
                         </select>
                     </div>
                     <div class="h-64 relative flex items-center justify-center">
-                        <Line :data="lineChartData" :options="lineChartOptions" />
+                        <p v-if="distributionError" class="text-sm text-red-600">{{ distributionError }}</p>
+                        <Line v-else :data="lineChartData" :options="lineChartOptions" />
                     </div>
                 </div>
             </div>
