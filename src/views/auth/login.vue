@@ -1,10 +1,11 @@
 <script setup>
-import { Eye, EyeOff } from '@lucide/vue'
+import { Eye, EyeOff, MoveLeft } from '@lucide/vue'
 import botikaLogo from '../../assets/BotikaWHITE-B0wYbg7D.png'
 import botikaBackground from '../../assets/Botikangbayan.jpg'
 import { loginUser, getMyProfile } from '../../services/Authservices';
 import { useRouter } from 'vue-router';
 import { onMounted, ref } from 'vue';
+import LoadingModal from '../../components/modals/loading.vue'
 
 const router = useRouter()
 
@@ -93,6 +94,7 @@ onMounted(() => {
 </script>
 
 <template>
+    <LoadingModal v-if="isLoading" />
     <section class="grid 2xl:grid-cols-2 grid-cols-1 2xl:p-0">
         <div class="grid relative 2xl:flex hidden">
             <div class="relative w-full 2xl:flex hidden">
@@ -134,7 +136,15 @@ onMounted(() => {
         <div class="w-full h-screen bg-gray-100 flex items-center justify-center p-4">
             <div class="p-6 bg-white rounded-xl w-100">
                 <div>
-                    <h1 class="text-2xl font-bold text-[#404040] text-[24px]">Welcome back Master!</h1>
+                    <router-link to="/">
+                        <div class="flex items-center justify-start text-gray-400 hover:text-gray-600">
+                            <MoveLeft size="18" class="mr-2" />
+                            <h1>Back to home</h1>
+                        </div>
+                    </router-link>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-[#404040] text-[24px] pt-6">Welcome back Master!</h1>
                     <p class="text-[#808080] text-[14px]">Login to create yout account</p>
                 </div>
                 <form @submit.prevent="handleSubmit" class="grid gap-4 mt-10">

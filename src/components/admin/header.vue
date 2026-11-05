@@ -4,6 +4,7 @@ import { LaptopMinimal, Menu, X, Globe, ChevronDown, Home, Info, Wrench, FileTex
 import { ref, onMounted, onUnmounted } from 'vue'
 import { signOutUser, getSessionUser } from '../../services/Authservices'
 import { useRoute, useRouter } from 'vue-router'
+import LoadingModal from '../../components/modals/loading.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -110,7 +111,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <header class="w-full fixed top-0 z-50 font-sans bg-gray-100/90 backdrop-blur-2xl"
+    <LoadingModal v-if="Isloading" />
+    <header class="w-full fixed top-0 z-50 font-sans bg-gray-50 backdrop-blur-2xl"
         :class="IsScrolled ? 'border-b border-gray-200' : ''">
         <div class="max-w-7xl mx-auto w-full flex items-center justify-between 2xl:px-0 px-4 py-2.5">
             <router-link to="/" class="flex items-center gap-2">
@@ -149,12 +151,11 @@ onUnmounted(() => {
         <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2"
             enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
             leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
-            <div v-if="!Iscollapsed" class="2xl:hidden w-full bg-gray-100 border-b border-gray-200 overflow-hidden">
+            <div v-if="!Iscollapsed" class="2xl:hidden w-full bg-gray-50 border-b border-gray-200 overflow-hidden">
                 <nav class="flex flex-col p-3">
                     <router-link v-for="link in navLinks" :key="link.label" :to="link.to" @click="toggle"
-                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-outfit transition-colors"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-md font-outfit transition-colors"
                         :class="isActive(link) ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-500 hover:bg-gray-50'">
-                        <component :is="link.icon" size="18" />
                         <span>{{ link.label }}</span>
                     </router-link>
                 </nav>
@@ -162,12 +163,10 @@ onUnmounted(() => {
                 <div class="border-t border-gray-100 p-3 flex flex-col gap-2">
                     <button @click="handleAuthAction(); toggle()" :disabled="Isloading"
                         class="flex items-center justify-center gap-2 border border-gray-200 text-gray-600 font-regular px-5 py-2.5 rounded-xl text-sm transition-all">
-                        <LogIn size="16" />
                         {{ Isloading ? 'Logging out...' : (isLoggedIn ? 'Logout' : 'Sign in') }}
                     </button>
                     <button @click="handleGetStarted(); toggle()"
                         class="flex items-center justify-center gap-2 bg-blue-700 hover:bg-blue-900 text-white font-regular px-5 py-2.5 rounded-xl text-sm transition-all">
-                        <LayoutGrid size="16" />
                         {{ isLoggedIn ? 'Dashboard' : 'Get started' }}
                     </button>
                 </div>

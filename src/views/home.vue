@@ -152,7 +152,7 @@ const sistemaSteps = ref([
                         <p class="text-gray-500 text-sm">Rural Health Unit &middot; Botika ng Bayan</p>
                     </div>
 
-                    <h1 class="text-4xl 2xl:text-5xl font-black font-interl leading-10 2xl:leading-14 text-black/70">
+                    <h1 class="text-5xl 2xl:text-5xl font-black font-interl leading-14 2xl:leading-14 text-black/70">
                         Smart <span class="text-blue-700">Medicine Management</span> for Botika ng Bayan.
                     </h1>
 
@@ -196,13 +196,13 @@ const sistemaSteps = ref([
             </div> -->
             <div class="grid md:grid-cols-3 gap-4 pt-8">
                 <div v-for="(feature, index) in features" :key="index"
-                    class="group grid gap-2.5 bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-2xl hover:shadow-gray-200 hover:-translate-y-1 transition-all duration-300">
+                    class="group grid gap-2.5 bg-white rounded-2xl p-6 border border-gray-100 shadow-2xl shadow-gray-200 hover:-translate-y-1 transition-all duration-300">
                     <div
                         class="bg-blue-700/10 h-11 w-11 rounded-xl flex items-center justify-center text-blue-700 mb-3 group-hover:scale-110 transition-transform duration-300">
                         <component :is="feature.icon" class="w-5 h-5" />
                     </div>
                     <h3 class="font-semibold text-gray-900">{{ feature.title }}</h3>
-                    <p class="text-gray-400 font-inter text-md leading-relaxed">
+                    <p class="text-gray-500 font-inter text-md leading-relaxed">
                         {{ feature.description }}
                     </p>
                 </div>
@@ -221,18 +221,18 @@ const sistemaSteps = ref([
         <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div class="lg:col-span-6 grid 2xl:grid-cols-2 sm:grid-cols-1 gap-6 relative py-6 order-1">
                 <div v-for="value in forWhom" :key="value.title"
-                    class="bg-white  grid gap-4 p-6 rounded-2xl border border-slate-100 transform transition-transform hover:rotate-0 hover:shadow-2xl hover:shadow-gray-200 duration-300">
+                    class="bg-white  grid gap-4 p-6 rounded-2xl border border-slate-100 transform transition-transform hover:rotate-0 shadow-2xl shadow-gray-200 duration-300">
                     <div class="h-11 w-11 rounded-lg bg-blue-700/10 flex items-center justify-center text-blue-600"
                         v-html="value.icon"></div>
                     <h3 class="font-bold text-gray-900 text-lg tracking-wide">{{ value.title }}</h3>
-                    <p class="text-md text-gray-400 font-inter leading-relaxed">{{ value.description }}</p>
+                    <p class="text-md text-gray-500 font-inter leading-relaxed">{{ value.description }}</p>
                 </div>
             </div>
             <div class="lg:col-span-6 flex flex-col gap-3 2xl:order-2">
-                <h2 class="text-3xl lg:text-5xl font-extrabold text-black/70 leading-tight">
+                <h2 class="text-5xl 2xl:text-5xl font-extrabold text-black/70 leading-tight">
                     Nagsisilbi para sa <span class="text-blue-600">kalusugan ng komunidad</span>
                 </h2>
-                <p class="2xl:text-lg text-md font-inter text-gray-400 leading-relaxed">
+                <p class="2xl:text-lg text-md font-inter text-gray-500 leading-relaxed">
                     Ang Botechka ay isang comprehensive na sistema para sa inventory management,
                     distribution monitoring, at inventory forecasting — tinutulungan ang Botika ng
                     Bayan sa Binangonan, Rizal na mapanatili ang sapat na suplay ng gamot para sa
@@ -240,9 +240,9 @@ const sistemaSteps = ref([
                 </p>
                 <div class="space-y-4 pt-2">
                     <div v-for="faq in faqs" :key="faq.question"
-                        class="bg-white p-4 rounded-xl border border-slate-100 flex items-center justify-between cursor-pointer hover:border-blue-200 transition-all"
+                        class="bg-white p-4 rounded-xl border border-slate-100 flex items-center justify-between cursor-pointer hover:border-blue-200 transition-all shadow-2xl shadow-gray-200"
                         @click="faq.open = !faq.open">
-                        <span class="text-md font-regular font-inter text-gray-400">{{ faq.question }}</span>
+                        <span class="text-md font-regular font-inter text-gray-500">{{ faq.question }}</span>
                         <span
                             class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm shrink-0 transition-transform"
                             :class="{ 'rotate-45': faq.open }">+</span>
