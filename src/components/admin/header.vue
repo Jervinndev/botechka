@@ -112,7 +112,7 @@ onUnmounted(() => {
 
 <template>
     <LoadingModal v-if="Isloading" />
-    <header class="w-full fixed top-0 z-50 font-sans bg-gray-50 backdrop-blur-2xl"
+    <header class="w-full fixed top-0 z-50 font-sans bg-white backdrop-blur-2xl"
         :class="IsScrolled ? 'border-b border-gray-200' : ''">
         <div class="max-w-7xl mx-auto w-full flex items-center justify-between 2xl:px-0 px-4 py-2.5">
             <router-link to="/" class="flex items-center gap-2">

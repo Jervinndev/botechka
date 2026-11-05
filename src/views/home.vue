@@ -152,7 +152,7 @@ const sistemaSteps = ref([
                         <p class="text-gray-500 text-sm">Rural Health Unit &middot; Botika ng Bayan</p>
                     </div>
 
-                    <h1 class="text-5xl 2xl:text-5xl font-black font-interl leading-14 2xl:leading-14 text-black/70">
+                    <h1 class="text-5xl 2xl:text-6xl font-black font-inter leading-14 2xl:leading-18 text-black/70">
                         Smart <span class="text-blue-700">Medicine Management</span> for Botika ng Bayan.
                     </h1>
 
@@ -257,8 +257,8 @@ const sistemaSteps = ref([
 <style scoped>
 .box-bg {
     background-image:
-        linear-gradient(to right, #00000010 1px, transparent 0.5px),
-        linear-gradient(to bottom, #0000000d 1px, transparent 0.5px);
+        linear-gradient(to right, #00000008 1px, transparent 0.5px),
+        linear-gradient(to bottom, #00000008 1px, transparent 0.5px);
 
     background-size: 70px 70px;
     animation: gridMove 12s linear infinite;

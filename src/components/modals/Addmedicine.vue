@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { Image as ImageIcon, X } from '@lucide/vue'
 import { getCategories } from '../../services/Fetches'
+import { AddMedicine } from '../../services/Medicines'
 import { addDaysToDate, getEarlierDate, getLaterDate, getLocalDateString } from '../../utils/dates'
 
 const props = defineProps({
@@ -138,7 +139,7 @@ async function saveMedicine() {
             throw new Error('Expiration date must be after the manufacturing date.')
         }
 
-        const response = await AddMedicineWithImage(payload, selectedImage.value)
+        const response = await AddMedicine(payload, selectedImage.value)
 
         if (response.error) {
             throw response.error
