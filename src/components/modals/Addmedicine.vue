@@ -2,11 +2,15 @@
 import { computed, ref, watch } from 'vue'
 import { Image as ImageIcon, X } from '@lucide/vue'
 import { getCategories } from '../../services/Fetches'
-import { AddMedicine } from '../../services/Medicines'
+import { AddMedicine, updateMedicine } from '../../services/Medicines'
 import { addDaysToDate, getEarlierDate, getLaterDate, getLocalDateString } from '../../utils/dates'
 
 const props = defineProps({
-    IsOpen: Boolean
+    IsOpen: Boolean,
+    medicine: {
+        type: Object,
+        default: null
+    }
 })
 const emit = defineEmits(['close', 'saved'])
 
@@ -97,8 +101,19 @@ function handleImageSelected(event) {
     errorMessage.value = ''
 }
 
-watch(() => props.IsOpen, isOpen => {
-    if (isOpen) fetchCategories()
+watch(() => [props.IsOpen, props.medicine], ([isOpen, medicine]) => {
+    if (!isOpen) return
+    if (medicine) {
+        formData.value = {
+            ...createDefaultForm(),
+            ...medicine,
+            quantity: Number(medicine.quantity) || 0
+        }
+        errorMessage.value = ''
+    } else {
+        resetForm()
+    }
+    fetchCategories()
 })
 
 function closeModal() {
@@ -112,11 +127,16 @@ async function saveMedicine() {
 
     try {
         const payload = {
-            ...formData.value,
             medicine_name: formData.value.medicine_name.trim(),
+            medicine_id: formData.value.medicine_id,
+            category: formData.value.category,
+            quantity: Number(formData.value.quantity),
+            dosage: formData.value.dosage,
+            unit: formData.value.unit,
             batch_number: formData.value.batch_number.trim(),
             supplier: formData.value.supplier.trim(),
-            quantity: Number(formData.value.quantity)
+            manufacturing_date: formData.value.manufacturing_date,
+            expiration_date: formData.value.expiration_date
         }
 
         if (!payload.medicine_name || !payload.category || !payload.dosage || !payload.unit || !payload.batch_number || !payload.supplier || !payload.manufacturing_date || !payload.expiration_date) {
@@ -131,7 +151,7 @@ async function saveMedicine() {
             throw new Error('Manufacturing date cannot be in the future.')
         }
 
-        if (payload.expiration_date <= today) {
+        if (!props.medicine && payload.expiration_date <= today) {
             throw new Error('Expiration date must be in the future.')
         }
 
@@ -139,7 +159,9 @@ async function saveMedicine() {
             throw new Error('Expiration date must be after the manufacturing date.')
         }
 
-        const response = await AddMedicine(payload, selectedImage.value)
+        const response = props.medicine
+            ? await updateMedicine(props.medicine.id, payload)
+            : await AddMedicine(payload, selectedImage.value)
 
         if (response.error) {
             throw response.error
@@ -183,9 +205,12 @@ async function saveMedicine() {
                 <form @submit.prevent="saveMedicine">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h1 class="mt-2 font-inter text-2xl font-bold text-[#404040]">Add New Medicine</h1>
-                            <p class="font-inter text-sm font-medium text-[#808080]">Add a new medicine to your
-                                inventory.</p>
+                            <h1 class="mt-2 font-inter text-2xl font-bold text-[#404040]">
+                                {{ props.medicine ? 'Edit Medicine' : 'Add New Medicine' }}
+                            </h1>
+                            <p class="font-inter text-sm font-medium text-[#808080]">
+                                {{ props.medicine ? 'Update medicine information.' : 'Add a new medicine to your inventory.' }}
+                            </p>
                         </div>
                         <X class="cursor-pointer text-gray-400 hover:text-[#404040]" @click="closeModal" />
                     </div>
@@ -195,7 +220,7 @@ async function saveMedicine() {
                     </div>
 
                     <div class="mt-6 grid grid-cols-1 gap-6">
-                        <div class="flex items-center gap-3">
+                        <div v-if="!props.medicine" class="flex items-center gap-3">
                             <img v-if="imagePreviewUrl" :src="imagePreviewUrl" alt="Medicine image preview"
                                 class="h-20 w-20 rounded-lg object-cover">
                             <div v-else
@@ -335,7 +360,7 @@ async function saveMedicine() {
                             class="cursor-pointer rounded-xl bg-blue-700 p-2 px-5 text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
                             :disabled="Isloading">
                             <span v-if="Isloading">Saving...</span>
-                            <span v-else>Save Medicine</span>
+                            <span v-else>{{ props.medicine ? 'Save Changes' : 'Save Medicine' }}</span>
                         </button>
                     </div>
                 </form>

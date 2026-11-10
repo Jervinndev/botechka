@@ -7,8 +7,12 @@ import {
     Truck,
     UserRoundCog
 } from '@lucide/vue'
+import { computed, onMounted, ref } from 'vue'
+import { getMyProfile } from '../../services/Authservices'
 
-const settingsLinks = [
+const isSuperAdmin = ref(false)
+const isProfileLoaded = ref(false)
+const allSettingsLinks = [
     { label: 'Appearance', to: { name: 'settings-appearance' }, Icon: Brush },
     { label: 'Account Management', to: { name: 'settings-account-management' }, Icon: UserRoundCog },
     { label: 'Backup & Recovery', to: { name: 'settings-backup-recovery' }, Icon: DatabaseBackup },
@@ -16,6 +20,23 @@ const settingsLinks = [
     { label: 'Configuration', to: { name: 'settings-configuration' }, Icon: Settings2 },
     { label: 'Suppliers', to: { name: 'settings-suppliers' }, Icon: Truck }
 ]
+const settingsLinks = computed(() => {
+    if (!isProfileLoaded.value) return []
+    return allSettingsLinks.filter((item) => isSuperAdmin.value
+        ? item.label === 'Account Management'
+        : item.label !== 'Account Management')
+})
+
+onMounted(async () => {
+    const result = await getMyProfile()
+    if (!result.success) {
+        console.error('Unable to check settings permissions:', result.error)
+        isProfileLoaded.value = true
+        return
+    }
+    isSuperAdmin.value = result.data.role?.toLowerCase() === 'super_admin'
+    isProfileLoaded.value = true
+})
 </script>
 
 <template>

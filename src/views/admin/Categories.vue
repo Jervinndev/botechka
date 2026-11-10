@@ -1,10 +1,11 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { AlignVerticalSpaceAround, Bell, TriangleAlert, Pill, List, LayoutDashboard } from '@lucide/vue'
+import { AlignVerticalSpaceAround, TriangleAlert, Pill, List, LayoutDashboard } from '@lucide/vue'
 import Categorymodal from '../../components/modals/Categorymodal.vue'
 import CategoryMedicinesModal from '../../components/modals/CategoryMedicinesModal.vue'
 import CategorySkeliton from '../../Skelitonloader/CategorySkeliton.vue'
 import { getCategories, getMedicines } from '../../services/Fetches'
+import AdminTopActions from '../../components/admin/AdminTopActions.vue'
 
 const categories = ref([]);
 const medicines = ref([]);
@@ -102,13 +103,7 @@ onMounted(() => {
                 <h1 class="font-inter font-bold text-gray-800 text-lg">Category</h1>
                 <p class="text-sm text-gray-500">Manage your medicine resources</p>
             </div>
-            <div class="flex items-center gap-4">
-                <Bell class="text-blue-700" />
-                <div class="flex items-center justify-center gap-1 border border-gray-500/40 rounded-full p-1">
-                    <img src="/src/assets/download (12).jpg" alt="" class="w-10 rounded-full">
-                    <!-- <p class="text-sm">Mark Hello po</p> -->
-                </div>
-            </div>
+            <AdminTopActions />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
@@ -145,16 +140,16 @@ onMounted(() => {
 
             </div>
         </div>
-        <div class="flex justify-between items-center mt-4">
+        <div class="2xl:flex justify-between items-center mt-4">
             <div class="flex gap-2">
                 <input v-model="categorySearch" type="text" placeholder="Search categories..."
-                    class="bg-white p-2 px-3 w-2xl rounded-xl">
+                    class="bg-white p-2 px-3 2xl:w-2xl w-full rounded-xl">
 
             </div>
             <div class="flex justify-between items-center gap-3">
                 <div>
                     <button @click="isCategoryModalOpen = true"
-                        class="p-2 bg-blue-700 text-white rounded-xl px-4 font-inter">Add
+                        class="w-full p-2 bg-blue-700 text-white rounded-xl px-4 font-inter">Add
                         category</button>
                 </div>
                 <div p-2>

@@ -1,10 +1,14 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { Pencil, Trash, Eye, RotateCcw } from '@lucide/vue'
+import { Pencil, Eye, Archive, RotateCcw, X } from '@lucide/vue'
 import Addnewbeneficiary from '../../components/modals/AddNewBeneficiary.vue'
 import { getBeneficiaries } from '../../services/Beneficiaries'
+import { setRecordArchived } from '../../services/Archive'
+import AdminTopActions from '../../components/admin/AdminTopActions.vue'
 
 const isModalOpen = ref(false)
+const isEditModalOpen = ref(false)
+const selectedBeneficiary = ref(null)
 const beneficiaries = ref([])
 const searchQuery = ref('')
 const selectedType = ref('All')
@@ -37,15 +41,39 @@ async function fetchBeneficiaries() {
     isLoading.value = true
     errorMessage.value = ''
 
-    const result = await getBeneficiaries()
-    if (result.error) {
-        errorMessage.value = 'Hindi ma-load ang beneficiaries. Subukan ulit.'
+    try {
+        const result = await getBeneficiaries()
+        if (result.error) throw result.error
+        beneficiaries.value = result.data || []
+    } catch (error) {
+        console.error('Unable to load beneficiaries:', error)
+        errorMessage.value = error.message || 'Hindi ma-load ang beneficiaries. Subukan ulit.'
+    } finally {
         isLoading.value = false
-        return
     }
+}
 
-    beneficiaries.value = result.data || []
-    isLoading.value = false
+async function archiveBeneficiary(beneficiary) {
+    if (!window.confirm(`Archive ${getFullName(beneficiary)}?`)) return
+
+    errorMessage.value = ''
+    try {
+        await setRecordArchived('Beneficiaries', beneficiary.beneficiary_id, true)
+        await fetchBeneficiaries()
+    } catch (error) {
+        console.error('Unable to archive beneficiary:', error)
+        errorMessage.value = error.message || 'Unable to archive this beneficiary.'
+    }
+}
+
+function openEdit(beneficiary) {
+    selectedBeneficiary.value = beneficiary
+    isEditModalOpen.value = true
+}
+
+function closeEdit() {
+    isEditModalOpen.value = false
+    selectedBeneficiary.value = null
 }
 
 function getFullName(beneficiary) {
@@ -80,9 +108,12 @@ onMounted(fetchBeneficiaries)
 
 <template>
     <section class="w-full">
-        <div>
-            <h1 class="font-inter font-bold text-[#404040] text-lg">Beneficiaries</h1>
-            <p class="text-sm text-[#808080]">Manage your beneficiary information</p>
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <h1 class="font-inter font-bold text-[#404040] text-lg">Beneficiaries</h1>
+                <p class="text-sm text-[#808080]">Manage your beneficiary information</p>
+            </div>
+            <AdminTopActions />
         </div>
         <div class="mt-4">
             <div class="bg-white p-2 rounded-md 2xl:flex grid w-full gap-2 items-center justify-between">
@@ -157,17 +188,17 @@ onMounted(fetchBeneficiaries)
                             <td class="p-3 text-sm text-gray-600">{{ beneficiary.status || '—' }}</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-2">
-                                <button title="View"
+                                <button title="View" @click="selectedBeneficiary = beneficiary"
                                     class="rounded-lg border border-gray-300 p-1.5 text-gray-500 transition hover:bg-blue-50">
+                                    <Eye size="18" />
+                                </button>
+                                <button title="Edit" @click="openEdit(beneficiary)"
+                                    class="rounded-lg border border-gray-300 p-1.5 text-gray-500 transition hover:bg-amber-50">
                                     <Pencil size="18" />
                                 </button>
-                                <button title="Edit"
-                                    class="rounded-lg border border-gray-300 p-1.5 text-gray-500 transition hover:bg-amber-50">
-                                    <Trash size="18" />
-                                </button>
-                                <button title="Archive"
+                                <button title="Archive" @click="archiveBeneficiary(beneficiary)"
                                     class="rounded-lg border border-gray-300 p-1.5 text-gray-500 transition hover:bg-gray-100">
-                                    <Eye size="18" />
+                                    <Archive size="18" />
                                 </button>
                                 </div>
                             </td>
@@ -186,4 +217,30 @@ onMounted(fetchBeneficiaries)
     </section>
 
     <Addnewbeneficiary :IsOpen="isModalOpen" @close="isModalOpen = false" @saved="fetchBeneficiaries" />
+    <Addnewbeneficiary :IsOpen="isEditModalOpen" :beneficiary="selectedBeneficiary"
+        @close="closeEdit" @saved="fetchBeneficiaries" />
+    <div v-if="selectedBeneficiary && !isEditModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+        @click.self="selectedBeneficiary = null">
+        <section role="dialog" aria-modal="true" aria-labelledby="beneficiary-details-title"
+            class="w-full max-w-xl rounded-xl bg-white p-6 shadow-xl">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h2 id="beneficiary-details-title" class="text-xl font-bold text-gray-800">Beneficiary Details</h2>
+                    <p class="mt-1 text-sm text-gray-500">{{ selectedBeneficiary.beneficiary_code }}</p>
+                </div>
+                <button type="button" aria-label="Close" @click="selectedBeneficiary = null"
+                    class="rounded-lg p-2 text-gray-500 hover:bg-gray-100"><X :size="18" /></button>
+            </div>
+            <dl class="mt-5 grid gap-4 sm:grid-cols-2">
+                <div><dt class="text-xs text-gray-500">Name</dt><dd class="mt-1 text-sm font-medium">{{ getFullName(selectedBeneficiary) }}</dd></div>
+                <div><dt class="text-xs text-gray-500">Type</dt><dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.beneficiary_type || '—' }}</dd></div>
+                <div><dt class="text-xs text-gray-500">Birth date</dt><dd class="mt-1 text-sm font-medium">{{ formatDate(selectedBeneficiary.birth_date) }}</dd></div>
+                <div><dt class="text-xs text-gray-500">Sex</dt><dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.sex || '—' }}</dd></div>
+                <div><dt class="text-xs text-gray-500">Contact</dt><dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.contact_number || '—' }}</dd></div>
+                <div><dt class="text-xs text-gray-500">Barangay</dt><dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.barangay || '—' }}</dd></div>
+                <div class="sm:col-span-2"><dt class="text-xs text-gray-500">Address</dt><dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.address || '—' }}</dd></div>
+            </dl>
+        </section>
+    </div>
 </template>

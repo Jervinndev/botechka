@@ -8,7 +8,7 @@ import Home from '../views/home.vue'
 import About from '../views/About.vue'
 import Pagenotfound from '../views/pagenotfound/Pagenotfound.vue'
 
-//Admin dashboard inamo puro sumbat
+//Admin dashboard
 import Adminlayout from '../components/layout/Adminlayout.vue'
 import Dashboard from '../views/admin/Dashboard.vue'
 import Inventory from '../views/admin/Inventory.vue'
@@ -37,10 +37,16 @@ import AvailableMedicines from '../views/beneficiary/AvailableMedicines.vue'
 import Beneficiarylayout from '../components/layout/Beneficiarylayout.vue'
 import Notificationbene from '../views/beneficiary/Notificationbene.vue'
 import Requestmedicines from '../views/beneficiary/Requestmedicines.vue'
+import BeneficiarySettings from '../views/beneficiary/BeneficiarySettings.vue'
 
 // eto mga routes naman to tanginanyo
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
+    scrollBehavior(to, from, savedPosition) {
+        if (savedPosition) return savedPosition
+        if (to.hash) return { el: to.hash, top: 96, behavior: 'smooth' }
+        return { top: 0 }
+    },
     routes: [
         {
             path: '/:pathMatch(.*)*',
@@ -117,6 +123,12 @@ const router = createRouter({
                     path: '/requestmedicines',
                     name: 'requestmedicines',
                     component: Requestmedicines,
+                    meta: { requiresAuth: true, beneficiaryOnly: true, hideHeader: true }
+                },
+                {
+                    path: '/beneficiary-settings',
+                    name: 'beneficiary-settings',
+                    component: BeneficiarySettings,
                     meta: { requiresAuth: true, beneficiaryOnly: true, hideHeader: true }
                 },
             ]
@@ -265,11 +277,21 @@ router.beforeEach(async (to, from) => {
         return { name: role ? 'dashboard' : 'login' }
     }
 
+    if (to.name === 'settings-account-management' && role !== 'super_admin') {
+        return { name: role === 'beneficiary' ? 'beneficiary-dashboard' : 'dashboard' }
+    }
+
+    if (role === 'super_admin' && to.meta.requiresAuth
+        && to.name !== 'settings-account-management') {
+        return { name: 'settings-account-management' }
+    }
+
     if (isAuthenticated && role === 'beneficiary' && to.meta.requiresAuth && !to.meta.beneficiaryOnly) {
         return { name: 'beneficiary-dashboard' }
     }
 
     if (isAuthenticated && (to.name === 'login' || to.name === 'register')) {
+        if (role === 'super_admin') return { name: 'settings-account-management' }
         return { name: role === 'beneficiary' ? 'beneficiary-dashboard' : 'dashboard' }
     }
 

@@ -27,11 +27,17 @@ import botikaLogo from '../../assets/BotikaBLUE-CcOSGtx9.png'
                         Quick Links
                     </h3>
                     <ul class="space-y-2.5 text-md text-gray-500">
-                        <li><a href="#" class="hover:text-blue-400 transition-colors">Home</a></li>
-                        <li><a href="#" class="hover:text-blue-400 transition-colors">About</a></li>
-                        <li><a href="#" class="hover:text-blue-400 transition-colors">Services</a></li>
-                        <li><a href="#" class="hover:text-blue-400 transition-colors">Guidelines</a></li>
-                        <li><a href="#" class="hover:text-blue-400 transition-colors">Contact</a></li>
+                        <li><router-link to="/" class="hover:text-blue-700 transition-colors">Home</router-link></li>
+                        <li><router-link to="/about" class="hover:text-blue-700 transition-colors">About</router-link>
+                        </li>
+                        <li><router-link to="/#services"
+                                class="hover:text-blue-700 transition-colors">Services</router-link></li>
+                        <li><router-link to="/#guidelines"
+                                class="hover:text-blue-700 transition-colors">Guidelines</router-link></li>
+                        <li><router-link to="/#how-it-works" class="hover:text-blue-700 transition-colors">How it
+                                works</router-link></li>
+                        <li><router-link to="/#contact"
+                                class="hover:text-blue-700 transition-colors">Contact</router-link></li>
                     </ul>
                 </div>
 
@@ -41,12 +47,16 @@ import botikaLogo from '../../assets/BotikaBLUE-CcOSGtx9.png'
                         System Features
                     </h3>
                     <ul class="space-y-2.5 text-md text-gray-500">
-                        <li><a href="#" class="hover:text-blue-400 transition-colors">Inventory Forecasting</a></li>
-                        <li><a href="#" class="hover:text-blue-400 transition-colors">Batch & Expiration Tracking</a>
-                        </li>
-                        <li><a href="#" class="hover:text-blue-400 transition-colors">Medicine Dispensing Logs</a></li>
-                        <li><a href="#" class="hover:text-blue-400 transition-colors">Beneficiary Schedules</a></li>
-                        <li><a href="#" class="hover:text-blue-400 transition-colors">Stock Demand Analytics</a></li>
+                        <li><router-link to="/#services" class="hover:text-blue-700 transition-colors">Inventory
+                                Forecasting</router-link></li>
+                        <li><router-link to="/#services" class="hover:text-blue-700 transition-colors">Batch &amp;
+                                Expiration Tracking</router-link></li>
+                        <li><router-link to="/#services" class="hover:text-blue-700 transition-colors">Medicine
+                                Dispensing Logs</router-link></li>
+                        <li><router-link to="/#services" class="hover:text-blue-700 transition-colors">Beneficiary
+                                Schedules</router-link></li>
+                        <li><router-link to="/#services" class="hover:text-blue-700 transition-colors">Stock Demand
+                                Analytics</router-link></li>
                     </ul>
                 </div>
 
@@ -64,7 +74,7 @@ import botikaLogo from '../../assets/BotikaBLUE-CcOSGtx9.png'
                             Municipal Rural Health Unit (RHU) Managed
                         </p>
                         <a href="mailto:support@rhubotechka.local"
-                            class="text-md  text-blue-400 hover:text-blue-300 font-medium transition-colors inline-block pt-1">
+                            class="text-md text-blue-700 hover:text-blue-900 font-medium transition-colors inline-block pt-1">
                             support@rhubotechka.local
                         </a>
                     </div>

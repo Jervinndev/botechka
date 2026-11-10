@@ -1,5 +1,5 @@
 <script setup>
-import { ShieldCheck, ChevronsRight, AlignVerticalSpaceAround, Bell, TriangleAlert, BookPlus } from '@lucide/vue'
+import { ShieldCheck, ChevronsRight, AlignVerticalSpaceAround, TriangleAlert, BookPlus } from '@lucide/vue'
 import { ref, onMounted } from 'vue'
 import {
     Chart as ChartJS,
@@ -18,6 +18,7 @@ import Dashboardskeliton from '../../Skelitonloader/Dashboardskeliton.vue'
 import { getMedicines } from '../../services/Fetches'
 import { getDistributionTransactions } from '../../services/Distribution'
 import { getLocalDateString } from '../../utils/dates'
+import AdminTopActions from '../../components/admin/AdminTopActions.vue'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, LineElement, PointElement, CategoryScale, LinearScale, ArcElement)
 
@@ -274,13 +275,7 @@ onMounted(async () => {
                 <h1 class="font-inter font-bold text-[#404040] text-lg">Dashboard</h1>
                 <p class="text-sm text-[#808080]">Manage your medicine resources</p>
             </div>
-            <div class="flex items-center gap-4">
-                <Bell class="text-blue-700" />
-                <div class="flex items-center justify-center gap-1 border border-gray-500/40 rounded-full p-1">
-                    <img src="/src/assets/download (12).jpg" alt="" class="w-10 rounded-full">
-                    <!-- <p class="text-sm">Mark Hello po</p> -->
-                </div>
-            </div>
+            <AdminTopActions />
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
             <div class="bg-blue-700 p-4 text-white rounded-xl">

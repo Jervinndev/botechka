@@ -1,11 +1,15 @@
 <script setup>
 import { reactive, ref, watch } from 'vue'
 import { X } from '@lucide/vue'
-import { addBeneficiary } from '../../services/Beneficiaries'
+import { addBeneficiary, updateBeneficiary } from '../../services/Beneficiaries'
 import { getLocalDateString } from '../../utils/dates'
 
 const props = defineProps({
-  IsOpen: Boolean
+  IsOpen: Boolean,
+  beneficiary: {
+    type: Object,
+    default: null
+  }
 })
 
 const emit = defineEmits(['close', 'saved'])
@@ -33,8 +37,10 @@ function resetForm() {
   errorMessage.value = ''
 }
 
-watch(() => props.IsOpen, (isOpen) => {
-  if (isOpen) resetForm()
+watch(() => [props.IsOpen, props.beneficiary], ([isOpen, beneficiary]) => {
+  if (!isOpen) return
+  resetForm()
+  if (beneficiary) Object.assign(form, beneficiary)
 })
 
 async function saveBeneficiary() {
@@ -47,18 +53,25 @@ async function saveBeneficiary() {
   errorMessage.value = ''
 
   try {
-    const result = await addBeneficiary({
-      ...form,
+    const payload = {
+      beneficiary_code: form.beneficiary_code,
+      beneficiary_type: form.beneficiary_type,
       first_name: form.first_name.trim(),
       middle_name: form.middle_name.trim(),
       last_name: form.last_name.trim(),
       suffix: form.suffix || null,
       birth_date: form.birth_date || null,
       sex: form.sex || null,
+      registration_date: form.registration_date,
+      status: form.status,
+      eligibility: form.eligibility,
       contact_number: form.contact_number.trim() || null,
       address: form.address.trim() || null,
       barangay: form.barangay.trim() || null
-    })
+    }
+    const result = props.beneficiary
+      ? await updateBeneficiary(props.beneficiary.beneficiary_id, payload)
+      : await addBeneficiary(payload)
 
     if (result.error) throw result.error
 
@@ -82,7 +95,9 @@ async function saveBeneficiary() {
         class="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 font-inter shadow-xl">
         <div class="flex items-start justify-between">
           <div>
-            <h1 class="font-inter text-2xl font-bold text-[#404040]">Add New Beneficiary</h1>
+            <h1 class="font-inter text-2xl font-bold text-[#404040]">
+              {{ props.beneficiary ? 'Edit Beneficiary' : 'Add New Beneficiary' }}
+            </h1>
             <p class="font-inter text-sm font-medium text-[#808080]">
               Register a beneficiary in your records.
             </p>
@@ -230,7 +245,7 @@ async function saveBeneficiary() {
           </button>
           <button type="submit" :disabled="isSaving"
             class="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60">
-            {{ isSaving ? 'Saving...' : 'Save Beneficiary' }}
+            {{ isSaving ? 'Saving...' : (props.beneficiary ? 'Save Changes' : 'Save Beneficiary') }}
           </button>
         </div>
       </form>

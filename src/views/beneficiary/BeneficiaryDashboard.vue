@@ -1,5 +1,5 @@
 <script setup>
-import { ChevronsRight, ShieldCheck, BookPlus, Bell, AlignVerticalSpaceAround, TriangleAlert } from '@lucide/vue'
+import { ChevronsRight, ShieldCheck, BookPlus, AlignVerticalSpaceAround, TriangleAlert } from '@lucide/vue'
 </script>
 
 
@@ -8,9 +8,6 @@ import { ChevronsRight, ShieldCheck, BookPlus, Bell, AlignVerticalSpaceAround, T
         <div>
             <h1 class="font-inter font-bold text-[#404040] text-lg">My Dashboard</h1>
             <p class="text-sm text-[#808080]">Hello po! Jervin Kamusta!</p>
-        </div>
-        <div>
-            <Bell class="text-blue-700" />
         </div>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">

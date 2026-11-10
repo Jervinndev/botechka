@@ -39,6 +39,7 @@ async function fetchMedicines() {
     const { data, error } = await supabase
         .from('medicines')
         .select('id, medicine_id, medicine_name, category, dosage, unit, quantity, batch_number, supplier, manufacturing_date, expiration_date')
+        .is('archived_at', null)
         .order('medicine_name')
 
     if (error) {

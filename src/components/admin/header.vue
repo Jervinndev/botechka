@@ -26,9 +26,9 @@ const navLinks = [
     { label: 'Home', to: { path: '/' }, icon: Home },
     { label: 'About', to: { path: '/about' }, icon: Info },
     { label: 'Services', to: { path: '/', hash: '#services' }, icon: Wrench },
-    { label: 'Guidelines', to: { path: '/Guidelines' }, icon: FileText },
+    { label: 'Guidelines', to: { path: '/', hash: '#guidelines' }, icon: FileText },
     { label: 'How it works', to: { path: '/', hash: '#how-it-works' }, icon: HelpCircle },
-    { label: 'Contact', to: { path: '/contact' }, icon: Mail },
+    { label: 'Contact', to: { path: '/', hash: '#contact' }, icon: Mail },
 ]
 
 function isActive(link) {

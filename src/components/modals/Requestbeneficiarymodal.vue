@@ -1,20 +1,77 @@
 <script setup>
-import { ref } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
+import { getMyProfile } from '../../services/Authservices'
+import { getAvailableRequestMedicines, submitMedicineRequest } from '../../services/MedicineRequests'
 
 const props = defineProps({
-    IsOpen: Boolean
+    IsOpen: Boolean,
+    initialMedicineId: {
+        type: String,
+        default: ''
+    }
 })
 const emit = defineEmits(['close', 'saved'])
 
-// Reactive states para sa Prescription File
+const profile = ref(null)
+const medicines = ref([])
+const loading = ref(false)
+const submitting = ref(false)
+const errorMessage = ref('')
+const selectedMedicine = ref('')
+const quantity = ref(1)
+const beneficiaryType = ref('Senior Citizen')
+const purpose = ref('')
 const prescriptionFile = ref(null)
 const prescriptionPreview = ref(null)
 
+watch(() => props.IsOpen, async (isOpen) => {
+    if (!isOpen) return
+
+    loading.value = true
+    errorMessage.value = ''
+
+    try {
+        const [profileResult, medicineData] = await Promise.all([
+            getMyProfile(),
+            getAvailableRequestMedicines()
+        ])
+        if (!profileResult.success) throw new Error(profileResult.error)
+        profile.value = profileResult.data
+        medicines.value = medicineData
+        selectedMedicine.value = medicineData.some((medicine) => medicine.id === props.initialMedicineId)
+            ? props.initialMedicineId
+            : medicineData[0]?.id ?? ''
+    } catch (error) {
+        console.error('Failed to load medicine request form:', error)
+        errorMessage.value = error.message || 'Unable to load the request form.'
+    } finally {
+        loading.value = false
+    }
+}, { immediate: true })
+
 function handleFileUpload(event) {
-    const file = event.target.files[0]
+    const file = event.target.files?.[0]
     if (file) {
+        if (prescriptionPreview.value) URL.revokeObjectURL(prescriptionPreview.value)
+        if (file.size > 5 * 1024 * 1024) {
+            prescriptionFile.value = null
+            prescriptionPreview.value = null
+            errorMessage.value = 'The prescription file must be 5 MB or smaller.'
+            event.target.value = ''
+            return
+        }
+
+        const supportedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp']
+        if (!supportedTypes.includes(file.type)) {
+            prescriptionFile.value = null
+            prescriptionPreview.value = null
+            errorMessage.value = 'Upload your prescription as a PDF, JPG, PNG, or WebP file.'
+            event.target.value = ''
+            return
+        }
+
+        errorMessage.value = ''
         prescriptionFile.value = file
-        // Preview if image file
         if (file.type.startsWith('image/')) {
             prescriptionPreview.value = URL.createObjectURL(file)
         } else {
@@ -24,14 +81,64 @@ function handleFileUpload(event) {
 }
 
 function removeFile() {
+    if (prescriptionPreview.value) URL.revokeObjectURL(prescriptionPreview.value)
     prescriptionFile.value = null
     prescriptionPreview.value = null
+}
+
+onBeforeUnmount(() => {
+    if (prescriptionPreview.value) URL.revokeObjectURL(prescriptionPreview.value)
+})
+
+function closeModal() {
+    if (submitting.value) return
+    emit('close')
+}
+
+async function submitRequest() {
+    errorMessage.value = ''
+
+    if (!selectedMedicine.value) {
+        errorMessage.value = 'Choose an available medicine.'
+        return
+    }
+    if (!Number.isInteger(Number(quantity.value)) || Number(quantity.value) < 1) {
+        errorMessage.value = 'Enter a quantity of at least one.'
+        return
+    }
+    if (!prescriptionFile.value) {
+        errorMessage.value = 'Upload your prescription before submitting.'
+        return
+    }
+
+    submitting.value = true
+    try {
+        await submitMedicineRequest({
+            medicineId: selectedMedicine.value,
+            quantity: quantity.value,
+            purpose: purpose.value,
+            beneficiaryType: beneficiaryType.value,
+            prescriptionFile: prescriptionFile.value
+        })
+
+        removeFile()
+        selectedMedicine.value = ''
+        quantity.value = 1
+        purpose.value = ''
+        emit('saved')
+    } catch (error) {
+        console.error('Failed to submit medicine request:', error)
+        errorMessage.value = error.message || 'Unable to submit your request.'
+    } finally {
+        submitting.value = false
+    }
 }
 </script>
 
 <template>
     <div v-if="IsOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 font-inter">
-        <div
+        <form
+            @submit.prevent="submitRequest"
             class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl relative overflow-hidden flex flex-col max-h-[90vh]">
 
             <!-- Modal Header -->
@@ -40,7 +147,7 @@ function removeFile() {
                     <h2 class="text-xl font-bold text-gray-900 tracking-tight">Request Medicine</h2>
                     <p class="text-xs text-gray-400 mt-0.5">Fill out the details for your medicine request</p>
                 </div>
-                <button @click="emit('close')"
+                <button type="button" @click="closeModal"
                     class="text-gray-400 hover:text-gray-600 p-1.5 rounded-full hover:bg-gray-100 transition-colors">
                     &times;
                 </button>
@@ -48,12 +155,16 @@ function removeFile() {
 
             <!-- Form Body -->
             <div class="py-3 px-1 space-y-4 overflow-y-auto flex-1">
+                <p v-if="errorMessage" class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700" role="alert">
+                    {{ errorMessage }}
+                </p>
 
                 <!-- Beneficiary Name -->
                 <div class="space-y-1.5">
                     <label class="text-xs font-semibold text-gray-700">Full Name <span
                             class="text-red-500">*</span></label>
-                    <input type="text" placeholder="e.g. Juan Dela Cruz"
+                    <input :value="[profile?.fname, profile?.mname, profile?.lname].filter(Boolean).join(' ')"
+                        type="text" readonly placeholder="Loading your profile..."
                         class="w-full bg-gray-50 text-xs text-gray-800 placeholder-gray-400 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
 
@@ -61,7 +172,7 @@ function removeFile() {
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-1.5">
                         <label class="text-xs font-semibold text-gray-700">Beneficiary Type</label>
-                        <select
+                        <select v-model="beneficiaryType"
                             class="w-full bg-gray-50 text-xs text-gray-800 px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500">
                             <option value="Senior Citizen">Senior Citizen</option>
                             <option value="PWD">PWD</option>
@@ -70,7 +181,7 @@ function removeFile() {
                     </div>
                     <div class="space-y-1.5">
                         <label class="text-xs font-semibold text-gray-700">Quantity (pcs)</label>
-                        <input type="number" value="1" min="1"
+                        <input v-model.number="quantity" type="number" min="1" step="1" required
                             class="w-full bg-gray-50 text-xs text-gray-800 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                     </div>
                 </div>
@@ -79,13 +190,14 @@ function removeFile() {
                 <div class="space-y-1.5">
                     <label class="text-xs font-semibold text-gray-700">Select Medicine <span
                             class="text-red-500">*</span></label>
-                    <select
+                    <select v-model="selectedMedicine" required :disabled="loading || medicines.length === 0"
                         class="w-full bg-gray-50 text-xs text-gray-800 px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                        <option value="">-- Choose Medicine --</option>
-                        <option value="Paracetamol">Paracetamol (500mg tablet)</option>
-                        <option value="Amoxicillin">Amoxicillin (500mg capsule)</option>
-                        <option value="Cetirizine">Cetirizine (10mg tablet)</option>
+                        <option value="" disabled>-- Choose Medicine --</option>
+                        <option v-for="medicine in medicines" :key="medicine.id" :value="medicine.id">
+                            {{ medicine.medicine_name }} ({{ medicine.dosage }} {{ medicine.unit }}) — {{ medicine.quantity }} in stock
+                        </option>
                     </select>
+                    <p v-if="!loading && !medicines.length" class="text-[11px] text-gray-500">No medicines are currently available.</p>
                 </div>
 
                 <!-- Prescription Upload Section -->
@@ -105,9 +217,9 @@ function removeFile() {
                                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                 </svg>
                                 <p class="text-xs font-semibold text-gray-700">Click to upload doctor's prescription</p>
-                                <p class="text-[10px] text-gray-400 mt-0.5">PNG, JPG, or PDF (Max 5MB)</p>
+                                <p class="text-[10px] text-gray-400 mt-0.5">PNG, JPG, WebP, or PDF (Max 5MB)</p>
                             </div>
-                            <input id="prescriptionInput" type="file" class="hidden" accept="image/*,.pdf"
+                            <input id="prescriptionInput" type="file" class="hidden" accept="image/jpeg,image/png,image/webp,application/pdf"
                                 @change="handleFileUpload" />
                         </label>
                     </div>
@@ -145,7 +257,7 @@ function removeFile() {
                 <!-- Purpose / Ailment -->
                 <div class="space-y-1.5">
                     <label class="text-xs font-semibold text-gray-700">Purpose / Ailment</label>
-                    <textarea rows="2" placeholder="State your reason or symptoms (e.g., Fever and severe headache)..."
+                    <textarea v-model="purpose" rows="2" placeholder="State your reason or symptoms (e.g., Fever and severe headache)..."
                         class="w-full bg-gray-50 text-xs text-gray-800 placeholder-gray-400 p-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"></textarea>
                 </div>
 
@@ -153,16 +265,16 @@ function removeFile() {
 
             <!-- Modal Footer Actions -->
             <div class="flex items-center gap-3 pt-4 border-t border-gray-100">
-                <button @click="emit('close')"
+                <button type="button" @click="closeModal"
                     class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold py-3 rounded-xl transition-colors">
                     Cancel
                 </button>
-                <button
+                <button type="submit" :disabled="submitting || loading"
                     class="flex-1 bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold py-3 rounded-xl transition-colors shadow-sm shadow-blue-200">
-                    Submit Request
+                    {{ submitting ? 'Submitting...' : 'Submit Request' }}
                 </button>
             </div>
 
-        </div>
+        </form>
     </div>
 </template>
