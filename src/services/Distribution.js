@@ -34,9 +34,20 @@ export async function getDistributionTransactions() {
             distribution_date,
             purpose,
             beneficiaries(first_name, middle_name, last_name, suffix, beneficiary_type),
-            distribution_items(quantity, medicine_name, medicine_image_url, unit)
+            returned_at,
+            distribution_items(quantity, medicine_name, medicine_image_url, unit, medicine:medicines(category))
         `)
         .order('distribution_date', { ascending: false })
+
+    if (error) throw new Error(error.message)
+
+    return data
+}
+
+export async function returnDistributionTransaction(transactionId) {
+    const { data, error } = await supabase.rpc('return_distribution_transaction', {
+        p_distribution_transaction_id: transactionId
+    })
 
     if (error) throw new Error(error.message)
 

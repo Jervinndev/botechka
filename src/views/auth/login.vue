@@ -72,7 +72,7 @@ async function handleSubmit() {
             beneficiary: '/beneficiary-dashboard',
             personnel: '/dashboard',
             admin: '/dashboard',
-            super_admin: '/dashboard'
+            super_admin: '/settings/account-management'
         }
 
         await router.replace(dashboardRoutes[role])

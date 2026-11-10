@@ -1,11 +1,13 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { Bell, Plus, ChevronDown, Pencil, Trash, Eye, RotateCcw } from '@lucide/vue'
+import { Pencil, Eye, Archive, RotateCcw, X } from '@lucide/vue'
 import { getMedicines } from '../../services/Fetches'
 import AddMedicineModal from '../../components/modals/Addmedicine.vue'
 import Addnewstocks from '../../components/modals/Addnewstocks.vue'
 import InventorySkeleton from '../../Skelitonloader/inventoryskeliton.vue'
+import { setRecordArchived } from '../../services/Archive'
+import AdminTopActions from '../../components/admin/AdminTopActions.vue'
 
 const medicines = ref([])
 const date = ref(null)
@@ -13,17 +15,46 @@ const route = useRoute()
 const isLoading = ref(false)
 const isAddModalOpen = ref(false)
 const IsAddstockOpen = ref(false)
+const isEditModalOpen = ref(false)
+const selectedMedicine = ref(null)
 const searchQuery = ref('')
+const actionError = ref('')
+const fetchError = ref('')
 
 async function fetchInventory() {
     isLoading.value = true
+    fetchError.value = ''
     try {
         const data = await getMedicines()
         medicines.value = data
     } catch (error) {
         console.error('Error fetching inventory:', error)
+        fetchError.value = error.message || 'Unable to load medicines. Please try again.'
+        medicines.value = []
     } finally {
         isLoading.value = false
+    }
+}
+
+function openEditMedicine(medicine) {
+    selectedMedicine.value = medicine
+    isEditModalOpen.value = true
+}
+
+function closeEditMedicine() {
+    isEditModalOpen.value = false
+    selectedMedicine.value = null
+}
+
+async function archiveMedicine(medicine) {
+    if (!window.confirm(`Archive ${medicine.medicine_name}?`)) return
+    actionError.value = ''
+    try {
+        await setRecordArchived('Medicines', medicine.id, true)
+        await fetchInventory()
+    } catch (error) {
+        console.error('Unable to archive medicine:', error)
+        actionError.value = error.message || 'Unable to archive this medicine.'
     }
 }
 
@@ -63,13 +94,7 @@ onMounted(() => {
                 <h1 class="font-inter font-bold text-[#404040] text-lg">Inventory</h1>
                 <p class="text-sm text-[#808080]">Manage your medicine resources</p>
             </div>
-            <div class="flex items-center gap-4">
-                <Bell class="text-blue-700" />
-                <div class="flex items-center justify-center gap-1 border border-gray-500/40 rounded-full p-1">
-                    <img src="/src/assets/download (12).jpg" alt="" class="w-10 rounded-full">
-                    <!-- <p class="text-sm">Mark Hello po</p> -->
-                </div>
-            </div>
+            <AdminTopActions />
         </div>
 
         <div class="mt-4">
@@ -105,8 +130,8 @@ onMounted(() => {
             </div>
             <div class="flex items-center gap-4 mt-4 p-2 rounded-md bg-white w-fit font-inter text-sm">
                 <span>{{ searchfilter.length }} Medicines found</span>
-                <button type="button" @click="fetchInventory" :disabled="isLoading" aria-label="Reload beneficiaries"
-                    title="Reload beneficiaries"
+                <button type="button" @click="fetchInventory" :disabled="isLoading" aria-label="Reload medicines"
+                    title="Reload medicines"
                     class="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-100 disabled:opacity-50">
                     <RotateCcw :size="16" :class="{ 'animate-spin': isLoading }" />
                 </button>
@@ -115,6 +140,7 @@ onMounted(() => {
 
         <div
             class="w-full h-150 overflow-x-scroll overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] mt-4">
+            <p v-if="actionError" role="alert" class="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ actionError }}</p>
             <!-- Table para sa Dynamic Data galing Supabase -->
             <table class="2xl:w-full w-200 bg-white border border-gray-100 rounded-xl border-collapse overflow-hidden">
                 <thead class="bg-blue-700 text-white">
@@ -131,6 +157,11 @@ onMounted(() => {
                 </thead>
 
                 <InventorySkeleton v-if="isLoading" />
+                <tbody v-else-if="fetchError">
+                    <tr>
+                        <td colspan="8" class="text-center p-6 text-red-600 text-sm">{{ fetchError }}</td>
+                    </tr>
+                </tbody>
                 <tbody v-else-if="searchfilter.length === 0">
                     <tr>
                         <td colspan="9" class="text-center p-6 text-gray-500 text-sm">
@@ -163,17 +194,17 @@ onMounted(() => {
                         <td class="p-3 text-gray-700">{{ med.dosage }}</td>
                         <td class="p-3 text-gray-700">{{ med.unit }}</td>
                         <td class="p-3 flex items-center gap-2">
-                            <button title="View"
+                            <button title="View" @click="selectedMedicine = med"
                                 class="p-1.5 text-gray-500 border border-gray-300 hover:bg-blue-50 rounded-lg transition">
+                                <Eye size="22" />
+                            </button>
+                            <button title="Edit" @click="openEditMedicine(med)"
+                                class="p-1.5 text-gray-500 border border-gray-300 hover:bg-amber-50 rounded-lg transition">
                                 <Pencil size="22" />
                             </button>
-                            <button title="Edit"
-                                class="p-1.5 text-gray-500 border border-gray-300 hover:bg-amber-50 rounded-lg transition">
-                                <Trash size="22" />
-                            </button>
-                            <button title="Archive"
+                            <button title="Archive" @click="archiveMedicine(med)"
                                 class="p-1.5 text-gray-500 border border-gray-300 hover:bg-gray-100 rounded-lg transition">
-                                <Eye size="22" />
+                                <Archive size="22" />
                             </button>
                         </td>
                     </tr>
@@ -184,6 +215,31 @@ onMounted(() => {
 
         <!-- Modal Component Integration -->
         <AddMedicineModal :IsOpen="isAddModalOpen" @close="isAddModalOpen = false" @saved="handleMedicineSaved" />
+        <AddMedicineModal :IsOpen="isEditModalOpen" :medicine="selectedMedicine"
+            @close="closeEditMedicine" @saved="handleMedicineSaved" />
         <Addnewstocks :IsOpen="IsAddstockOpen" @close="IsAddstockOpen = false" @saved="handleStockSaved" />
+        <div v-if="selectedMedicine && !isEditModalOpen"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+            @click.self="selectedMedicine = null">
+            <section role="dialog" aria-modal="true" aria-labelledby="medicine-details-title"
+                class="w-full max-w-xl rounded-xl bg-white p-6 shadow-xl">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 id="medicine-details-title" class="text-xl font-bold text-gray-800">{{ selectedMedicine.medicine_name }}</h2>
+                        <p class="mt-1 text-sm text-gray-500">{{ selectedMedicine.medicine_id }}</p>
+                    </div>
+                    <button type="button" aria-label="Close" @click="selectedMedicine = null"
+                        class="rounded-lg p-2 text-gray-500 hover:bg-gray-100"><X :size="18" /></button>
+                </div>
+                <dl class="mt-5 grid gap-4 sm:grid-cols-2">
+                    <div><dt class="text-xs text-gray-500">Category</dt><dd class="mt-1 text-sm font-medium">{{ selectedMedicine.category }}</dd></div>
+                    <div><dt class="text-xs text-gray-500">Available stock</dt><dd class="mt-1 text-sm font-medium">{{ selectedMedicine.quantity }} {{ selectedMedicine.unit }}</dd></div>
+                    <div><dt class="text-xs text-gray-500">Dosage</dt><dd class="mt-1 text-sm font-medium">{{ selectedMedicine.dosage }}</dd></div>
+                    <div><dt class="text-xs text-gray-500">Batch number</dt><dd class="mt-1 text-sm font-medium">{{ selectedMedicine.batch_number }}</dd></div>
+                    <div><dt class="text-xs text-gray-500">Supplier</dt><dd class="mt-1 text-sm font-medium">{{ selectedMedicine.supplier }}</dd></div>
+                    <div><dt class="text-xs text-gray-500">Expiration date</dt><dd class="mt-1 text-sm font-medium">{{ selectedMedicine.expiration_date || '—' }}</dd></div>
+                </dl>
+            </section>
+        </div>
     </section>
 </template>

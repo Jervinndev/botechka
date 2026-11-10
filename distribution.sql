@@ -36,6 +36,9 @@ CREATE TABLE IF NOT EXISTS public.distribution_transactions (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE public.distribution_transactions
+    ADD COLUMN IF NOT EXISTS returned_at TIMESTAMPTZ;
+
 CREATE TABLE IF NOT EXISTS public.distribution_items (
     distribution_item_id BIGSERIAL PRIMARY KEY,
     distribution_transaction_id BIGINT NOT NULL
@@ -73,7 +76,7 @@ CREATE POLICY "Staff can view distribution purposes"
             SELECT 1
             FROM public.profiles AS profile
             WHERE profile.id = (SELECT auth.uid())
-              AND LOWER(profile.role) IN ('personnel', 'admin', 'super_admin')
+              AND LOWER(profile.role) IN ('personnel', 'admin')
         )
     );
 
@@ -87,7 +90,7 @@ CREATE POLICY "Staff can add distribution purposes"
             SELECT 1
             FROM public.profiles AS profile
             WHERE profile.id = (SELECT auth.uid())
-              AND LOWER(profile.role) IN ('personnel', 'admin', 'super_admin')
+              AND LOWER(profile.role) IN ('personnel', 'admin')
         )
     );
 
@@ -101,7 +104,7 @@ CREATE POLICY "Staff can view distribution transactions"
             SELECT 1
             FROM public.profiles AS profile
             WHERE profile.id = (SELECT auth.uid())
-              AND LOWER(profile.role) IN ('personnel', 'admin', 'super_admin')
+              AND LOWER(profile.role) IN ('personnel', 'admin')
         )
     );
 
@@ -118,13 +121,31 @@ CREATE POLICY "Staff can view distribution items"
               ON profile.id = (SELECT auth.uid())
             WHERE dist.distribution_transaction_id =
                     distribution_items.distribution_transaction_id
-              AND LOWER(profile.role) IN ('personnel', 'admin', 'super_admin')
+              AND LOWER(profile.role) IN ('personnel', 'admin')
         )
     );
 
 GRANT SELECT, INSERT ON public.distribution_purposes TO authenticated;
 GRANT SELECT ON public.distribution_transactions TO authenticated;
 GRANT SELECT ON public.distribution_items TO authenticated;
+GRANT INSERT, UPDATE ON public.distribution_transactions TO authenticated;
+GRANT INSERT, UPDATE ON public.distribution_items TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE public.distribution_transactions_distribution_transaction_id_seq TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE public.distribution_items_distribution_item_id_seq TO authenticated;
+
+DROP POLICY IF EXISTS "Staff can restore distribution transactions" ON public.distribution_transactions;
+CREATE POLICY "Staff can restore distribution transactions"
+    ON public.distribution_transactions
+    FOR ALL TO authenticated
+    USING (public.is_current_user_staff())
+    WITH CHECK (public.is_current_user_staff());
+
+DROP POLICY IF EXISTS "Staff can restore distribution items" ON public.distribution_items;
+CREATE POLICY "Staff can restore distribution items"
+    ON public.distribution_items
+    FOR ALL TO authenticated
+    USING (public.is_current_user_staff())
+    WITH CHECK (public.is_current_user_staff());
 GRANT USAGE, SELECT ON SEQUENCE public.distribution_purposes_purpose_id_seq TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.dispense_distribution(
@@ -156,7 +177,7 @@ BEGIN
       FROM public.profiles AS profile
      WHERE profile.id = v_user_id;
 
-    IF v_role IS NULL OR v_role NOT IN ('personnel', 'admin', 'super_admin') THEN
+    IF v_role IS NULL OR v_role NOT IN ('personnel', 'admin') THEN
         RAISE EXCEPTION 'You are not authorized to dispense medicines.';
     END IF;
 
@@ -265,4 +286,82 @@ $$;
 REVOKE ALL ON FUNCTION public.dispense_distribution(BIGINT, TIMESTAMPTZ, TEXT, JSONB, TEXT)
     FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.dispense_distribution(BIGINT, TIMESTAMPTZ, TEXT, JSONB, TEXT)
+    TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.return_distribution_transaction(
+    p_distribution_transaction_id BIGINT
+)
+RETURNS BIGINT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_user_id UUID := auth.uid();
+    v_role TEXT;
+    v_returned_at TIMESTAMPTZ;
+    v_transaction_id BIGINT;
+    v_item RECORD;
+    v_returned_count INTEGER := 0;
+BEGIN
+    IF v_user_id IS NULL THEN
+        RAISE EXCEPTION 'Authentication is required to return medicines.';
+    END IF;
+
+    SELECT LOWER(profile.role)
+      INTO v_role
+      FROM public.profiles AS profile
+     WHERE profile.id = v_user_id;
+
+    IF v_role IS NULL OR v_role NOT IN ('personnel', 'admin') THEN
+        RAISE EXCEPTION 'You are not authorized to return medicines.';
+    END IF;
+
+    SELECT distribution_transaction_id, returned_at
+      INTO v_transaction_id, v_returned_at
+      FROM public.distribution_transactions
+     WHERE distribution_transaction_id = p_distribution_transaction_id
+     FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Distribution transaction was not found.';
+    END IF;
+
+    IF v_returned_at IS NOT NULL THEN
+        RAISE EXCEPTION 'Medicines in this distribution have already been returned.';
+    END IF;
+
+    FOR v_item IN
+        SELECT medicine.id, distribution_item.quantity
+          FROM public.distribution_items AS distribution_item
+          JOIN public.medicines AS medicine
+            ON medicine.id = distribution_item.medicine_id
+         WHERE distribution_item.distribution_transaction_id = v_transaction_id
+         ORDER BY medicine.id
+         FOR UPDATE OF medicine
+    LOOP
+        UPDATE public.medicines
+           SET quantity = quantity + v_item.quantity
+         WHERE id = v_item.id;
+
+        v_returned_count := v_returned_count + 1;
+    END LOOP;
+
+    IF v_returned_count = 0 THEN
+        RAISE EXCEPTION 'This distribution has no medicines to return.';
+    END IF;
+
+    UPDATE public.distribution_transactions
+       SET returned_at = NOW(),
+           updated_by = v_user_id,
+           updated_at = NOW()
+     WHERE distribution_transaction_id = v_transaction_id;
+
+    RETURN v_transaction_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.return_distribution_transaction(BIGINT)
+    FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.return_distribution_transaction(BIGINT)
     TO authenticated;

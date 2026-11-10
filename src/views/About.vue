@@ -1,7 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
 import { Eye, MapPin, Mail, Clock2 } from '@lucide/vue';
-import gsap from 'gsap';
 
 
 const visionMissionItems = [
@@ -57,68 +55,52 @@ const faq = [
 </script>
 
 <template>
-    <section class="relative min-h-screen py-8 px-4 sm:px-6 lg:px-8 pt-32 overflow-hidden">
-
-        <!-- 1. Full-width Background Image sa likod ng buong section -->
-        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            :style="{ backgroundImage: `url('/botika-ng-bayan.jpg')` }">
-        </div>
-
-        <!-- 2. White Shadow / Gradient Overlay (Para sa puting shadow effect papuntang kanan) -->
-        <div
-            class="absolute w-full inset-0 bg-gradient-to-r from-transparent via-blue-950/70 to-blue-950/70 pointer-events-none">
-        </div>
-
-        <!-- 3. Ang iyong eksaktong content structure (Naka-relative para lumitaw sa ibabaw ng background) -->
-        <div class="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-start">
-
-            <!-- Kaliwang bahagi (Puwede mong lagyan ng blangko o transparent spacer para mas ma-highlight ang kanan) -->
-            <div class="hidden lg:block"></div>
-
-            <!-- Kanang bahagi (Dito nakalagay ang lahat ng buong content at grid items mo) -->
-            <div>
-                <h1 class="text-3xl 2xl:text-5xl font-black font-outfit text-gray-100 leading-tight mt-4 mb-4">
-                    Naglilingkod sa
-                    <span class="text-blue-600">Kalusugan</span>
-                    ng Calumpang
-                </h1>
-                <p class="text-gray-200 font-outfit text-lg leading-relaxed mb-10 max-w-xl">
-                    Ang RHUBoTechka ay isang comprehensive na sistema para sa inventory management,
-                    distribution monitoring, at inventory forecasting — tinutulungan ang Botika ng
-                    Bayan sa Binangonan, Rizal na mapanatili ang sapat na suplay ng gamot para sa
-                    komunidad.
-                </p>
-                <div class="grid sm:grid-cols-2 gap-4 mb-4">
-                    <div v-for="(item, index) in visionMissionItems" :key="index"
-                        class="bg-white rounded-2xl p-6 hover:-translate-y-1 transition-all duration-300">
-                        <div
-                            class="h-10 w-10 rounded-lg bg-blue-700/10 flex items-center justify-center text-blue-700 mb-4">
-                            <component :is="item.icon" class="h-5 w-5" />
-                        </div>
-                        <h2 class="font-bold tracking-wide text-sm text-gray-900 mb-2">{{ item.title }}</h2>
-                        <p class="text-[#808080] text-md font-outfit leading-relaxed">
-                            {{ item.description }}
-                        </p>
+    <main class="bg-slate-50">
+        <section class="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100 px-6 pb-16 pt-32 md:px-10 lg:pb-24">
+            <div class="pointer-events-none absolute -right-24 -top-20 h-80 w-80 rounded-full bg-blue-200/40 blur-3xl"></div>
+            <div class="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center">
+                <div>
+                    <p class="font-inter text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">Tungkol sa RHUBoTechka</p>
+                    <h1 class="mt-4 font-outfit text-4xl font-black leading-tight text-gray-900 sm:text-5xl">
+                        Naglilingkod sa <span class="text-blue-700">kalusugan</span> ng Calumpang
+                    </h1>
+                    <p class="mt-5 max-w-xl font-inter text-base leading-relaxed text-gray-600 sm:text-lg">
+                        Ang RHUBoTechka ay isang comprehensive na sistema para sa inventory management,
+                        distribution monitoring, at inventory forecasting — tinutulungan ang Botika ng
+                        Bayan sa Binangonan, Rizal na mapanatili ang sapat na suplay ng gamot para sa
+                        komunidad.
+                    </p>
+                    <div class="mt-7 flex flex-wrap gap-3">
+                        <router-link to="/#services" class="rounded-xl bg-blue-700 px-5 py-3 font-inter text-sm font-semibold text-white transition hover:bg-blue-800">
+                            Tingnan ang serbisyo
+                        </router-link>
+                        <router-link to="/#contact" class="rounded-xl border border-blue-200 bg-white px-5 py-3 font-inter text-sm font-semibold text-blue-800 transition hover:bg-blue-50">
+                            Makipag-ugnayan
+                        </router-link>
                     </div>
                 </div>
-                <div class="grid sm:grid-cols-2 gap-4">
-                    <div v-for="(item, index) in objectivesItems" :key="index"
-                        class="bg-white rounded-2xl p-6 hover:-translate-y-1 transition-all duration-300">
-                        <div
-                            class="h-10 w-10 rounded-lg bg-blue-700/10 flex items-center justify-center text-blue-700 mb-4">
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div v-for="(item, index) in visionMissionItems" :key="index"
+                        class="rounded-2xl border border-blue-100 bg-white p-6 shadow-lg shadow-blue-900/5 transition duration-300 hover:-translate-y-1">
+                        <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-700/10 text-blue-700">
                             <component :is="item.icon" class="h-5 w-5" />
                         </div>
-                        <h2 class="font-bold tracking-wide text-sm text-gray-900 mb-2">{{ item.title }}</h2>
-                        <p class="text-[#808080] text-md font-outfit leading-relaxed">
-                            {{ item.description }}
-                        </p>
+                        <h2 class="mb-2 font-inter text-sm font-bold tracking-wide text-gray-900">{{ item.title }}</h2>
+                        <p class="font-outfit text-sm leading-relaxed text-gray-600">{{ item.description }}</p>
+                    </div>
+                    <div v-for="(item, index) in objectivesItems" :key="`objective-${index}`"
+                        class="rounded-2xl border border-blue-100 bg-white p-6 shadow-lg shadow-blue-900/5 transition duration-300 hover:-translate-y-1">
+                        <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-700/10 text-blue-700">
+                            <component :is="item.icon" class="h-5 w-5" />
+                        </div>
+                        <h2 class="mb-2 font-inter text-sm font-bold tracking-wide text-gray-900">{{ item.title }}</h2>
+                        <p class="font-outfit text-sm leading-relaxed text-gray-600">{{ item.description }}</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="py-16 px-6">
+    <section class="px-6 py-16 md:py-20">
         <div class="max-w-3xl mx-auto text-center">
             <span class="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 mb-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none"
@@ -132,7 +114,7 @@ const faq = [
             <h2 class="text-3xl font-extrabold font-outfit text-[#404040] mb-2">Frequently Asked Questions</h2>
             <p class="text-[#808080] font-outfit mb-10">Everything you need to know about RHUBoTechka.</p>
             <div class="space-y-4 text-left">
-                <details v-for="(faq, index) in faq" :key="index" class="group bg-white rounded-2xl overflow-hidden">
+                <details v-for="(faq, index) in faq" :key="index" class="group overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm">
                     <summary class="list-none cursor-pointer flex items-center justify-between gap-4 px-6 py-5">
                         <span class="font-bold font-outfit text-lg text-[#404040]">{{ faq.question }}</span>
                         <span
@@ -151,4 +133,5 @@ const faq = [
             </div>
         </div>
     </section>
+    </main>
 </template>

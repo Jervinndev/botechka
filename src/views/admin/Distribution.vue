@@ -1,7 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import {
-    Bell,
     Search,
     RotateCcw,
     Plus,
@@ -20,9 +19,11 @@ import { getBeneficiaries } from '../../services/Beneficiaries'
 import {
     dispenseDistribution,
     getDistributionPurposes,
-    getDistributionTransactions
+    getDistributionTransactions,
+    returnDistributionTransaction
 } from '../../services/Distribution'
 import { getMedicines } from '../../services/Fetches'
+import AdminTopActions from '../../components/admin/AdminTopActions.vue'
 
 const IsmodalOpen = ref(false)
 const Isaddpurposeopen = ref(false)
@@ -41,6 +42,14 @@ const transactions = ref([])
 const isLoadingTransactions = ref(false)
 const transactionsError = ref('')
 const successMessage = ref('')
+const transactionSearchQuery = ref('')
+const expandedTransactionId = ref(null)
+const viewedTransaction = ref(null)
+const isTransactionViewOpen = ref(false)
+const transactionToReturn = ref(null)
+const isReturnConfirmOpen = ref(false)
+const isReturning = ref(false)
+const returnError = ref('')
 const totalMedicineQuantity = computed(() => selectedMedicines.value.reduce((total, medicine) => total + medicine.quantity, 0))
 const selectedBeneficiary = computed(() => beneficiaries.value.find(
     (beneficiary) => beneficiary.beneficiary_id === selectedBeneficiaryId.value
@@ -48,6 +57,25 @@ const selectedBeneficiary = computed(() => beneficiaries.value.find(
 const selectedPurpose = computed(() => purposes.value.find(
     (purpose) => purpose.purpose_id === selectedPurposeId.value
 ))
+const filteredTransactions = computed(() => {
+    const query = transactionSearchQuery.value.trim().toLowerCase()
+    if (!query) return transactions.value
+
+    return transactions.value.filter((transaction) => {
+        const searchValues = [
+            `dist-${String(transaction.distribution_transaction_id).padStart(4, '0')}`,
+            transaction.distribution_date,
+            transaction.purpose,
+            transaction.beneficiaries?.beneficiary_type,
+            getBeneficiaryName(transaction.beneficiaries),
+            ...transaction.distribution_items.flatMap((item) => [
+                item.medicine_name,
+                item.medicine?.category
+            ])
+        ]
+        return searchValues.some((value) => String(value || '').toLowerCase().includes(query))
+    })
+})
 
 function getBeneficiaryName(beneficiary) {
     if (!beneficiary) return 'Unknown beneficiary'
@@ -64,6 +92,51 @@ function formatDistributionDate(date) {
     if (!date) return '—'
     const parsedDate = new Date(date)
     return Number.isNaN(parsedDate.getTime()) ? '—' : parsedDate.toLocaleString()
+}
+
+function getTransactionCategories(transaction) {
+    return [...new Set(transaction.distribution_items
+        .map((item) => item.medicine?.category)
+        .filter(Boolean))]
+}
+
+function getTransactionQuantity(transaction) {
+    return transaction.distribution_items.reduce((total, item) => total + Number(item.quantity || 0), 0)
+}
+
+function toggleTransaction(transactionId) {
+    expandedTransactionId.value = expandedTransactionId.value === transactionId ? null : transactionId
+}
+
+function showTransaction(transaction) {
+    viewedTransaction.value = transaction
+    isTransactionViewOpen.value = true
+}
+
+function askReturnTransaction(transaction) {
+    if (transaction.returned_at) return
+    transactionToReturn.value = transaction
+    returnError.value = ''
+    isReturnConfirmOpen.value = true
+}
+
+async function confirmReturnTransaction() {
+    if (!transactionToReturn.value || isReturning.value) return
+
+    isReturning.value = true
+    returnError.value = ''
+    try {
+        await returnDistributionTransaction(transactionToReturn.value.distribution_transaction_id)
+        await fetchTransactions()
+        isReturnConfirmOpen.value = false
+        transactionToReturn.value = null
+        successMessage.value = 'Medicines from the selected distribution were returned to inventory.'
+    } catch (error) {
+        console.error('Error returning distribution medicines:', error)
+        returnError.value = error.message || 'Unable to return these medicines. Please try again.'
+    } finally {
+        isReturning.value = false
+    }
 }
 
 async function fetchBeneficiaries(preselect = null) {
@@ -226,13 +299,7 @@ onMounted(() => {
                 <p class="text-sm text-[#808080]">Manage your distribution channels and logistics</p>
             </div>
 
-            <div class="flex items-center gap-4">
-                <Bell class="text-blue-700" :size="20" />
-                <div class="flex items-center justify-center gap-1 border border-gray-500/40 rounded-full p-1">
-                    <img src="/src/assets/download (12).jpg" alt="Profile"
-                        class="w-10 h-10 rounded-full object-cover" />
-                </div>
-            </div>
+            <AdminTopActions />
         </div>
         <div class="grid grid-cols-1 mt-4 gap-4 items-start">
             <div class="w-full grid 2xl:grid-cols-2 grid-cols-1 gap-4 min-w-0">
@@ -427,13 +494,9 @@ onMounted(() => {
                     <div class="w-full flex flex-col sm:flex-row sm:justify-between gap-3">
                         <div class="relative w-full sm:max-w-[300px]">
                             <Search :size="17" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input type="text" placeholder="Search..."
+                            <input v-model="transactionSearchQuery" type="search" placeholder="Search distributions..."
                                 class="border border-black/10 rounded-xl py-2 pl-9 pr-3 w-full outline-none focus:border-blue-500 text-sm" />
                         </div>
-                        <button type="button"
-                            class="flex items-center justify-center gap-2 rounded-md bg-blue-700 p-2 px-4 text-sm text-white transition hover:bg-blue-800 whitespace-nowrap">
-                            <RotateCcw :size="16" />Return Medicines
-                        </button>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
                         <select class="filter-input">
@@ -483,8 +546,7 @@ onMounted(() => {
                                 <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">Transaction</th>
                                 <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">Date &amp; Time</th>
                                 <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">Beneficiary</th>
-                                <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">Medicine
-                                    (PerReseta)</th>
+                                <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">Category</th>
                                 <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">Quantity</th>
                                 <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide">Purpose</th>
                                 <th class="px-4 py-3 text-[12px] font-semibold uppercase tracking-wide text-center">
@@ -492,13 +554,23 @@ onMounted(() => {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
-                            <tr v-if="isLoadingTransactions || transactionsError || transactions.length === 0">
+                            <tr v-if="isLoadingTransactions || transactionsError">
                                 <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-500">
-                                    {{ transactionsError || (isLoadingTransactions ? 'Loading distributions...' : 'No distributions recorded yet.') }}
+                                    {{ transactionsError || 'Loading distributions...' }}
                                 </td>
                             </tr>
-                            <tr v-for="transaction in transactions" :key="transaction.distribution_transaction_id"
-                                class="hover:bg-gray-50 transition-colors">
+                            <tr v-else-if="filteredTransactions.length === 0">
+                                <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-500">
+                                    {{ transactionSearchQuery ? 'No matching distributions found.' : 'No distributions recorded yet.' }}
+                                </td>
+                            </tr>
+                            <template v-for="transaction in filteredTransactions"
+                                :key="transaction.distribution_transaction_id">
+                            <tr @click="toggleTransaction(transaction.distribution_transaction_id)"
+                                @keydown.enter="toggleTransaction(transaction.distribution_transaction_id)"
+                                tabindex="0" role="button"
+                                :aria-expanded="expandedTransactionId === transaction.distribution_transaction_id"
+                                class="cursor-pointer hover:bg-gray-50 transition-colors focus:outline-none focus-visible:bg-blue-50">
                                 <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
                                     DIST-{{ String(transaction.distribution_transaction_id).padStart(4, '0') }}
                                 </td>
@@ -509,41 +581,60 @@ onMounted(() => {
                                     <p class="text-sm font-medium text-gray-700">{{ getBeneficiaryName(transaction.beneficiaries) }}</p>
                                     <p class="text-[12px] text-gray-400 mt-1">{{ transaction.beneficiaries?.beneficiary_type || 'Beneficiary' }}</p>
                                 </td>
-                                <td class="px-4 py-3">
-                                    <div class="flex flex-col gap-2">
-                                        <div v-for="item in transaction.distribution_items" :key="item.medicine_name"
-                                            class="flex items-center gap-2">
-                                            <img v-if="item.medicine_image_url" :src="item.medicine_image_url"
-                                                :alt="`${item.medicine_name} image`"
-                                                class="h-9 w-9 rounded-md object-cover">
-                                            <div v-else
-                                                class="flex h-9 w-9 items-center justify-center rounded-md bg-gray-100 text-[10px] text-gray-400">
-                                                No image
-                                            </div>
-                                            <div>
-                                                <p class="text-sm font-medium text-gray-700">{{ item.medicine_name }}</p>
-                                                <p class="text-[12px] text-gray-400">{{ item.unit }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <td class="px-4 py-3 text-sm text-gray-600">
+                                    {{ getTransactionCategories(transaction).join(', ') || 'Uncategorized' }}
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
-                                    {{ transaction.distribution_items.map((item) => `${item.quantity} ${item.unit}`).join(', ') }}
+                                    {{ getTransactionQuantity(transaction) }}
+                                    <span class="text-xs text-gray-400">({{ transaction.distribution_items.length }} items)</span>
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-500">{{ transaction.purpose }}</td>
                                 <td class="px-4 py-3">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <button type="button" title="View transaction"
+                                    <div class="flex items-center justify-center gap-2" @click.stop>
+                                        <button type="button" title="View transaction" @click="showTransaction(transaction)"
                                             class="flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 text-gray-500 transition hover:bg-blue-50 hover:text-blue-700">
                                             <Eye :size="16" />
                                         </button>
-                                        <button type="button" title="Return medicine"
-                                            class="flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 text-gray-500 transition hover:bg-red-50 hover:text-red-500">
+                                        <button type="button"
+                                            :title="transaction.returned_at ? 'Already returned' : 'Return this distribution'"
+                                            :disabled="Boolean(transaction.returned_at)"
+                                            @click="askReturnTransaction(transaction)"
+                                            class="flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 text-gray-500 transition hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-40">
                                             <RotateCcw :size="15" />
                                         </button>
                                     </div>
                                 </td>
                             </tr>
+                            <tr>
+                                <td colspan="7" class="bg-blue-50/50 px-6 py-0">
+                                    <Transition enter-active-class="transition duration-200 ease-out"
+                                        enter-from-class="opacity-0 -translate-y-2"
+                                        enter-to-class="opacity-100 translate-y-0"
+                                        leave-active-class="transition duration-150 ease-in"
+                                        leave-from-class="opacity-100 translate-y-0"
+                                        leave-to-class="opacity-0 -translate-y-2">
+                                        <div v-if="expandedTransactionId === transaction.distribution_transaction_id"
+                                            class="py-4">
+                                            <h3 class="mb-2 text-sm font-semibold text-gray-700">Medicines dispensed</h3>
+                                            <ul class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                                <li v-for="(item, index) in transaction.distribution_items"
+                                                    :key="`${item.medicine_name}-${index}`"
+                                                    class="flex items-center gap-3 rounded-lg border border-gray-100 bg-white p-3">
+                                                    <img v-if="item.medicine_image_url" :src="item.medicine_image_url"
+                                                        :alt="`${item.medicine_name} image`"
+                                                        class="h-10 w-10 rounded-md object-cover">
+                                                    <div v-else class="h-10 w-10 rounded-md bg-gray-100"></div>
+                                                    <div class="min-w-0 flex-1">
+                                                        <p class="truncate text-sm font-medium text-gray-700">{{ item.medicine_name }}</p>
+                                                        <p class="text-xs text-gray-500">{{ item.quantity }} {{ item.unit || 'units' }}</p>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </Transition>
+                                </td>
+                            </tr>
+                            </template>
                         </tbody>
                     </table>
                 </div>
@@ -556,6 +647,102 @@ onMounted(() => {
     <Addnewpurpose :IsOpen="Isaddpurposeopen" @close="Isaddpurposeopen = false" @saved="handlePurposeSaved" />
     <AddNewBeneficiary :IsOpen="IsbeneficiaryOpen" @close="IsbeneficiaryOpen = false"
         @saved="handleBeneficiarySaved" />
+
+    <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
+        enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100" leave-to-class="opacity-0">
+        <section v-if="isTransactionViewOpen && viewedTransaction"
+            class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
+            <div role="dialog" aria-modal="true" aria-labelledby="distribution-view-title"
+                class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h2 id="distribution-view-title" class="text-lg font-bold text-gray-800">Distribution Details</h2>
+                        <p class="mt-1 text-sm text-gray-500">
+                            DIST-{{ String(viewedTransaction.distribution_transaction_id).padStart(4, '0') }}
+                        </p>
+                    </div>
+                    <button type="button" aria-label="Close details" @click="isTransactionViewOpen = false"
+                        class="rounded-md p-1 text-gray-500 hover:bg-gray-100">
+                        <X :size="20" />
+                    </button>
+                </div>
+                <dl class="mt-5 grid gap-3 border-b border-gray-100 pb-4 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-xs text-gray-400">Beneficiary</dt>
+                        <dd class="mt-1 text-sm font-medium text-gray-700">
+                            {{ getBeneficiaryName(viewedTransaction.beneficiaries) }}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-gray-400">Date &amp; Time</dt>
+                        <dd class="mt-1 text-sm font-medium text-gray-700">
+                            {{ formatDistributionDate(viewedTransaction.distribution_date) }}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-gray-400">Purpose</dt>
+                        <dd class="mt-1 text-sm font-medium text-gray-700">{{ viewedTransaction.purpose }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-gray-400">Status</dt>
+                        <dd class="mt-1 text-sm font-medium text-gray-700">
+                            {{ viewedTransaction.returned_at ? 'Returned to inventory' : 'Dispensed' }}
+                        </dd>
+                    </div>
+                </dl>
+                <h3 class="mb-2 mt-4 text-sm font-semibold text-gray-700">Medicines</h3>
+                <ul class="divide-y divide-gray-100 rounded-lg border border-gray-100">
+                    <li v-for="(item, index) in viewedTransaction.distribution_items"
+                        :key="`${item.medicine_name}-${index}`" class="flex items-center gap-3 p-3">
+                        <img v-if="item.medicine_image_url" :src="item.medicine_image_url"
+                            :alt="`${item.medicine_name} image`" class="h-10 w-10 rounded-md object-cover">
+                        <div v-else class="h-10 w-10 rounded-md bg-gray-100"></div>
+                        <p class="min-w-0 flex-1 truncate text-sm font-medium text-gray-700">{{ item.medicine_name }}</p>
+                        <p class="whitespace-nowrap text-sm text-gray-500">{{ item.quantity }} {{ item.unit || 'units' }}</p>
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </Transition>
+
+    <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
+        enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100" leave-to-class="opacity-0">
+        <section v-if="isReturnConfirmOpen && transactionToReturn"
+            class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
+            <div role="alertdialog" aria-modal="true" aria-labelledby="return-distribution-title"
+                class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+                <h2 id="return-distribution-title" class="text-lg font-bold text-gray-800">Return Medicines</h2>
+                <p class="mt-2 text-sm text-gray-600">
+                    Ibalik ang lahat ng gamot mula sa napiling distribution sa inventory?
+                </p>
+                <div class="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-gray-600">
+                    <p class="font-medium text-gray-800">
+                        DIST-{{ String(transactionToReturn.distribution_transaction_id).padStart(4, '0') }}
+                    </p>
+                    <p class="mt-1">{{ getBeneficiaryName(transactionToReturn.beneficiaries) }}</p>
+                    <p class="mt-1">
+                        {{ transactionToReturn.distribution_items.length }} medicine(s),
+                        {{ getTransactionQuantity(transactionToReturn) }} total units
+                    </p>
+                </div>
+                <p v-if="returnError" role="alert" class="mt-3 text-sm text-red-600">{{ returnError }}</p>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" :disabled="isReturning"
+                        @click="isReturnConfirmOpen = false; transactionToReturn = null"
+                        class="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50">
+                        Cancel
+                    </button>
+                    <button type="button" :disabled="isReturning" @click="confirmReturnTransaction"
+                        class="flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50">
+                        <RotateCcw :size="15" />
+                        {{ isReturning ? 'Returning...' : 'Confirm Return' }}
+                    </button>
+                </div>
+            </div>
+        </section>
+    </Transition>
 
     <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
         enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in"

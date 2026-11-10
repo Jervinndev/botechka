@@ -75,6 +75,22 @@ export async function AddMedicine(MedicineData, imageFile = null) {
     }
 }
 
+export async function updateMedicine(medicineId, medicineData) {
+    try {
+        const { data, error } = await supabase
+            .from('medicines')
+            .update(medicineData)
+            .eq('id', medicineId)
+            .select()
+            .single()
+
+        if (error) throw error
+        return { data, error: null }
+    } catch (error) {
+        console.error('Error in updateMedicine service:', error.message)
+        return { data: null, error }
+    }
+}
 
 export async function addMedicineStock(medicineId, quantity, stockDetails) {
     try {

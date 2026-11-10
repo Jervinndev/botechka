@@ -17,7 +17,7 @@ import {
     UserRound
 } from '@lucide/vue'
 
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import sidebarLogo from '../../assets/ChatGPT Image Sep 23, 2026, 03_08_04 PM(1).png'
 import { getCachedMyProfile, getMyProfile } from '../../services/Authservices.js'
 import Logoutmodal from '../modals/logoutmodal.vue'
@@ -35,7 +35,7 @@ const profile = ref(cachedProfile)
 const isLoadingProfile = ref(!cachedProfile)
 const profileError = ref(false)
 
-const isCollapsed = ref(typeof localStorage !== 'undefined' && localStorage.getItem('sidebar_collapsed' === 'true'))
+const isCollapsed = ref(typeof localStorage !== 'undefined' && localStorage.getItem('sidebar_collapsed') === 'true')
 
 const isLogoutModalOpen = ref(false)
 const isMobileMenuOpen = ref(false)
@@ -50,6 +50,7 @@ const isSuperAdmin = computed(() => role.value === 'super_admin')
 const isAuthorizedRole = computed(() => ['beneficiary', 'personnel', 'admin', 'super_admin'].includes(role.value))
 
 const isExpanded = computed(() => !isCollapsed.value || isMobileMenuOpen.value)
+let desktopMediaQuery
 
 const overview = [
     {
@@ -172,7 +173,12 @@ const visibleInsight = computed(() => {
     return insight
 })
 
-const visibleSettings = computed(() => settings)
+const visibleSettings = computed(() => {
+    if (isBeneficiary.value) {
+        return [{ label: 'Settings', to: { name: 'beneficiary-settings' }, Icon: Bolt }]
+    }
+    return isSuperAdmin.value ? [] : settings
+})
 
 const displayName = computed(() => {
     if (!profile.value) return ''
@@ -246,10 +252,26 @@ function closeMobileMenu() {
     isMobileMenuOpen.value = false
 }
 
+function handleDesktopViewportChange(event) {
+    if (event.matches) {
+        closeMobileMenu()
+    }
+}
+
 onMounted(() => {
     if (!cachedProfile) {
         loadProfile()
     }
+
+    desktopMediaQuery = window.matchMedia('(min-width: 768px)')
+    desktopMediaQuery.addEventListener('change', handleDesktopViewportChange)
+    if (desktopMediaQuery.matches) {
+        closeMobileMenu()
+    }
+})
+
+onUnmounted(() => {
+    desktopMediaQuery?.removeEventListener('change', handleDesktopViewportChange)
 })
 </script>
 
@@ -299,7 +321,7 @@ onMounted(() => {
                 <!-- Navigation links -->
                 <div>
                     <!-- Dashboard -->
-                    <div class="mt-6 flex flex-col gap-2">
+                    <div v-if="!isSuperAdmin" class="mt-6 flex flex-col gap-2">
                         <h2 v-if="isExpanded" class="text-[14px] text-[#808080]">
                             {{ isBeneficiary ? 'My account' : 'Operation' }}
                         </h2>
@@ -318,7 +340,7 @@ onMounted(() => {
                     </div>
 
                     <!-- Operations -->
-                    <div class="mt-4 flex flex-col gap-2">
+                    <div v-if="!isSuperAdmin" class="mt-4 flex flex-col gap-2">
                         <h2 v-if="isExpanded" class="text-[14px] text-[#808080]">
                             {{ isBeneficiary ? 'Services' : 'Management' }}
                         </h2>
@@ -335,7 +357,7 @@ onMounted(() => {
                     </div>
 
                     <!-- Reports and notifications -->
-                    <div class="mt-4 flex flex-col gap-2">
+                    <div v-if="!isSuperAdmin" class="mt-4 flex flex-col gap-2">
                         <h2 v-if="isExpanded" class="text-[14px] text-[#808080]">
                             {{ isBeneficiary ? 'Updates' : 'Insights' }}
                         </h2>
@@ -351,20 +373,20 @@ onMounted(() => {
                         </router-link>
                     </div>
 
-                    <!-- Super admin-only account management placeholder -->
+                    <!-- Super admin-only account management -->
                     <div v-if="isSuperAdmin" class="mt-4 flex flex-col gap-2">
                         <h2 v-if="isExpanded" class="text-[14px] text-[#808080]">
-                            System
+                            Account administration
                         </h2>
 
-                        <div class="flex items-center gap-2 rounded-lg p-2.5 text-sm font-medium text-gray-400"
-                            :title="isExpanded ? 'User management route not configured yet' : 'User management'">
+                        <router-link :to="{ name: 'settings-account-management' }"
+                            class="flex items-center gap-2 rounded-lg p-2.5 text-sm font-medium text-[#808080] transition-all hover:bg-slate-100 hover:text-blue-700"
+                            active-class="!bg-blue-700 !text-white" @click="closeMobileMenu">
                             <UserRound :size="22" />
-
                             <span v-if="isExpanded" class="font-poppins">
-                                User Management
+                                Account Management
                             </span>
-                        </div>
+                        </router-link>
                     </div>
                 </div>
             </div>

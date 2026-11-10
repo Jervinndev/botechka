@@ -4,6 +4,7 @@ export async function getMedicines() {
     const { data, error } = await supabase
         .from('medicines')
         .select('*')
+        .is('archived_at', null)
         .order('created_at', { ascending: false })
 
     if (error) throw new Error(error.message)
@@ -27,6 +28,7 @@ export async function getMedicinesByCategory(categoryName) {
         .from('medicines')
         .select('*')
         .eq('category', categoryName)
+        .is('archived_at', null)
         .order('medicine_name', { ascending: true })
 
     if (error) throw new Error(error.message)
