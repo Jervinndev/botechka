@@ -3,7 +3,7 @@ import botikaLogo from '../../assets/BotikaBLUE-CcOSGtx9.png'
 </script>
 
 <template>
-    <footer class="bg-white text-gray-500 border-t border-slate-800/10 font-outfit">
+    <footer class="bg-black text-gray-500 border-t border-slate-800/10 font-outfit">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
                 <!-- Brand Info -->
@@ -15,7 +15,7 @@ import botikaLogo from '../../assets/BotikaBLUE-CcOSGtx9.png'
                             </div>
                         </router-link>
                     </div>
-                    <p class="text-md dark:text-gray-500 text-gray-400 leading-relaxed">
+                    <p class="text-md dark:text-gray-500 text-white/70 leading-relaxed">
                         A Medicine Management System with Inventory Forecasting for Botika ng Bayan in Barangay
                         Calumpang, Binangonan, Rizal.
                     </p>
@@ -23,10 +23,10 @@ import botikaLogo from '../../assets/BotikaBLUE-CcOSGtx9.png'
 
                 <!-- Quick Links -->
                 <div class="space-y-4">
-                    <h3 class="text-xs font-semibold text-gray-400  uppercase tracking-wider">
+                    <h3 class="text-xs font-semibold text-white/50 uppercase tracking-wider">
                         Quick Links
                     </h3>
-                    <ul class="space-y-2.5 text-md text-gray-500">
+                    <ul class="space-y-2.5 text-md text-white/70">
                         <li><router-link to="/" class="hover:text-blue-700 transition-colors">Home</router-link></li>
                         <li><router-link to="/about" class="hover:text-blue-700 transition-colors">About</router-link>
                         </li>
@@ -43,10 +43,10 @@ import botikaLogo from '../../assets/BotikaBLUE-CcOSGtx9.png'
 
                 <!-- System Features -->
                 <div class="space-y-4">
-                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    <h3 class="text-xs font-semibold text-white/50 uppercase tracking-wider">
                         System Features
                     </h3>
-                    <ul class="space-y-2.5 text-md text-gray-500">
+                    <ul class="space-y-2.5 text-md text-white/70">
                         <li><router-link to="/#services" class="hover:text-blue-700 transition-colors">Inventory
                                 Forecasting</router-link></li>
                         <li><router-link to="/#services" class="hover:text-blue-700 transition-colors">Batch &amp;
@@ -62,15 +62,15 @@ import botikaLogo from '../../assets/BotikaBLUE-CcOSGtx9.png'
 
                 <!-- Location & Contact -->
                 <div class="space-y-4">
-                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    <h3 class="text-xs font-semibold text-white/50 uppercase tracking-wider">
                         Botika ng Bayan
                     </h3>
-                    <div class="space-y-2.5 text-md ">
-                        <p class="text-gray-500">
-                            <span class="text-gray-500 font-medium">Barangay Calumpang</span><br />
+                    <div class="space-y-2.5 text-md text-white/70">
+                        <p class="">
+                            <span class="font-medium">Barangay Calumpang</span><br />
                             Binangonan, Rizal
                         </p>
-                        <p class="text-gray-500 text-md">
+                        <p class=" text-md">
                             Municipal Rural Health Unit (RHU) Managed
                         </p>
                         <a href="mailto:support@rhubotechka.local"
@@ -83,9 +83,9 @@ import botikaLogo from '../../assets/BotikaBLUE-CcOSGtx9.png'
 
             <!-- Bottom Copyright -->
             <div
-                class="mt-12 pt-6 dark:border-t dark:border-slate-800/10 border-t border-gray-50/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-400">
+                class="mt-12 pt-6 dark:border-t dark:border-slate-800/10 border-t border-gray-50/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-white/70">
                 <p>&copy; 2026 RHU-BoTechKa. All rights reserved.</p>
-                <p class="text-gray-400 font-medium rounded-full">
+                <p class="font-medium rounded-full">
                     Developed for Brgy. Calumpang, Binangonan, Rizal Capstone Project
                 </p>
             </div>

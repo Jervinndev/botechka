@@ -113,7 +113,7 @@ onUnmounted(() => {
 <template>
     <LoadingModal v-if="Isloading" />
     <header class="w-full fixed top-0 z-50 font-sans bg-white backdrop-blur-2xl"
-        :class="IsScrolled ? 'border-b border-gray-200' : ''">
+        :class="IsScrolled ? 'border-b border-black/5' : ''">
         <div class="max-w-7xl mx-auto w-full flex items-center justify-between 2xl:px-0 px-4 py-2.5">
             <router-link to="/" class="flex items-center gap-2">
                 <img :src="botikaLogo" alt="RHUBoTechka logo" class="w-30 h-12 object-contain">
@@ -132,11 +132,11 @@ onUnmounted(() => {
 
             <div class="2xl:flex hidden items-center gap-3 font-outfit">
                 <button @click="handleAuthAction" :disabled="Isloading"
-                    class="bg-white hover:bg-white/20 text-gray-700 font-regular px-4 py-1.5 rounded-lg border border-white/20 text-sm transition-all">
+                    class="bg-gray-100 hover:bg-white/20 text-gray-700 font-regular px-4 py-2 rounded-lg border border-white/20 text-sm transition-all">
                     {{ Isloading ? 'Logging out...' : (isLoggedIn ? 'Logout' : 'Sign in') }}
                 </button>
                 <button @click="handleGetStarted"
-                    class="bg-blue-700 hover:bg-blue-900 text-white font-semibold px-4 py-1.5 rounded-lg text-sm transition-all">
+                    class="bg-blue-700 hover:bg-blue-900 text-white font-semibold px-4 py-2 rounded-lg text-sm transition-all">
                     {{ isLoggedIn ? 'Dashboard' : 'Get started' }}
                 </button>
             </div>
@@ -151,7 +151,7 @@ onUnmounted(() => {
         <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2"
             enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
             leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
-            <div v-if="!Iscollapsed" class="2xl:hidden w-full bg-gray-50 border-b border-gray-200 overflow-hidden">
+            <div v-if="!Iscollapsed" class="2xl:hidden w-full bg-white border-b border-gray-200 overflow-hidden">
                 <nav class="flex flex-col p-3">
                     <router-link v-for="link in navLinks" :key="link.label" :to="link.to" @click="toggle"
                         class="flex items-center gap-3 px-4 py-3 rounded-xl text-md font-outfit transition-colors"
@@ -162,7 +162,7 @@ onUnmounted(() => {
 
                 <div class="border-t border-gray-100 p-3 flex flex-col gap-2">
                     <button @click="handleAuthAction(); toggle()" :disabled="Isloading"
-                        class="flex items-center justify-center gap-2 border border-gray-200 text-gray-600 font-regular px-5 py-2.5 rounded-xl text-sm transition-all">
+                        class="flex items-center justify-center gap-2 bg-gray-100 text-gray-600 font-regular px-5 py-2.5 rounded-xl text-sm transition-all">
                         {{ Isloading ? 'Logging out...' : (isLoggedIn ? 'Logout' : 'Sign in') }}
                     </button>
                     <button @click="handleGetStarted(); toggle()"

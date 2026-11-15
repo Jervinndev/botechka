@@ -2,25 +2,11 @@
 
 ## Inventory Supabase setup
 
-Run this SQL in the Supabase SQL Editor before using the new batch and image features:
+After creating the medicines and suppliers tables, run [medicine_batches.sql](./medicine_batches.sql) in the Supabase SQL Editor. It creates the batch table, adds staff access policies and atomic stock functions, and backfills the existing medicine batch details.
+
+Run this SQL in the Supabase SQL Editor to configure medicine image storage:
 
 ```sql
-create table if not exists public.medicine_batches (
-	id uuid primary key default gen_random_uuid(),
-	medicine_id uuid not null references public.medicines(id) on delete cascade,
-	batch_number text not null,
-	quantity integer not null check (quantity >= 0),
-	supplier text,
-	manufacturing_date date not null,
-	expiration_date date not null,
-	image_url text,
-	status text not null default 'Available',
-	created_at timestamptz not null default now()
-);
-
-create index if not exists medicine_batches_medicine_id_idx
-	on public.medicine_batches(medicine_id);
-
 insert into storage.buckets (id, name, public)
 values ('medicine-images', 'medicine-images', true)
 on conflict (id) do update set public = true;

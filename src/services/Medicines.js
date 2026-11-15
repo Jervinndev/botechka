@@ -58,10 +58,9 @@ export async function AddMedicine(MedicineData, imageFile = null) {
 
         const finalData = { ...MedicineData, ...(imageUrl && { image_url: imageUrl }) };
 
-        const { data, error } = await supabase
-            .from('medicines')
-            .insert([finalData])
-            .select();
+        const { data, error } = await supabase.rpc('create_medicine_with_batch', {
+            p_medicine: finalData
+        });
 
         if (error) throw error;
         return { data, error: null };
@@ -94,17 +93,14 @@ export async function updateMedicine(medicineId, medicineData) {
 
 export async function addMedicineStock(medicineId, quantity, stockDetails) {
     try {
-        const updates = { quantity }
-
-        if (stockDetails) {
-            Object.assign(updates, stockDetails)
-        }
-
-        const { data, error } = await supabase
-            .from('medicines')
-            .update(updates)
-            .eq('id', medicineId)
-            .select()
+        const { data, error } = await supabase.rpc('add_medicine_batch', {
+            p_medicine_id: medicineId,
+            p_quantity: quantity,
+            p_batch_number: stockDetails?.batch_number ?? null,
+            p_supplier: stockDetails?.supplier ?? null,
+            p_manufacturing_date: stockDetails?.manufacturing_date ?? null,
+            p_expiration_date: stockDetails?.expiration_date ?? null
+        })
 
         if (error) throw error
         return { data, error: null }

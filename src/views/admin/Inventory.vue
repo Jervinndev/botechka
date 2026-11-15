@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Pencil, Eye, Archive, RotateCcw, X } from '@lucide/vue'
 import { getMedicines } from '../../services/Fetches'
@@ -18,6 +18,8 @@ const IsAddstockOpen = ref(false)
 const isEditModalOpen = ref(false)
 const selectedMedicine = ref(null)
 const searchQuery = ref('')
+const currentPage = ref(1)
+const pageSize = 10
 const actionError = ref('')
 const fetchError = ref('')
 
@@ -82,6 +84,27 @@ const searchfilter = computed(() => {
     })
 })
 
+const totalPages = computed(() => Math.ceil(searchfilter.value.length / pageSize))
+const paginatedMedicines = computed(() => {
+    const start = (currentPage.value - 1) * pageSize
+    return searchfilter.value.slice(start, start + pageSize)
+})
+const pageNumbers = computed(() => {
+    const visiblePageCount = 5
+    let start = Math.max(1, currentPage.value - 2)
+    let end = Math.min(totalPages.value, start + visiblePageCount - 1)
+    start = Math.max(1, end - visiblePageCount + 1)
+
+    return Array.from({ length: end - start + 1 }, (_, index) => start + index)
+})
+
+watch([searchQuery, () => route.query.category], () => {
+    currentPage.value = 1
+})
+watch(totalPages, pages => {
+    if (currentPage.value > pages) currentPage.value = pages || 1
+})
+
 onMounted(() => {
     fetchInventory()
 })
@@ -115,7 +138,7 @@ onMounted(() => {
             </div>
         </div>
 
-        <div class="flex items-center justify-between mt-4">
+        <div class="flex items-center justify-between mt-2">
             <div class="flex items-center gap-4 mt-4 p-2 rounded-md bg-white w-fit font-inter">
                 <div>
                     <h1 class="text-sm">Filter by category</h1>
@@ -170,7 +193,7 @@ onMounted(() => {
                     </tr>
                 </tbody>
                 <tbody v-else class="divide-y divide-gray-100">
-                    <tr v-for="med in searchfilter" :key="med.id"
+                    <tr v-for="med in paginatedMedicines" :key="med.id"
                         class="grid grid-cols-8 items-center hover:bg-gray-50">
                         <td class="flex item-center justify-start text-center gap-3 p-3 text-gray-700">
                             <img v-if="med.image_url" :src="med.image_url" :alt="`${med.medicine_name} image`"
@@ -212,6 +235,31 @@ onMounted(() => {
             </table>
         </div>
 
+        <div v-if="searchfilter.length > pageSize"
+            class="mt-4 flex flex-col gap-3 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
+            <p>
+                Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ Math.min(currentPage * pageSize, searchfilter.length) }}
+                of {{ searchfilter.length }} medicines
+            </p>
+            <nav class="flex flex-wrap items-center gap-1" aria-label="Inventory pagination">
+                <button type="button" @click="currentPage--" :disabled="currentPage === 1"
+                    class="rounded-md border border-gray-200 bg-white px-3 py-2 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
+                    Previous
+                </button>
+                <button v-for="page in pageNumbers" :key="page" type="button" @click="currentPage = page"
+                    :aria-current="page === currentPage ? 'page' : undefined"
+                    :class="page === currentPage
+                        ? 'border-blue-700 bg-blue-700 text-white'
+                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'"
+                    class="min-w-10 rounded-md border px-3 py-2 transition">
+                    {{ page }}
+                </button>
+                <button type="button" @click="currentPage++" :disabled="currentPage === totalPages"
+                    class="rounded-md border border-gray-200 bg-white px-3 py-2 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
+                    Next
+                </button>
+            </nav>
+        </div>
 
         <!-- Modal Component Integration -->
         <AddMedicineModal :IsOpen="isAddModalOpen" @close="isAddModalOpen = false" @saved="handleMedicineSaved" />

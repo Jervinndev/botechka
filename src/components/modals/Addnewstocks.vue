@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { Plus, X } from '@lucide/vue'
 import { supabase } from '../../supabase/supabase.js'
 import { addMedicineStock } from '../../services/Medicines'
+import { getSuppliers } from '../../services/Suppliers'
 import { addDaysToDate, getEarlierDate, getLaterDate, getLocalDateString } from '../../utils/dates'
 
 const props = defineProps({
@@ -14,6 +15,7 @@ const emit = defineEmits(['close', 'saved'])
 const Isloading = ref(false)
 const errorMessage = ref('')
 const medicines = ref([])
+const suppliers = ref([])
 const isNewBatch = ref(false)
 const today = getLocalDateString()
 
@@ -50,6 +52,16 @@ async function fetchMedicines() {
     }
 
     medicines.value = data || []
+}
+
+async function fetchSuppliers() {
+    try {
+        suppliers.value = await getSuppliers()
+    } catch (error) {
+        console.error('Failed to load suppliers:', error)
+        suppliers.value = []
+        errorMessage.value = error.message || 'Failed to load suppliers.'
+    }
 }
 
 function selectMedicine() {
@@ -141,14 +153,13 @@ async function saveStock() {
 
     try {
         const medicine = selectedMedicine.value
-        const quantity = Number(medicine.quantity || 0) + Number(formData.value.quantity)
         const stockDetails = isNewBatch.value ? {
             batch_number: formData.value.batch_number.trim(),
             supplier: formData.value.supplier.trim(),
             manufacturing_date: formData.value.manufacturing_date,
             expiration_date: formData.value.expiration_date
         } : null
-        const response = await addMedicineStock(medicine.id, quantity, stockDetails)
+        const response = await addMedicineStock(medicine.id, Number(formData.value.quantity), stockDetails)
 
         if (response.error) {
             throw response.error
@@ -165,7 +176,10 @@ async function saveStock() {
 }
 
 watch(() => props.IsOpen, isOpen => {
-    if (isOpen) fetchMedicines()
+    if (isOpen) {
+        fetchMedicines()
+        fetchSuppliers()
+    }
 })
 </script>
 
@@ -275,11 +289,24 @@ watch(() => props.IsOpen, isOpen => {
                                         :required="isNewBatch">
                                 </div>
                                 <div class="grid gap-1">
-                                    <label class="font-inter text-sm font-medium text-[#404040]">Supplier name</label>
-                                    <input v-model="formData.supplier" type="text" placeholder="e.g. Metro Drug"
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Supplier</label>
+                                    <select v-model="formData.supplier"
                                         :disabled="!isNewBatch"
-                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-slate-600"
+                                        class="w-full cursor-pointer rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-slate-600"
                                         :required="isNewBatch">
+                                        <option value="">-- Select Supplier --</option>
+                                        <option v-if="formData.supplier && !suppliers.some(supplier => supplier.company_name === formData.supplier)"
+                                            :value="formData.supplier">
+                                            {{ formData.supplier }} (current supplier)
+                                        </option>
+                                        <option v-for="supplier in suppliers" :key="supplier.id"
+                                            :value="supplier.company_name">
+                                            {{ supplier.company_name }}
+                                        </option>
+                                    </select>
+                                    <p v-if="isNewBatch && suppliers.length === 0" class="text-xs text-gray-500">
+                                        No active suppliers found. Add a supplier first.
+                                    </p>
                                 </div>
                                 <div class="grid gap-1">
                                     <label class="font-inter text-sm font-medium text-[#404040]">Manufacturing Date</label>

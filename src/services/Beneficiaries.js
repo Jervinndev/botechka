@@ -16,6 +16,16 @@ export async function getBeneficiaries() {
     }
 }
 
+export async function getBeneficiaryCount() {
+    const { data, error } = await supabase.rpc('get_beneficiary_count')
+
+    if (error) {
+        console.error('Error in getBeneficiaryCount:', error.message)
+        return { count: 0, error }
+    }
+    return { count: data, error: null }
+}
+
 export async function addBeneficiary(beneficiaryData) {
     try {
         const { data, error } = await supabase
