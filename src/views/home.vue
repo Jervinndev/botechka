@@ -304,7 +304,7 @@ const avatars = [
 
                 <!-- Photo card -->
                 <div class="relative min-h-[460px] overflow-hidden rounded-3xl lg:col-span-2">
-                    <img src="/dist/assets/Botikangbayan-BlXzJ0En.jpg" alt="Botika ng Bayan staff assisting a patient"
+                    <img src="/src/assets/Botikangbayan.jpg" alt="Botika ng Bayan staff assisting a patient"
                         class="absolute inset-0 h-full w-full object-cover" />
                     <!-- gradient overlay: transparent sa taas, solid blue sa baba -->
                     <div class="absolute inset-0 bg-gradient-to-t from-blue-800 via-blue-800/90 via-45% to-transparent">
