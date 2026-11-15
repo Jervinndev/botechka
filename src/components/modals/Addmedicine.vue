@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { Image as ImageIcon, X } from '@lucide/vue'
 import { getCategories } from '../../services/Fetches'
 import { AddMedicine, updateMedicine } from '../../services/Medicines'
+import { getSuppliers } from '../../services/Suppliers'
 import { addDaysToDate, getEarlierDate, getLaterDate, getLocalDateString } from '../../utils/dates'
 
 const props = defineProps({
@@ -17,6 +18,7 @@ const emit = defineEmits(['close', 'saved'])
 const Isloading = ref(false)
 const errorMessage = ref('')
 const categories = ref([])
+const suppliers = ref([])
 const selectedImage = ref(null)
 const imagePreviewUrl = ref('')
 
@@ -71,6 +73,16 @@ async function fetchCategories() {
     }
 }
 
+async function fetchSuppliers() {
+    try {
+        suppliers.value = await getSuppliers()
+    } catch (error) {
+        console.error('Failed to load suppliers:', error)
+        suppliers.value = []
+        errorMessage.value = error.message || 'Failed to load suppliers.'
+    }
+}
+
 function resetForm() {
     formData.value = createDefaultForm()
     selectedImage.value = null
@@ -114,6 +126,7 @@ watch(() => [props.IsOpen, props.medicine], ([isOpen, medicine]) => {
         resetForm()
     }
     fetchCategories()
+    fetchSuppliers()
 })
 
 function closeModal() {
@@ -323,11 +336,24 @@ async function saveMedicine() {
                                         placeholder="e.g. BATCH-A1" required>
                                 </div>
                                 <div class="grid gap-1">
-                                    <label class="font-inter text-sm font-medium text-[#404040]">Supplier name <span
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Supplier <span
                                             class="text-red-500">*</span></label>
-                                    <input type="text" v-model="formData.supplier"
-                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 placeholder:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-700"
-                                        placeholder="e.g. Metro Drug" required>
+                                    <select v-model="formData.supplier"
+                                        class="w-full cursor-pointer rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700"
+                                        required>
+                                        <option value="">-- Select Supplier --</option>
+                                        <option v-if="formData.supplier && !suppliers.some(supplier => supplier.company_name === formData.supplier)"
+                                            :value="formData.supplier">
+                                            {{ formData.supplier }} (current supplier)
+                                        </option>
+                                        <option v-for="supplier in suppliers" :key="supplier.id"
+                                            :value="supplier.company_name">
+                                            {{ supplier.company_name }}
+                                        </option>
+                                    </select>
+                                    <p v-if="suppliers.length === 0 && !formData.supplier" class="text-xs text-gray-500">
+                                        No active suppliers found. Add a supplier first.
+                                    </p>
                                 </div>
                             </div>
                         </div>
