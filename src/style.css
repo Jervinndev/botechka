@@ -47,13 +47,13 @@ body {
 
 html.dark {
   color-scheme: dark;
-  --app-background: #10141d;
-  --app-sidebar: #151b28;
-  --app-surface: #1b2332;
-  --app-elevated: #222d3d;
-  --app-text-primary: #e2e8f0;
-  --app-text-secondary: #94a3b8;
-  --app-border: #334155;
+  --app-background: #111112;
+  --app-sidebar: #111112;
+  --app-surface: #181818;
+  --app-elevated: #212121;
+  --app-text-primary: #ffffffc5;
+  --app-text-secondary: #e5e5e5b1;
+  --app-border: #ffffff0e;
   --app-input: #1b2332;
 }
 
@@ -159,7 +159,7 @@ html.dark {
   background-color: var(--app-elevated);
 }
 
-.dark .peer:checked ~ [class~="peer-checked:bg-blue-50"] {
+.dark .peer:checked~[class~="peer-checked:bg-blue-50"] {
   background-color: rgb(37 99 235 / 0.2);
 }
 
@@ -276,9 +276,9 @@ html.dark {
   border-color: #66512a;
 }
 
-.dark [class~="divide-gray-50"] > :not(:last-child),
-.dark [class~="divide-gray-100"] > :not(:last-child),
-.dark [class~="divide-slate-100"] > :not(:last-child) {
+.dark [class~="divide-gray-50"]> :not(:last-child),
+.dark [class~="divide-gray-100"]> :not(:last-child),
+.dark [class~="divide-slate-100"]> :not(:last-child) {
   border-color: var(--app-border);
 }
 

@@ -121,24 +121,23 @@ onMounted(() => {
         </div>
 
         <div class="mt-4">
-            <div class="bg-white p-2 rounded-md 2xl:flex grid w-full gap-2 items-center justify-between">
-                <input type="text" placeholder="Search medicines...."
-                    class="p-2 bg-gray-100 2xl:max-w-5xl max-w-full w-full rounded-md" v-model="searchQuery">
-                <div class="flex gap-2 font-inter">
-                    <!-- Button para buksan ang Add Medicine Modal -->
+            <div class="bg-white p-2 rounded-md flex-row 2xl:flex w-full gap-2 items-center justify-between">
+                <input type="text" placeholder="Search medicines...." class="p-2 bg-gray-100 w-full rounded-md"
+                    v-model="searchQuery">
+                <div class="flex items-end justify-end gap-2 2xl:mt-0 mt-2 font-inter w-full">
                     <button @click="isAddModalOpen = true"
-                        class="flex items-center justify-center bg-blue-700 text-white p-2 px-4 gap-2 rounded-md hover:bg-blue-800 transition">
+                        class="flex items-center justify-center 2xl:w-auto w-full bg-blue-700 text-white p-2 px-4 gap-2 rounded-md hover:bg-blue-800 transition">
                         <span class="2xl:text-md text-sm">Add Medicines</span>
                     </button>
                     <button @click="IsAddstockOpen = true"
-                        class="flex items-center justify-center bg-green-700 text-white p-2 px-4 gap-2 rounded-md">
+                        class="flex items-center justify-center 2xl:w-auto w-full bg-green-700 text-white p-2 px-4 gap-2 rounded-md">
                         <span class="2xl:text-md text-sm">Add stock</span>
                     </button>
                 </div>
             </div>
         </div>
 
-        <div class="flex items-center justify-between mt-2">
+        <div class="flex-row 2xl:flex items-center justify-between mt-2">
             <div class="flex items-center gap-4 mt-4 p-2 rounded-md bg-white w-fit font-inter">
                 <div>
                     <h1 class="text-sm">Filter by category</h1>
@@ -151,7 +150,8 @@ onMounted(() => {
                 </div>
                 <VueDatePicker v-model="date" placeholder="Select date"></VueDatePicker>
             </div>
-            <div class="flex items-center gap-4 mt-4 p-2 rounded-md bg-white w-fit font-inter text-sm">
+            <div
+                class="flex items-center justify-between gap-4 mt-4 p-2 rounded-md bg-white 2xl:w-fit w-full font-inter text-sm">
                 <span>{{ searchfilter.length }} Medicines found</span>
                 <button type="button" @click="fetchInventory" :disabled="isLoading" aria-label="Reload medicines"
                     title="Reload medicines"
@@ -162,8 +162,9 @@ onMounted(() => {
         </div>
 
         <div
-            class="w-full h-150 overflow-x-scroll overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] mt-4">
-            <p v-if="actionError" role="alert" class="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ actionError }}</p>
+            class="w-full h-160 overflow-x-scroll overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] mt-4">
+            <p v-if="actionError" role="alert" class="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ actionError
+            }}</p>
             <!-- Table para sa Dynamic Data galing Supabase -->
             <table class="2xl:w-full w-200 bg-white border border-gray-100 rounded-xl border-collapse overflow-hidden">
                 <thead class="bg-blue-700 text-white">
@@ -238,7 +239,8 @@ onMounted(() => {
         <div v-if="searchfilter.length > pageSize"
             class="mt-4 flex flex-col gap-3 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
             <p>
-                Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ Math.min(currentPage * pageSize, searchfilter.length) }}
+                Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ Math.min(currentPage * pageSize, searchfilter.length)
+                }}
                 of {{ searchfilter.length }} medicines
             </p>
             <nav class="flex flex-wrap items-center gap-1" aria-label="Inventory pagination">
@@ -247,8 +249,7 @@ onMounted(() => {
                     Previous
                 </button>
                 <button v-for="page in pageNumbers" :key="page" type="button" @click="currentPage = page"
-                    :aria-current="page === currentPage ? 'page' : undefined"
-                    :class="page === currentPage
+                    :aria-current="page === currentPage ? 'page' : undefined" :class="page === currentPage
                         ? 'border-blue-700 bg-blue-700 text-white'
                         : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'"
                     class="min-w-10 rounded-md border px-3 py-2 transition">
@@ -263,8 +264,8 @@ onMounted(() => {
 
         <!-- Modal Component Integration -->
         <AddMedicineModal :IsOpen="isAddModalOpen" @close="isAddModalOpen = false" @saved="handleMedicineSaved" />
-        <AddMedicineModal :IsOpen="isEditModalOpen" :medicine="selectedMedicine"
-            @close="closeEditMedicine" @saved="handleMedicineSaved" />
+        <AddMedicineModal :IsOpen="isEditModalOpen" :medicine="selectedMedicine" @close="closeEditMedicine"
+            @saved="handleMedicineSaved" />
         <Addnewstocks :IsOpen="IsAddstockOpen" @close="IsAddstockOpen = false" @saved="handleStockSaved" />
         <div v-if="selectedMedicine && !isEditModalOpen"
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
@@ -273,19 +274,41 @@ onMounted(() => {
                 class="w-full max-w-xl rounded-xl bg-white p-6 shadow-xl">
                 <div class="flex items-start justify-between">
                     <div>
-                        <h2 id="medicine-details-title" class="text-xl font-bold text-gray-800">{{ selectedMedicine.medicine_name }}</h2>
+                        <h2 id="medicine-details-title" class="text-xl font-bold text-gray-800">{{
+                            selectedMedicine.medicine_name }}</h2>
                         <p class="mt-1 text-sm text-gray-500">{{ selectedMedicine.medicine_id }}</p>
                     </div>
                     <button type="button" aria-label="Close" @click="selectedMedicine = null"
-                        class="rounded-lg p-2 text-gray-500 hover:bg-gray-100"><X :size="18" /></button>
+                        class="rounded-lg p-2 text-gray-500 hover:bg-gray-100">
+                        <X :size="18" />
+                    </button>
                 </div>
                 <dl class="mt-5 grid gap-4 sm:grid-cols-2">
-                    <div><dt class="text-xs text-gray-500">Category</dt><dd class="mt-1 text-sm font-medium">{{ selectedMedicine.category }}</dd></div>
-                    <div><dt class="text-xs text-gray-500">Available stock</dt><dd class="mt-1 text-sm font-medium">{{ selectedMedicine.quantity }} {{ selectedMedicine.unit }}</dd></div>
-                    <div><dt class="text-xs text-gray-500">Dosage</dt><dd class="mt-1 text-sm font-medium">{{ selectedMedicine.dosage }}</dd></div>
-                    <div><dt class="text-xs text-gray-500">Batch number</dt><dd class="mt-1 text-sm font-medium">{{ selectedMedicine.batch_number }}</dd></div>
-                    <div><dt class="text-xs text-gray-500">Supplier</dt><dd class="mt-1 text-sm font-medium">{{ selectedMedicine.supplier }}</dd></div>
-                    <div><dt class="text-xs text-gray-500">Expiration date</dt><dd class="mt-1 text-sm font-medium">{{ selectedMedicine.expiration_date || '—' }}</dd></div>
+                    <div>
+                        <dt class="text-xs text-gray-500">Category</dt>
+                        <dd class="mt-1 text-sm font-medium">{{ selectedMedicine.category }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-gray-500">Available stock</dt>
+                        <dd class="mt-1 text-sm font-medium">{{ selectedMedicine.quantity }} {{ selectedMedicine.unit }}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-gray-500">Dosage</dt>
+                        <dd class="mt-1 text-sm font-medium">{{ selectedMedicine.dosage }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-gray-500">Batch number</dt>
+                        <dd class="mt-1 text-sm font-medium">{{ selectedMedicine.batch_number }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-gray-500">Supplier</dt>
+                        <dd class="mt-1 text-sm font-medium">{{ selectedMedicine.supplier }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-gray-500">Expiration date</dt>
+                        <dd class="mt-1 text-sm font-medium">{{ selectedMedicine.expiration_date || '—' }}</dd>
+                    </div>
                 </dl>
             </section>
         </div>

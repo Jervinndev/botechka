@@ -321,7 +321,7 @@ onUnmounted(() => {
                 <!-- Navigation links -->
                 <div>
                     <!-- Dashboard -->
-                    <div v-if="!isSuperAdmin" class="mt-4 2xl:p-4 p-0 flex flex-col gap-2">
+                    <div v-if="!isSuperAdmin" class="2xl:mt-0 mt-4 2xl:p-4 p-0 flex flex-col gap-2">
                         <h2 v-if="isExpanded" class="text-[14px] text-[#808080]">
                             {{ isBeneficiary ? 'My account' : 'Operation' }}
                         </h2>
