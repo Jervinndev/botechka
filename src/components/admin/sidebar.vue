@@ -18,7 +18,7 @@ import {
 } from '@lucide/vue'
 
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import sidebarLogo from '../../assets/ChatGPT Image Sep 23, 2026, 03_08_04 PM(1).png'
+import sidebarLogo from '../../assets/BotikaBLUE-CcOSGtx9.png'
 import { getCachedMyProfile, getMyProfile } from '../../services/Authservices.js'
 import Logoutmodal from '../modals/logoutmodal.vue'
 
@@ -278,7 +278,7 @@ onUnmounted(() => {
 <template>
     <aside :class="[
         'bg-white transition-all duration-300 flex flex-col border-r border-gray-200',
-        'w-full h-16 md:h-screen md:p-4 md:shrink-0',
+        'w-full h-16 md:h-screen md:shrink-0',
         isCollapsed ? 'md:w-20' : 'md:w-80'
     ]">
         <!-- Mobile header -->
@@ -306,7 +306,7 @@ onUnmounted(() => {
         ]">
             <div>
                 <!-- Desktop logo and collapse -->
-                <div class="hidden items-center justify-between gap-3 md:flex">
+                <div class="hidden items-center justify-between 2xl:p-4 p-0 gap-3 md:flex">
                     <img v-if="!isCollapsed" :src="sidebarLogo" alt="BOTECHKA Logo" class="w-30" />
 
                     <button type="button" @click="toggle" class="rounded-lg bg-gray-100 p-2 hover:bg-gray-200"
@@ -321,7 +321,7 @@ onUnmounted(() => {
                 <!-- Navigation links -->
                 <div>
                     <!-- Dashboard -->
-                    <div v-if="!isSuperAdmin" class="mt-6 flex flex-col gap-2">
+                    <div v-if="!isSuperAdmin" class="mt-4 2xl:p-4 p-0 flex flex-col gap-2">
                         <h2 v-if="isExpanded" class="text-[14px] text-[#808080]">
                             {{ isBeneficiary ? 'My account' : 'Operation' }}
                         </h2>
@@ -340,7 +340,7 @@ onUnmounted(() => {
                     </div>
 
                     <!-- Operations -->
-                    <div v-if="!isSuperAdmin" class="mt-4 flex flex-col gap-2">
+                    <div v-if="!isSuperAdmin" class="2xl:mt-0 mt-4 2xl:p-4 p-0 flex flex-col gap-2">
                         <h2 v-if="isExpanded" class="text-[14px] text-[#808080]">
                             {{ isBeneficiary ? 'Services' : 'Management' }}
                         </h2>
@@ -357,7 +357,7 @@ onUnmounted(() => {
                     </div>
 
                     <!-- Reports and notifications -->
-                    <div v-if="!isSuperAdmin" class="mt-4 flex flex-col gap-2">
+                    <div v-if="!isSuperAdmin" class="2xl:mt-0 mt-4 2xl:p-4 p-0 flex flex-col gap-2">
                         <h2 v-if="isExpanded" class="text-[14px] text-[#808080]">
                             {{ isBeneficiary ? 'Updates' : 'Insights' }}
                         </h2>
@@ -374,7 +374,7 @@ onUnmounted(() => {
                     </div>
 
                     <!-- Super admin-only account management -->
-                    <div v-if="isSuperAdmin" class="mt-4 flex flex-col gap-2">
+                    <div v-if="isSuperAdmin" class="mt-4 p-4 flex flex-col gap-2">
                         <h2 v-if="isExpanded" class="text-[14px] text-[#808080]">
                             Account administration
                         </h2>
@@ -392,7 +392,7 @@ onUnmounted(() => {
             </div>
 
             <!-- Bottom: profile, settings and logout -->
-            <div class="mt-6">
+            <div class="2xl:mt-0 mt-4 2xl:p-4 p-0">
                 <div v-if="isExpanded && profile && !profileError" class="flex flex-col gap-1 break-words font-poppins">
                     <h2 class="text-sm font-semibold text-gray-800">
                         {{ displayName || 'User' }}

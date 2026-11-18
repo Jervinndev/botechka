@@ -38,7 +38,6 @@ const filteredSuppliers = computed(() => {
         supplier.supplier_type
     ].some((value) => String(value || '').toLowerCase().includes(query)))
 })
-
 async function loadSuppliers() {
     isLoading.value = true
     errorMessage.value = ''

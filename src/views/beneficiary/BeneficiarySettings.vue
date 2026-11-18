@@ -1,11 +1,11 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { Moon, Palette, Sun, LaptopMinimal } from '@lucide/vue'
 import { getMyProfile } from '../../services/Authservices'
+import { useDark } from '../../composable/useDark.js'
 
-const theme = ref('system')
+const { theme, setTheme } = useDark()
 const profile = ref(null)
-let systemPreference
 
 const themeOptions = [
     { value: 'light', label: 'Light', description: 'Use a bright appearance.', Icon: Sun },
@@ -20,24 +20,7 @@ const fullName = computed(() => {
         .join(' ') || '—'
 })
 
-function applyTheme() {
-    const dark = theme.value === 'dark'
-        || (theme.value === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    document.documentElement.classList.toggle('dark', dark)
-    localStorage.setItem('theme', theme.value)
-}
-
-function handleSystemThemeChange() {
-    if (theme.value === 'system') applyTheme()
-}
-
 onMounted(async () => {
-    const savedTheme = localStorage.getItem('theme')
-    theme.value = ['light', 'dark', 'system'].includes(savedTheme) ? savedTheme : 'system'
-    applyTheme()
-    systemPreference = window.matchMedia('(prefers-color-scheme: dark)')
-    systemPreference.addEventListener('change', handleSystemThemeChange)
-
     const result = await getMyProfile()
     if (!result.success) {
         console.error('Unable to load beneficiary profile settings:', result.error)
@@ -45,8 +28,6 @@ onMounted(async () => {
     }
     profile.value = result.data
 })
-
-onUnmounted(() => systemPreference?.removeEventListener('change', handleSystemThemeChange))
 </script>
 
 <template>
@@ -56,6 +37,7 @@ onUnmounted(() => systemPreference?.removeEventListener('change', handleSystemTh
                 <Palette :size="22" /> My Settings
             </h1>
             <p class="mt-1 text-sm text-slate-500">Manage your profile details and dashboard appearance.</p>
+            
         </header>
 
         <section class="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -85,7 +67,7 @@ onUnmounted(() => systemPreference?.removeEventListener('change', handleSystemTh
             <p class="mt-1 text-sm text-slate-500">Choose light mode, dark mode, or follow your device setting.</p>
             <div class="mt-4 grid gap-3 sm:grid-cols-3">
                 <label v-for="option in themeOptions" :key="option.value" class="cursor-pointer">
-                    <input v-model="theme" @change="applyTheme" type="radio" name="beneficiary-theme"
+                    <input v-model="theme" @change="setTheme($event.target.value)" type="radio" name="beneficiary-theme"
                         :value="option.value" class="peer sr-only">
                     <span class="flex h-full flex-col rounded-xl border border-slate-200 p-4 transition hover:border-blue-300 peer-checked:border-blue-600 peer-checked:bg-blue-50">
                         <component :is="option.Icon" :size="20" class="text-blue-700" />

@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import Requestbeneficiarymodal from '../../components/modals/Requestbeneficiarymodal.vue';
 import { cancelMedicineRequest, getMyMedicineRequests } from '../../services/MedicineRequests'
+import BeneficiaryTopActions from '../../components/beneficiary/BeneficiaryTopActions.vue'
 import { useRoute } from 'vue-router'
 
 const Ismodalopen = ref(false)
@@ -30,7 +31,6 @@ const filteredRequests = computed(() => {
         return matchesStatus && matchesQuery
     })
 })
-
 async function loadRequests() {
     loading.value = true
     errorMessage.value = ''
@@ -92,12 +92,15 @@ onMounted(() => {
     <div class="font-inter text-gray-800">
 
         <!-- Top Header -->
-        <div class="flex justify-between items-center mb-6">
+        <header class="flex justify-between items-center mb-6">
             <div>
                 <h1 class="text-lg font-bold text-gray-600 tracking-tight">Beneficiary Request Portal</h1>
                 <p class="text-sm text-gray-500 mt-0.5">Submit and monitor your medicine requests easily</p>
             </div>
-        </div>
+            <div>
+                <BeneficiaryTopActions />
+            </div>
+        </header>
 
         <!-- Stats / Overview Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">

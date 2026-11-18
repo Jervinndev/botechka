@@ -10,6 +10,8 @@ import {
   updateMedicineRequestStatus
 } from '../../services/MedicineRequests'
 import AdminTopActions from '../../components/admin/AdminTopActions.vue'
+import TablePagination from '../../components/TablePagination.vue'
+import { usePagination } from '../../composable/usePagination.js'
 
 const requests = ref([])
 const loading = ref(true)
@@ -39,6 +41,7 @@ const filteredRequests = computed(() => {
     return matchesStatus && matchesQuery
   })
 })
+const { currentPage: requestPage, paginatedItems: paginatedRequests } = usePagination(filteredRequests)
 
 async function loadRequests() {
   loading.value = true
@@ -200,7 +203,7 @@ onMounted(loadRequests)
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr v-for="request in filteredRequests" :key="request.request_id"
+          <tr v-for="request in paginatedRequests" :key="request.request_id"
             class="transition-colors odd:bg-white even:bg-gray-50 hover:bg-blue-50">
             <td class="px-6 py-4 font-semibold text-slate-600">{{ requestCode(request.request_id) }}</td>
             <td class="px-6 py-4">
@@ -257,10 +260,8 @@ onMounted(loadRequests)
         </tbody>
       </table>
 
-      <div
-        class="flex flex-col items-center justify-between gap-3 border-t border-gray-100 px-4 py-3 text-sm text-gray-500 sm:flex-row">
-        <p>Showing {{ filteredRequests.length }} of {{ requests.length }} requests</p>
-      </div>
+      <TablePagination v-model="requestPage" :total-items="filteredRequests.length" item-label="requests"
+        aria-label="Beneficiary request pagination" class="border-t border-gray-100 px-4 py-3" />
     </section>
   </div>
 </template>

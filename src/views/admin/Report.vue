@@ -156,7 +156,6 @@ const reportRows = computed(() => {
     return rows.filter((row) => !query || Object.values(row)
         .some((value) => String(value ?? '').toLowerCase().includes(query)))
 })
-
 const reportColumns = computed(() => {
     const columns = {
         Category: [['id', 'ID'], ['category', 'Category Name'], ['medicineCount', 'No. of Medicines'], ['stock', 'Total Stock'], ['lowStock', 'Low Stock'], ['outOfStock', 'Out of Stock'], ['status', 'Status'], ['expired', 'Expired']],
