@@ -3,6 +3,8 @@ import { computed, onMounted, ref } from 'vue'
 import { Pill, Search, RotateCcw, ArrowRight } from '@lucide/vue'
 import { useRouter } from 'vue-router'
 import { getMedicines } from '../../services/Fetches'
+import BeneficiaryTopActions from '../../components/beneficiary/BeneficiaryTopActions.vue'
+
 
 const router = useRouter()
 const medicines = ref([])
@@ -55,9 +57,14 @@ onMounted(loadMedicines)
 
 <template>
     <section class="font-inter text-slate-800">
-        <header class="mb-5">
-            <h1 class="text-lg font-bold text-[#404040]">Available Medicines</h1>
-            <p class="text-sm text-[#808080]">Browse medicines currently available for request.</p>
+        <header class="mb-5 flex justify-between">
+            <div>
+                <h1 class="text-lg font-bold text-[#404040]">Available Medicines</h1>
+                <p class="text-sm text-[#808080]">Browse medicines currently available for request.</p>
+            </div>
+            <div>
+                <BeneficiaryTopActions />
+            </div>
         </header>
 
         <div class="mb-5 flex flex-col gap-3 sm:flex-row">
@@ -86,7 +93,8 @@ onMounted(loadMedicines)
         <p v-if="errorMessage" role="alert" class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
             {{ errorMessage }}
         </p>
-        <p v-else-if="isLoading && !medicines.length" class="rounded-xl bg-white p-10 text-center text-sm text-gray-500">
+        <p v-else-if="isLoading && !medicines.length"
+            class="rounded-xl bg-white p-10 text-center text-sm text-gray-500">
             Loading available medicines...
         </p>
         <p v-else-if="!filteredMedicines.length" class="rounded-xl bg-white p-10 text-center text-sm text-gray-500">
@@ -97,7 +105,8 @@ onMounted(loadMedicines)
             <article v-for="medicine in filteredMedicines" :key="medicine.id"
                 class="flex flex-col justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-4">
                 <div class="flex items-start gap-3">
-                    <div class="flex h-12 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-100 bg-gray-50 p-1">
+                    <div
+                        class="flex h-12 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-100 bg-gray-50 p-1">
                         <img v-if="medicine.image_url" :src="medicine.image_url" :alt="medicine.medicine_name"
                             class="h-full w-full object-contain">
                         <Pill v-else :size="23" class="text-blue-600" />
@@ -109,10 +118,12 @@ onMounted(loadMedicines)
                     </div>
                 </div>
                 <div class="flex items-center justify-between gap-2 border-t border-gray-100 pt-3">
-                    <span class="text-xs font-bold text-gray-800">{{ medicine.quantity }} {{ medicine.unit }} available</span>
+                    <span class="text-xs font-bold text-gray-800">{{ medicine.quantity }} {{ medicine.unit }}
+                        available</span>
                     <button type="button" @click="requestMedicine(medicine)"
                         class="inline-flex shrink-0 items-center gap-1 rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-800">
-                        Request <ArrowRight :size="14" />
+                        Request
+                        <ArrowRight :size="14" />
                     </button>
                 </div>
             </article>

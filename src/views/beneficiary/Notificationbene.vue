@@ -77,7 +77,9 @@ onMounted(async () => {
     <section class="font-inter text-slate-800">
         <header class="mb-4 flex flex-wrap items-start justify-between gap-3 border-b border-gray-100 pb-4">
             <div>
-                <h1 class="flex items-center gap-2 text-lg font-bold text-[#404040]"><Bell :size="19" /> My Notifications</h1>
+                <h1 class="flex items-center gap-2 text-lg font-bold text-[#404040]">
+                    <Bell :size="19" /> My Notifications
+                </h1>
                 <p class="mt-1 text-sm text-[#808080]">Updates about your medicine requests.</p>
             </div>
             <div class="flex gap-2">
@@ -90,19 +92,20 @@ onMounted(async () => {
                     <RotateCcw :size="16" :class="{ 'animate-spin': isLoading }" /> Refresh
                 </button>
             </div>
+
         </header>
 
         <p class="mb-3 text-xs text-gray-500">{{ unreadCount }} unread</p>
         <p v-if="errorMessage" role="alert" class="rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ errorMessage }}</p>
-        <p v-else-if="isLoading && !notifications.length" class="rounded-xl bg-white p-10 text-center text-sm text-gray-500">
+        <p v-else-if="isLoading && !notifications.length"
+            class="rounded-xl bg-white p-10 text-center text-sm text-gray-500">
             Loading your notifications...
         </p>
         <p v-else-if="!notifications.length" class="rounded-xl bg-white p-10 text-center text-sm text-gray-500">
             No request updates yet.
         </p>
         <ul v-else class="overflow-hidden rounded-xl border border-gray-200 bg-white">
-            <li v-for="item in notifications" :key="item.id"
-                :class="isRead(item.id) ? 'bg-white' : 'bg-blue-50/60'"
+            <li v-for="item in notifications" :key="item.id" :class="isRead(item.id) ? 'bg-white' : 'bg-blue-50/60'"
                 class="flex items-start gap-4 border-b border-gray-100 p-4 last:border-b-0 sm:p-5">
                 <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
                     <Bell :size="18" />
@@ -110,7 +113,8 @@ onMounted(async () => {
                 <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-2">
                         <h2 class="text-sm font-semibold capitalize text-gray-800">{{ item.title }}</h2>
-                        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] capitalize text-gray-600">{{ item.status }}</span>
+                        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] capitalize text-gray-600">{{
+                            item.status }}</span>
                     </div>
                     <p class="mt-1 text-sm text-gray-600">{{ item.description }}</p>
                     <p v-if="item.reason" class="mt-1 text-xs text-red-600">Reason: {{ item.reason }}</p>

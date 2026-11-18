@@ -24,6 +24,8 @@ import {
 } from '../../services/Distribution'
 import { getMedicines } from '../../services/Fetches'
 import AdminTopActions from '../../components/admin/AdminTopActions.vue'
+import TablePagination from '../../components/TablePagination.vue'
+import { usePagination } from '../../composable/usePagination.js'
 
 const IsmodalOpen = ref(false)
 const Isaddpurposeopen = ref(false)
@@ -76,6 +78,7 @@ const filteredTransactions = computed(() => {
         return searchValues.some((value) => String(value || '').toLowerCase().includes(query))
     })
 })
+const { currentPage: transactionPage, paginatedItems: paginatedTransactions } = usePagination(filteredTransactions)
 
 function getBeneficiaryName(beneficiary) {
     if (!beneficiary) return 'Unknown beneficiary'
@@ -564,7 +567,7 @@ onMounted(() => {
                                     {{ transactionSearchQuery ? 'No matching distributions found.' : 'No distributions recorded yet.' }}
                                 </td>
                             </tr>
-                            <template v-for="transaction in filteredTransactions"
+                            <template v-for="transaction in paginatedTransactions"
                                 :key="transaction.distribution_transaction_id">
                             <tr @click="toggleTransaction(transaction.distribution_transaction_id)"
                                 @keydown.enter="toggleTransaction(transaction.distribution_transaction_id)"
@@ -638,6 +641,8 @@ onMounted(() => {
                         </tbody>
                     </table>
                 </div>
+                <TablePagination v-model="transactionPage" :total-items="filteredTransactions.length"
+                    item-label="distributions" aria-label="Distribution history pagination" />
             </div>
         </div>
     </section>

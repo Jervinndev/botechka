@@ -169,7 +169,7 @@ onMounted(async () => {
         </div>
 
         <div v-if="activePanel === 'profile'"
-            class="absolute right-0 top-12 z-[80] w-64 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xl"
+            class="absolute right-0 top-12 z-[80] w-64 rounded-xl border border-slate-200 bg-white p-4 text-left"
             role="menu" aria-label="Profile menu">
             <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
                 <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-700 text-sm font-bold text-white">{{ initials }}</span>

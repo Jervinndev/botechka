@@ -1,30 +1,8 @@
 <script setup>
 import { Palette } from '@lucide/vue'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { useDark } from '../../composable/useDark.js'
 
-const theme = ref('light')
-let systemPreference
-
-function applyTheme() {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    const shouldUseDark = theme.value === 'dark' || (theme.value === 'system' && prefersDark)
-    document.documentElement.classList.toggle('dark', shouldUseDark)
-    localStorage.setItem('theme', theme.value)
-}
-
-function handleSystemThemeChange() {
-    if (theme.value === 'system') applyTheme()
-}
-
-onMounted(() => {
-    const savedTheme = localStorage.getItem('theme')
-    theme.value = ['light', 'dark', 'system'].includes(savedTheme) ? savedTheme : 'system'
-    applyTheme()
-    systemPreference = window.matchMedia('(prefers-color-scheme: dark)')
-    systemPreference.addEventListener('change', handleSystemThemeChange)
-})
-
-onUnmounted(() => systemPreference?.removeEventListener('change', handleSystemThemeChange))
+const { theme, setTheme } = useDark()
 </script>
 
 <template>
@@ -42,11 +20,11 @@ onUnmounted(() => systemPreference?.removeEventListener('change', handleSystemTh
         <section class="grid max-w-3xl gap-4 sm:grid-cols-3">
             <!-- Light -->
             <label class="group block cursor-pointer">
-                <input v-model="theme" @change="applyTheme" type="radio" name="theme" value="light" class="peer sr-only" />
+                <input v-model="theme" @change="setTheme($event.target.value)" type="radio" name="theme" value="light" class="peer sr-only" />
                 <div
                     class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 transition group-hover:ring-blue-300 peer-checked:ring-2 peer-checked:ring-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-400">
                     <div class="relative h-24 w-full overflow-hidden">
-                        <div class="flex h-full w-full bg-white">
+                        <div data-theme-preview="light" class="flex h-full w-full bg-white">
                             <div class="flex w-[18%] flex-col gap-1.5 p-1.5 bg-slate-50">
                                 <span class="h-1.5 w-full rounded-sm bg-blue-600"></span>
                                 <span class="h-1 w-full rounded-sm bg-slate-200"></span><span
@@ -84,7 +62,7 @@ onUnmounted(() => systemPreference?.removeEventListener('change', handleSystemTh
 
             <!-- Dark -->
             <label class="group block cursor-pointer">
-                <input v-model="theme" @change="applyTheme" type="radio" name="theme" value="dark" class="peer sr-only" />
+                <input v-model="theme" @change="setTheme($event.target.value)" type="radio" name="theme" value="dark" class="peer sr-only" />
                 <div
                     class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 transition group-hover:ring-blue-300 peer-checked:ring-2 peer-checked:ring-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-400">
                     <div class="relative h-24 w-full overflow-hidden">
@@ -125,11 +103,11 @@ onUnmounted(() => systemPreference?.removeEventListener('change', handleSystemTh
 
             <!-- System -->
             <label class="group block cursor-pointer">
-                <input v-model="theme" @change="applyTheme" type="radio" name="theme" value="system" class="peer sr-only" />
+                <input v-model="theme" @change="setTheme($event.target.value)" type="radio" name="theme" value="system" class="peer sr-only" />
                 <div
                     class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 transition group-hover:ring-blue-300 peer-checked:ring-2 peer-checked:ring-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-400">
                     <div class="relative h-24 w-full overflow-hidden">
-                        <div class="flex h-full w-full bg-white">
+                        <div data-theme-preview="light" class="flex h-full w-full bg-white">
                             <div class="flex w-[18%] flex-col gap-1.5 p-1.5 bg-slate-50">
                                 <span class="h-1.5 w-full rounded-sm bg-blue-600"></span>
                                 <span class="h-1 w-full rounded-sm bg-slate-200"></span><span

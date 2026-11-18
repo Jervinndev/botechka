@@ -1,6 +1,6 @@
 <script setup>
 import { ShieldCheck, ChevronsRight, AlignVerticalSpaceAround, TriangleAlert, BookPlus } from '@lucide/vue'
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import {
     Chart as ChartJS,
     Title,
@@ -19,9 +19,11 @@ import { getMedicines } from '../../services/Fetches'
 import { getDistributionTransactions } from '../../services/Distribution'
 import { getLocalDateString } from '../../utils/dates'
 import AdminTopActions from '../../components/admin/AdminTopActions.vue'
+import { useDark } from '../../composable/useDark.js'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, LineElement, PointElement, CategoryScale, LinearScale, ArcElement)
 
+const { isDark } = useDark()
 const loading = ref(true)
 const medicines = ref([])
 const distributionTransactions = ref([])
@@ -34,37 +36,67 @@ const barChartData = ref({
     datasets: []
 })
 
-const barChartOptions = {
+const chartTextColor = computed(() => isDark.value ? '#94a3b8' : '#666')
+const chartGridColor = computed(() => isDark.value ? '#334155' : 'rgba(0, 0, 0, 0.1)')
+const chartTooltip = computed(() => isDark.value ? {
+    backgroundColor: '#222d3d',
+    titleColor: '#e2e8f0',
+    bodyColor: '#e2e8f0',
+    borderColor: '#334155',
+    borderWidth: 1
+} : {})
+
+const barChartOptions = computed(() => ({
     responsive: true,
     maintainAspectRatio: false,
+    color: chartTextColor.value,
     plugins: {
-        legend: { display: false }
+        legend: { display: false },
+        tooltip: chartTooltip.value
     },
     scales: {
+        x: {
+            ticks: { color: chartTextColor.value },
+            grid: { color: chartGridColor.value }
+        },
         y: {
             beginAtZero: true,
             max: 200,
             ticks: {
+                color: chartTextColor.value,
                 precision: 0,
                 stepSize: 20,
                 callback: (value) => Number(value).toLocaleString()
-            }
+            },
+            grid: { color: chartGridColor.value }
         }
     }
-}
+}))
 
 const lineChartData = ref({
     labels: [],
     datasets: []
 })
 
-const lineChartOptions = {
+const lineChartOptions = computed(() => ({
     responsive: true,
     maintainAspectRatio: false,
+    color: chartTextColor.value,
     plugins: {
-        legend: { display: false }
+        legend: { display: false },
+        tooltip: chartTooltip.value
+    },
+    scales: {
+        x: {
+            ticks: { color: chartTextColor.value },
+            grid: { color: chartGridColor.value }
+        },
+        y: {
+            ticks: { color: chartTextColor.value },
+            grid: { color: chartGridColor.value }
+        }
     }
-}
+}))
 
 async function fetchDashboardData() {
     try {

@@ -169,7 +169,7 @@ const avatars = [
                         <p class="text-gray-700 text-sm">Rural Health Unit &middot; Botika ng Bayan</p>
                     </div>
 
-                    <h1 class="text-4xl 2xl:text-6xl font-black font-inter leading-10 2xl:leading-18 text-black/70">
+                    <h1 class="text-4xl 2xl:text-6xl font-black font-poppins leading-10 2xl:leading-18 text-black/70">
                         Smart <span class="text-blue-700">Medicine Management</span> for Botika ng Bayan.
                     </h1>
 
@@ -217,7 +217,7 @@ const avatars = [
         </div>
     </section>
 
-    <section class="w-full flex items-center justify-center px-6 md:px-10 py-16 2xl:py-20 transition-all duration-100">
+    <section class="w-full flex items-center justify-center px-6 md:px-10 2xl:py-20 py-10 transition-all duration-100">
         <div class="max-w-7xl mx-auto w-full flex item-center justify-center gap-2">
             <img src="/src/assets/Screenshot 2026-08-04 113304(2).png" alt=""
                 class="h-18 mt-1.5 object-contain opacity-30 hover:opacity-100 transition-all duration-300">

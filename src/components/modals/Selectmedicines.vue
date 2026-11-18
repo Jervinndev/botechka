@@ -29,7 +29,6 @@ const filteredMedicines = computed(() => {
         return matchesQuery && matchesCategory
     })
 })
-
 const selectableMedicines = computed(() => filteredMedicines.value.filter((medicine) => medicine.stock > 0))
 const selectedCount = computed(() => selectedIds.value.length)
 const allVisibleSelected = computed(() => selectableMedicines.value.length > 0

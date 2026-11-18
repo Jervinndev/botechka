@@ -5,6 +5,8 @@ import Addnewbeneficiary from '../../components/modals/AddNewBeneficiary.vue'
 import { getBeneficiaries } from '../../services/Beneficiaries'
 import { setRecordArchived } from '../../services/Archive'
 import AdminTopActions from '../../components/admin/AdminTopActions.vue'
+import TablePagination from '../../components/TablePagination.vue'
+import { usePagination } from '../../composable/usePagination.js'
 
 const isModalOpen = ref(false)
 const isEditModalOpen = ref(false)
@@ -36,6 +38,7 @@ const filteredBeneficiaries = computed(() => {
         return matchesSearch && matchesType
     })
 })
+const { currentPage: beneficiaryPage, paginatedItems: paginatedBeneficiaries } = usePagination(filteredBeneficiaries)
 
 async function fetchBeneficiaries() {
     isLoading.value = true
@@ -172,7 +175,7 @@ onMounted(fetchBeneficiaries)
                                 {{ searchQuery ? 'No matching beneficiaries found.' : 'No beneficiaries yet.' }}
                             </td>
                         </tr>
-                        <tr v-for="beneficiary in filteredBeneficiaries" :key="beneficiary.beneficiary_id"
+                        <tr v-for="beneficiary in paginatedBeneficiaries" :key="beneficiary.beneficiary_id"
                             class="transition-colors odd:bg-white even:bg-gray-50 hover:bg-blue-50">
                             <td class="p-3 text-sm font-medium text-gray-700">{{ getFullName(beneficiary) }}</td>
                             <td class="p-3 text-sm text-gray-500">{{ beneficiary.beneficiary_code }}</td>
@@ -208,12 +211,9 @@ onMounted(fetchBeneficiaries)
             </div>
         </div>
 
-        <div class="mt-4 rounded-lg bg-white px-3 py-3">
-            <p class="text-[11px] text-gray-500">
-                Showing <span class="font-semibold text-gray-700">{{ filteredBeneficiaries.length }}</span>
-                of <span class="font-semibold text-gray-700">{{ beneficiaries.length }}</span> Beneficiaries
-            </p>
-        </div>
+        <TablePagination v-model="beneficiaryPage" :total-items="filteredBeneficiaries.length"
+            item-label="beneficiaries" aria-label="Beneficiaries pagination"
+            class="rounded-lg bg-white px-3 py-3" />
     </section>
 
     <Addnewbeneficiary :IsOpen="isModalOpen" @close="isModalOpen = false" @saved="fetchBeneficiaries" />
