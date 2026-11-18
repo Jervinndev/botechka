@@ -178,7 +178,7 @@ const avatars = [
                         Binangonan, Rizal.
                     </p>
 
-                    <div class="grid 2xl:grid-cols-2 md:grid-cols-2 grid-cols-1 2xl:w-fit gap-3 text-md w-full">
+                    <div class="grid 2xl:grid-cols-2 md:grid-cols-2 grid-cols-2 2xl:w-fit gap-3 text-md w-full">
                         <router-link to="/#services"
                             class="flex items-center justify-center 2xl:p-3 p-2.5 w-full 2xl:w-35 rounded-xl bg-blue-700 text-white font-semibold hover:bg-blue-800 transition-colors">
                             View Services
