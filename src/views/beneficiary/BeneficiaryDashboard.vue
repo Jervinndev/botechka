@@ -93,12 +93,12 @@ import BeneficiaryTopActions from '../../components/beneficiary/BeneficiaryTopAc
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-blue-700 text-white text-xs font-semibold tracking-wider uppercase">
-                            <th class="py-3.5 px-6">Transaction #</th>
-                            <th class="py-3.5 px-6">Date & Time</th>
-                            <th class="py-3.5 px-6">Medicine</th>
-                            <th class="py-3.5 px-6">Quantity</th>
-                            <th class="py-3.5 px-6">Purpose</th>
-                            <th class="py-3.5 px-6">Dispense By</th>
+                            <th class="py-3.5 px-4">Transaction #</th>
+                            <th class="py-3.5 px-3">Date & Time</th>
+                            <th class="py-3.5 px-3">Medicine</th>
+                            <th class="py-3.5 px-3">Quantity</th>
+                            <th class="py-3.5 px-3">Purpose</th>
+                            <th class="py-3.5 px-3">Dispense By</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 text-xs">

@@ -154,7 +154,7 @@ onUnmounted(() => {
             <div v-if="!Iscollapsed" class="2xl:hidden w-full bg-white border-b border-gray-200 overflow-hidden">
                 <nav class="flex flex-col p-3">
                     <router-link v-for="link in navLinks" :key="link.label" :to="link.to" @click="toggle"
-                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-md font-outfit transition-colors"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-outfit transition-colors"
                         :class="isActive(link) ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-500 hover:bg-gray-50'">
                         <span>{{ link.label }}</span>
                     </router-link>

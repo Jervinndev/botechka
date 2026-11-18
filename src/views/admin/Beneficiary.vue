@@ -119,10 +119,10 @@ onMounted(fetchBeneficiaries)
             <AdminTopActions />
         </div>
         <div class="mt-4">
-            <div class="bg-white p-2 rounded-md 2xl:flex grid w-full gap-2 items-center justify-between">
+            <div class="bg-white p-2 rounded-md flex-row 2xl:flex  w-full gap-2 items-center justify-between">
                 <input v-model="searchQuery" type="search" placeholder="Search beneficiaries..."
                     class="p-2 bg-gray-100 2xl:max-w-5xl max-w-full w-full rounded-md">
-                <div class="flex gap-2 font-inter">
+                <div class="flex items-end justify-end gap-2 font-inter 2xl:mt-0 mt-2">
                     <button @click="isModalOpen = true"
                         class="flex items-center justify-center bg-blue-700 text-white p-2 px-4 gap-2 rounded-md hover:bg-blue-800 transition">
                         <span class="2xl:text-md text-sm">Add New Beneficiary</span>
@@ -131,21 +131,25 @@ onMounted(fetchBeneficiaries)
             </div>
         </div>
         <div class="w-full rounded-xl mt-4">
-            <div class="mb-3 flex flex-wrap items-center gap-2">
-                <button v-for="type in ['All', 'PWD', 'Regular', 'Senior']" :key="type"
-                    type="button" @click="selectedType = type"
-                    :class="selectedType === type
-                        ? 'border-[#2638ff] bg-blue-700 text-white'
-                        : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-100'"
-                    class="rounded-full border px-4 py-1.5 text-sm transition">
-                    {{ type }}
-                </button>
-                <span class="ml-auto text-sm text-gray-500">{{ filteredBeneficiaries.length }} Beneficiaries</span>
-                <button type="button" @click="fetchBeneficiaries" :disabled="isLoading"
-                    aria-label="Reload beneficiaries" title="Reload beneficiaries"
-                    class="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-100 disabled:opacity-50">
-                    <RotateCcw :size="16" :class="{ 'animate-spin': isLoading }" />
-                </button>
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center justify-center gap-2 font-inter">
+                    <button v-for="type in ['All', 'PWD', 'Regular', 'Senior']" :key="type" type="button"
+                        @click="selectedType = type" :class="selectedType === type
+                            ? 'border-[#2638ff] bg-blue-700 text-white'
+                            : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-100'"
+                        class="rounded-full border px-4 py-1.5 text-sm transition">
+                        {{ type }}
+                    </button>
+                </div>
+                <div
+                    class="flex items-center justify-between gap-4 p-2 rounded-md bg-white 2xl:w-fit w-full font-inter text-sm">
+                    <span class="text-sm text-gray-500">{{ filteredBeneficiaries.length }} Beneficiaries</span>
+                    <button type="button" @click="fetchBeneficiaries" :disabled="isLoading"
+                        aria-label="Reload beneficiaries" title="Reload beneficiaries"
+                        class="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-100 disabled:opacity-50">
+                        <RotateCcw :size="16" :class="{ 'animate-spin': isLoading }" />
+                    </button>
+                </div>
             </div>
             <div class="w-full overflow-x-auto rounded-xl border border-gray-100 bg-white">
                 <table class="w-full min-w-[1000px] border-collapse text-left">
@@ -182,27 +186,29 @@ onMounted(fetchBeneficiaries)
                             <td class="p-3 text-sm text-gray-600">{{ beneficiary.barangay || '—' }}</td>
                             <td class="p-3 text-sm text-gray-600">{{ beneficiary.beneficiary_type || '—' }}</td>
                             <td class="p-3 text-sm text-gray-600">{{ getAge(beneficiary.birth_date) }}</td>
-                            <td class="whitespace-nowrap p-3 text-sm text-gray-500">{{ formatDate(beneficiary.registration_date) }}</td>
+                            <td class="whitespace-nowrap p-3 text-sm text-gray-500">{{
+                                formatDate(beneficiary.registration_date) }}</td>
                             <td class="p-3">
-                                <span class="inline-flex whitespace-nowrap rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
+                                <span
+                                    class="inline-flex whitespace-nowrap rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
                                     {{ beneficiary.eligibility || '—' }}
                                 </span>
                             </td>
                             <td class="p-3 text-sm text-gray-600">{{ beneficiary.status || '—' }}</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-2">
-                                <button title="View" @click="selectedBeneficiary = beneficiary"
-                                    class="rounded-lg border border-gray-300 p-1.5 text-gray-500 transition hover:bg-blue-50">
-                                    <Eye size="18" />
-                                </button>
-                                <button title="Edit" @click="openEdit(beneficiary)"
-                                    class="rounded-lg border border-gray-300 p-1.5 text-gray-500 transition hover:bg-amber-50">
-                                    <Pencil size="18" />
-                                </button>
-                                <button title="Archive" @click="archiveBeneficiary(beneficiary)"
-                                    class="rounded-lg border border-gray-300 p-1.5 text-gray-500 transition hover:bg-gray-100">
-                                    <Archive size="18" />
-                                </button>
+                                    <button title="View" @click="selectedBeneficiary = beneficiary"
+                                        class="rounded-lg border border-gray-300 p-1.5 text-gray-500 transition hover:bg-blue-50">
+                                        <Eye size="18" />
+                                    </button>
+                                    <button title="Edit" @click="openEdit(beneficiary)"
+                                        class="rounded-lg border border-gray-300 p-1.5 text-gray-500 transition hover:bg-amber-50">
+                                        <Pencil size="18" />
+                                    </button>
+                                    <button title="Archive" @click="archiveBeneficiary(beneficiary)"
+                                        class="rounded-lg border border-gray-300 p-1.5 text-gray-500 transition hover:bg-gray-100">
+                                        <Archive size="18" />
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -212,13 +218,12 @@ onMounted(fetchBeneficiaries)
         </div>
 
         <TablePagination v-model="beneficiaryPage" :total-items="filteredBeneficiaries.length"
-            item-label="beneficiaries" aria-label="Beneficiaries pagination"
-            class="rounded-lg bg-white px-3 py-3" />
+            item-label="beneficiaries" aria-label="Beneficiaries pagination" class="rounded-lg bg-white px-3 py-3" />
     </section>
 
     <Addnewbeneficiary :IsOpen="isModalOpen" @close="isModalOpen = false" @saved="fetchBeneficiaries" />
-    <Addnewbeneficiary :IsOpen="isEditModalOpen" :beneficiary="selectedBeneficiary"
-        @close="closeEdit" @saved="fetchBeneficiaries" />
+    <Addnewbeneficiary :IsOpen="isEditModalOpen" :beneficiary="selectedBeneficiary" @close="closeEdit"
+        @saved="fetchBeneficiaries" />
     <div v-if="selectedBeneficiary && !isEditModalOpen"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
         @click.self="selectedBeneficiary = null">
@@ -230,16 +235,39 @@ onMounted(fetchBeneficiaries)
                     <p class="mt-1 text-sm text-gray-500">{{ selectedBeneficiary.beneficiary_code }}</p>
                 </div>
                 <button type="button" aria-label="Close" @click="selectedBeneficiary = null"
-                    class="rounded-lg p-2 text-gray-500 hover:bg-gray-100"><X :size="18" /></button>
+                    class="rounded-lg p-2 text-gray-500 hover:bg-gray-100">
+                    <X :size="18" />
+                </button>
             </div>
             <dl class="mt-5 grid gap-4 sm:grid-cols-2">
-                <div><dt class="text-xs text-gray-500">Name</dt><dd class="mt-1 text-sm font-medium">{{ getFullName(selectedBeneficiary) }}</dd></div>
-                <div><dt class="text-xs text-gray-500">Type</dt><dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.beneficiary_type || '—' }}</dd></div>
-                <div><dt class="text-xs text-gray-500">Birth date</dt><dd class="mt-1 text-sm font-medium">{{ formatDate(selectedBeneficiary.birth_date) }}</dd></div>
-                <div><dt class="text-xs text-gray-500">Sex</dt><dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.sex || '—' }}</dd></div>
-                <div><dt class="text-xs text-gray-500">Contact</dt><dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.contact_number || '—' }}</dd></div>
-                <div><dt class="text-xs text-gray-500">Barangay</dt><dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.barangay || '—' }}</dd></div>
-                <div class="sm:col-span-2"><dt class="text-xs text-gray-500">Address</dt><dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.address || '—' }}</dd></div>
+                <div>
+                    <dt class="text-xs text-gray-500">Name</dt>
+                    <dd class="mt-1 text-sm font-medium">{{ getFullName(selectedBeneficiary) }}</dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-gray-500">Type</dt>
+                    <dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.beneficiary_type || '—' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-gray-500">Birth date</dt>
+                    <dd class="mt-1 text-sm font-medium">{{ formatDate(selectedBeneficiary.birth_date) }}</dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-gray-500">Sex</dt>
+                    <dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.sex || '—' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-gray-500">Contact</dt>
+                    <dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.contact_number || '—' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-gray-500">Barangay</dt>
+                    <dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.barangay || '—' }}</dd>
+                </div>
+                <div class="sm:col-span-2">
+                    <dt class="text-xs text-gray-500">Address</dt>
+                    <dd class="mt-1 text-sm font-medium">{{ selectedBeneficiary.address || '—' }}</dd>
+                </div>
             </dl>
         </section>
     </div>

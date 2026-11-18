@@ -42,24 +42,24 @@ const categoriesWithStock = computed(() => {
         .filter(category => category.status !== 'archived')
         .filter(category => !query || category.category_name?.toLowerCase().includes(query))
         .map(category => {
-        const categoryMedicines = medicines.value.filter(
-            medicine => medicine.category?.trim().toLowerCase() === category.category_name?.trim().toLowerCase()
-        );
-        const categoryStock = categoryMedicines.reduce(
-            (total, medicine) => total + Math.max(Number(medicine.quantity) || 0, 0),
-            0
-        );
-        const stockedCount = categoryMedicines.filter(medicine => Number(medicine.quantity) > 0).length
+            const categoryMedicines = medicines.value.filter(
+                medicine => medicine.category?.trim().toLowerCase() === category.category_name?.trim().toLowerCase()
+            );
+            const categoryStock = categoryMedicines.reduce(
+                (total, medicine) => total + Math.max(Number(medicine.quantity) || 0, 0),
+                0
+            );
+            const stockedCount = categoryMedicines.filter(medicine => Number(medicine.quantity) > 0).length
 
-        return {
-            ...category,
-            totalStock: categoryStock,
-            medicineCount: categoryMedicines.length,
-            stockPercentage: categoryMedicines.length
-                ? Math.round((stockedCount / categoryMedicines.length) * 100)
-                : 0
-        };
-    });
+            return {
+                ...category,
+                totalStock: categoryStock,
+                medicineCount: categoryMedicines.length,
+                stockPercentage: categoryMedicines.length
+                    ? Math.round((stockedCount / categoryMedicines.length) * 100)
+                    : 0
+            };
+        });
 });
 
 const selectedCategoryMedicines = computed(() => {
@@ -125,7 +125,8 @@ onMounted(() => {
                     <p class="text-sm font-medium">Most Stocked Category</p>
                 </div>
                 <h1 class="text-2xl font-black text-gray-700 mt-2">
-                    {{ mostStockedCategory ? `${mostStockedCategory.category_name} (${mostStockedCategory.totalStock})` : 'None' }}
+                    {{ mostStockedCategory ? `${mostStockedCategory.category_name} (${mostStockedCategory.totalStock})`
+                        : 'None' }}
                 </h1>
 
             </div>
@@ -152,11 +153,13 @@ onMounted(() => {
                         class="w-full p-2 bg-blue-700 text-white rounded-xl px-4 font-inter">Add
                         category</button>
                 </div>
-                <div p-2>
-                    <List @click="Isflex = false" />
-                </div>
-                <div p-2>
-                    <LayoutDashboard @click="Isflex = true" />
+                <div class="flex gap-3">
+                    <div p-2>
+                        <List @click="Isflex = false" />
+                    </div>
+                    <div p-2>
+                        <LayoutDashboard @click="Isflex = true" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -164,13 +167,13 @@ onMounted(() => {
             {{ errorMessage }}
         </p>
         <CategorySkeliton v-if="isLoading" />
-        <div v-else-if="categoriesWithStock.length === 0" class="mt-4 rounded-xl bg-white p-6 text-center text-sm text-gray-500">
+        <div v-else-if="categoriesWithStock.length === 0"
+            class="mt-4 rounded-xl bg-white p-6 text-center text-sm text-gray-500">
             No categories found. Add a category to get started.
         </div>
         <div v-else class="grid gap-4 mt-4 rounded-xl transition-all duration-100"
             :class="Isflex ? 'grid grid-cols-3' : 'flex'">
-            <div v-for="cat in categoriesWithStock" :key="cat.id"
-                role="button" tabindex="0" @click="openCategory(cat)"
+            <div v-for="cat in categoriesWithStock" :key="cat.id" role="button" tabindex="0" @click="openCategory(cat)"
                 @keydown.enter="openCategory(cat)" @keydown.space.prevent="openCategory(cat)"
                 class="flex flex-col justify-center gap-3 font-inter p-4 bg-white rounded-xl w-full cursor-pointer hover:ring-2 hover:ring-blue-200 transition">
                 <div>

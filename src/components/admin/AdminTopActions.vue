@@ -198,7 +198,8 @@ onMounted(async () => {
             :aria-expanded="activePanel === 'notifications'"
             class="relative flex h-10 w-10 items-center justify-center rounded-full text-blue-700 transition hover:bg-blue-50">
             <Bell :size="20" />
-            <span v-if="unreadCount" class="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+            <span v-if="unreadCount"
+                class="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
                 {{ unreadCount > 9 ? '9+' : unreadCount }}
             </span>
         </button>
@@ -209,7 +210,7 @@ onMounted(async () => {
         </button>
 
         <div v-if="activePanel === 'notifications'"
-            class="absolute right-0 top-12 z-[80] w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-slate-200 bg-white text-left shadow-xl"
+            class="absolute right-0 top-12 z-[80] w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-slate-200 bg-white text-left"
             role="dialog" aria-modal="false" aria-label="Notifications">
             <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
                 <div>
@@ -217,12 +218,15 @@ onMounted(async () => {
                     <p class="text-xs text-slate-500">{{ unreadCount }} unread</p>
                 </div>
                 <button type="button" @click="activePanel = ''" aria-label="Close notifications"
-                    class="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"><X :size="17" /></button>
+                    class="rounded-md p-1.5 text-slate-500 hover:bg-slate-100">
+                    <X :size="17" />
+                </button>
             </div>
             <p v-if="notificationError" role="alert" class="m-3 rounded-lg bg-red-50 p-3 text-xs text-red-700">
                 {{ notificationError }}
             </p>
-            <p v-else-if="isLoadingNotifications && !notifications.length" class="px-4 py-8 text-center text-sm text-slate-500">
+            <p v-else-if="isLoadingNotifications && !notifications.length"
+                class="px-4 py-8 text-center text-sm text-slate-500">
                 Loading notifications...
             </p>
             <p v-else-if="!notifications.length" class="px-4 py-8 text-center text-sm text-slate-500">
@@ -252,14 +256,17 @@ onMounted(async () => {
         </div>
 
         <div v-if="activePanel === 'profile'"
-            class="absolute right-0 top-12 z-[80] w-64 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xl"
+            class="absolute right-0 top-12 z-[80] w-64 rounded-xl border border-slate-200 bg-white p-4 text-left"
             role="menu" aria-label="Profile menu">
             <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
-                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-700 text-sm font-bold text-white">{{ initials }}</span>
+                <span
+                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-700 text-sm font-bold text-white">{{
+                        initials }}</span>
                 <span class="min-w-0">
                     <span class="block truncate text-sm font-semibold text-slate-800">{{ displayName }}</span>
                     <span class="block truncate text-xs text-slate-500">{{ profile?.email }}</span>
-                    <span class="mt-1 block text-xs capitalize text-blue-700">{{ profile?.role?.replace('_', ' ') }}</span>
+                    <span class="mt-1 block text-xs capitalize text-blue-700">{{ profile?.role?.replace('_', ' ')
+                        }}</span>
                 </span>
             </div>
             <p v-if="profileError" role="alert" class="mt-3 text-xs text-red-600">{{ profileError }}</p>
