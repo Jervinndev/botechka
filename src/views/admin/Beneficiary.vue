@@ -28,7 +28,6 @@ const filteredBeneficiaries = computed(() => {
             beneficiary.last_name,
             beneficiary.suffix,
             beneficiary.barangay,
-            beneficiary.status,
             beneficiary.eligibility,
             beneficiary.beneficiary_type
         ].some((value) => value?.toLowerCase().includes(query))
@@ -162,8 +161,7 @@ onMounted(fetchBeneficiaries)
                             <th class="p-3 font-semibold text-gray-50">Age</th>
                             <th class="p-3 font-semibold text-gray-50">Registered</th>
                             <th class="p-3 font-semibold text-gray-50">Eligibility</th>
-                            <th class="p-3 font-semibold text-gray-50">Status</th>
-                            <th class="p-3 font-semibold text-gray-50">Action</th>
+                            <th class="p-3 font-semibold text-gray-50 text-right">Action</th>
                         </tr>
                     </thead>
 
@@ -194,9 +192,8 @@ onMounted(fetchBeneficiaries)
                                     {{ beneficiary.eligibility || '—' }}
                                 </span>
                             </td>
-                            <td class="p-3 text-sm text-gray-600">{{ beneficiary.status || '—' }}</td>
-                            <td class="p-3">
-                                <div class="flex items-center gap-2">
+                            <td class="p-3 text-right">
+                                <div class="flex items-center justify-end gap-2">
                                     <button title="View" @click="selectedBeneficiary = beneficiary"
                                         class="rounded-lg border border-gray-300 p-1.5 text-gray-500 transition hover:bg-blue-50">
                                         <Eye size="18" />

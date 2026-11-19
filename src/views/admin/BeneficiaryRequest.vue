@@ -20,6 +20,12 @@ const searchQuery = ref('')
 const activeStatus = ref('all')
 const updatingRequestId = ref(null)
 const statusMessage = ref('')
+const selectedRequest = ref(null)
+const prescriptionUrl = ref('')
+const isRequestViewOpen = ref(false)
+const isPrescriptionPreviewOpen = ref(false)
+const isLoadingPrescription = ref(false)
+const prescriptionError = ref('')
 
 const pendingCount = computed(() => requests.value.filter(request => request.status === 'pending').length)
 const approvedCount = computed(() => requests.value.filter(request => request.status === 'approved').length)
@@ -74,16 +80,33 @@ async function setRequestStatus(request, status) {
   }
 }
 
-async function openPrescription(request) {
-  errorMessage.value = ''
+async function openRequestDetails(request) {
+  selectedRequest.value = request
+  prescriptionUrl.value = ''
+  prescriptionError.value = ''
+  isRequestViewOpen.value = true
+  if (!request.prescription_path) return
 
+  isLoadingPrescription.value = true
   try {
-    const url = await getPrescriptionUrl(request.prescription_path)
-    window.open(url, '_blank', 'noopener,noreferrer')
+    prescriptionUrl.value = await getPrescriptionUrl(request.prescription_path)
   } catch (error) {
-    console.error('Failed to open beneficiary prescription:', error)
-    errorMessage.value = error.message || 'Unable to open the prescription.'
+    console.error('Failed to load beneficiary prescription:', error)
+    prescriptionError.value = error.message || 'Unable to load the prescription.'
+  } finally {
+    isLoadingPrescription.value = false
   }
+}
+
+function closeRequestDetails() {
+  isRequestViewOpen.value = false
+  isPrescriptionPreviewOpen.value = false
+  selectedRequest.value = null
+  prescriptionUrl.value = ''
+}
+
+function isImagePrescription(path) {
+  return /\.(jpe?g|png|webp)$/i.test(path || '')
 }
 
 function requestCode(requestId) {
@@ -160,25 +183,25 @@ onMounted(loadRequests)
     <!-- Tabs + filters -->
     <section class="rounded-xl border border-gray-100 bg-white p-4">
       <!-- Status tabs (active tab = blue) -->
-      <div class="mb-4 flex flex-wrap gap-2">
-        <button @click="activeStatus = 'all'"
-          :class="activeStatus === 'all' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'"
-          class="rounded-md px-4 py-2 text-sm font-medium transition">All</button>
-        <button @click="activeStatus = 'pending'"
-          :class="activeStatus === 'pending' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'"
-          class="rounded-md px-4 py-2 text-sm font-medium transition">Pending</button>
-        <button @click="activeStatus = 'approved'"
-          :class="activeStatus === 'approved' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'"
-          class="rounded-md px-4 py-2 text-sm font-medium transition">Approved</button>
-        <button @click="activeStatus = 'rejected'"
-          :class="activeStatus === 'rejected' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'"
-          class="rounded-md px-4 py-2 text-sm font-medium transition">Rejected</button>
-      </div>
-
-      <div class="relative">
-        <input v-model="searchQuery" type="text" placeholder="Search for Beneficiary Request.."
-          class="w-full rounded-md bg-gray-100 px-4 py-2.5 pr-12 text-sm outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-blue-200" />
-        <Search :size="18" class="absolute right-4 top-1/2 -translate-y-1/2" />
+      <div class="2xl:flex flex-row gap-2">
+        <div class="mb-4 2xl:flex flex-row gap-2 2xl:mb-0 2xl:items-center">
+          <button @click="activeStatus = 'all'"
+            :class="activeStatus === 'all' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'"
+            class="rounded-md px-4 py-2 text-sm font-medium transition">All</button>
+          <button @click="activeStatus = 'pending'"
+            :class="activeStatus === 'pending' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'"
+            class="rounded-md px-4 py-2 text-sm font-medium transition">Pending</button>
+          <button @click="activeStatus = 'approved'"
+            :class="activeStatus === 'approved' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'"
+            class="rounded-md px-4 py-2 text-sm font-medium transition">Approved</button>
+          <button @click="activeStatus = 'rejected'"
+            :class="activeStatus === 'rejected' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'"
+            class="rounded-md px-4 py-2 text-sm font-medium transition">Rejected</button>
+        </div>
+        <div class="relative w-full">
+          <input v-model="searchQuery" type="text" placeholder="Search for Beneficiary Request.."
+            class="w-full rounded-md bg-gray-100 px-4 py-2.5 pr-12 text-sm outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-blue-200" />
+        </div>
       </div>
     </section>
 
@@ -212,9 +235,6 @@ onMounted(loadRequests)
             </td>
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
-                <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-pink-50 text-pink-500">
-                  <Pill :size="18" />
-                </span>
                 <span class="font-semibold leading-tight text-slate-600">
                   {{ request.medicine_name }} {{ request.medicine_dosage || '' }}
                 </span>
@@ -229,9 +249,9 @@ onMounted(loadRequests)
             </td>
             <td class="px-6 py-4">
               <div class="flex justify-end gap-2">
-                <button @click="openPrescription(request)"
+                <button @click="openRequestDetails(request)"
                   class="flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 text-gray-500 transition hover:bg-blue-50 hover:text-blue-700"
-                  aria-label="View prescription">
+                  aria-label="View request details">
                   <Eye :size="18" />
                 </button>
                 <template v-if="request.status === 'pending'">
@@ -263,5 +283,84 @@ onMounted(loadRequests)
       <TablePagination v-model="requestPage" :total-items="filteredRequests.length" item-label="requests"
         aria-label="Beneficiary request pagination" class="border-t border-gray-100 px-4 py-3" />
     </section>
+  </div>
+
+  <div v-if="isRequestViewOpen && selectedRequest"
+    class="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4"
+    @click.self="closeRequestDetails">
+    <section role="dialog" aria-modal="true" aria-labelledby="request-details-title"
+      class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h2 id="request-details-title" class="text-lg font-bold text-slate-900">Request Details</h2>
+          <p class="mt-1 text-sm text-slate-500">{{ requestCode(selectedRequest.request_id) }}</p>
+        </div>
+        <button type="button" aria-label="Close request details" @click="closeRequestDetails"
+          class="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+          <X :size="18" />
+        </button>
+      </div>
+
+      <dl class="mt-5 grid gap-4 border-b border-gray-100 pb-5 sm:grid-cols-2">
+        <div>
+          <dt class="text-xs text-slate-400">Beneficiary</dt>
+          <dd class="mt-1 text-sm font-medium text-slate-700">{{ selectedRequest.beneficiary_name }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-slate-400">Beneficiary type</dt>
+          <dd class="mt-1 text-sm font-medium text-slate-700">{{ selectedRequest.beneficiary_type }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-slate-400">Medicine</dt>
+          <dd class="mt-1 text-sm font-medium text-slate-700">
+            {{ selectedRequest.medicine_name }} {{ selectedRequest.medicine_dosage || '' }}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-xs text-slate-400">Quantity</dt>
+          <dd class="mt-1 text-sm font-medium text-slate-700">
+            {{ selectedRequest.quantity }} {{ selectedRequest.medicine_unit }}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-xs text-slate-400">Purpose</dt>
+          <dd class="mt-1 text-sm font-medium text-slate-700">{{ selectedRequest.purpose || '—' }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-slate-400">Requested</dt>
+          <dd class="mt-1 text-sm font-medium text-slate-700">{{ formatDate(selectedRequest.created_at) }}</dd>
+        </div>
+      </dl>
+
+      <div class="mt-5">
+        <h3 class="mb-2 text-sm font-semibold text-slate-800">Prescription</h3>
+        <p v-if="isLoadingPrescription" class="rounded-lg bg-slate-50 p-6 text-center text-sm text-slate-500">
+          Loading prescription...
+        </p>
+        <p v-else-if="prescriptionError" role="alert" class="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          {{ prescriptionError }}
+        </p>
+        <button v-else-if="prescriptionUrl && isImagePrescription(selectedRequest.prescription_path)" type="button"
+          @click="isPrescriptionPreviewOpen = true"
+          class="block max-h-80 w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-2">
+          <img :src="prescriptionUrl" alt="Beneficiary prescription"
+            class="mx-auto max-h-72 max-w-full object-contain">
+          <span class="mt-2 block text-xs text-slate-500">Click image to enlarge</span>
+        </button>
+        <iframe v-else-if="prescriptionUrl" :src="prescriptionUrl" title="Beneficiary prescription PDF"
+          class="h-[55vh] w-full rounded-lg border border-slate-200"></iframe>
+      </div>
+    </section>
+  </div>
+
+  <div v-if="isPrescriptionPreviewOpen && prescriptionUrl"
+    class="fixed inset-0 z-[80] flex items-center justify-center bg-black/90 p-4"
+    @click.self="isPrescriptionPreviewOpen = false">
+    <button type="button" aria-label="Close enlarged prescription" @click="isPrescriptionPreviewOpen = false"
+      class="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20">
+      <X :size="22" />
+    </button>
+    <img :src="prescriptionUrl" alt="Enlarged beneficiary prescription"
+      class="max-h-full max-w-full object-contain">
   </div>
 </template>

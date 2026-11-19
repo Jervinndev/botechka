@@ -1,16 +1,17 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { Pencil, Eye, Archive, RotateCcw, X } from '@lucide/vue'
+import { Pencil, Eye, Archive, RotateCcw, X, ChevronDown } from '@lucide/vue'
 import { getMedicines } from '../../services/Fetches'
 import AddMedicineModal from '../../components/modals/Addmedicine.vue'
 import Addnewstocks from '../../components/modals/Addnewstocks.vue'
 import InventorySkeleton from '../../Skelitonloader/inventoryskeliton.vue'
 import { setRecordArchived } from '../../services/Archive'
 import AdminTopActions from '../../components/admin/AdminTopActions.vue'
+import { isWithinDateRange } from '../../utils/dateRange.js'
 
 const medicines = ref([])
-const date = ref(null)
+const dateRange = ref(null)
 const route = useRoute()
 const isLoading = ref(false)
 const isAddModalOpen = ref(false)
@@ -80,7 +81,8 @@ const searchfilter = computed(() => {
         const matchesSearch = !query ||
             med.category?.toLowerCase().includes(query) ||
             med.medicine_name?.toLowerCase().includes(query)
-        return matchesCategory && matchesSearch
+        const matchesDate = isWithinDateRange(med.created_at, dateRange.value)
+        return matchesCategory && matchesSearch && matchesDate
     })
 })
 
@@ -98,7 +100,7 @@ const pageNumbers = computed(() => {
     return Array.from({ length: end - start + 1 }, (_, index) => start + index)
 })
 
-watch([searchQuery, () => route.query.category], () => {
+watch([searchQuery, dateRange, () => route.query.category], () => {
     currentPage.value = 1
 })
 watch(totalPages, pages => {
@@ -137,7 +139,7 @@ onMounted(() => {
             </div>
         </div>
 
-        <div class="flex-row 2xl:flex items-center justify-between mt-2">
+        <div class="flex-row 2xl:flex items-center justify-between">
             <div class="flex items-center gap-4 mt-4 p-2 rounded-md bg-white w-fit font-inter">
                 <div>
                     <h1 class="text-sm">Filter by category</h1>
@@ -148,7 +150,8 @@ onMounted(() => {
                         <ChevronDown />
                     </button>
                 </div>
-                <VueDatePicker v-model="date" placeholder="Select date"></VueDatePicker>
+                <VueDatePicker v-model="dateRange" range :partial-range="false" :enable-time-picker="true"
+                    placeholder="From - To" auto-apply class="min-w-[260px]" />
             </div>
             <div
                 class="flex items-center justify-between gap-4 mt-4 p-2 rounded-md bg-white 2xl:w-fit w-full font-inter text-sm">
@@ -162,9 +165,9 @@ onMounted(() => {
         </div>
 
         <div
-            class="w-full h-160 overflow-x-scroll overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] mt-4">
+            class="w-full h-162 overflow-x-scroll overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] mt-4">
             <p v-if="actionError" role="alert" class="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ actionError
-            }}</p>
+                }}</p>
             <!-- Table para sa Dynamic Data galing Supabase -->
             <table class="2xl:w-full w-200 bg-white border border-gray-100 rounded-xl border-collapse overflow-hidden">
                 <thead class="bg-blue-700 text-white">

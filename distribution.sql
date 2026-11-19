@@ -39,6 +39,9 @@ CREATE TABLE IF NOT EXISTS public.distribution_transactions (
 ALTER TABLE public.distribution_transactions
     ADD COLUMN IF NOT EXISTS returned_at TIMESTAMPTZ;
 
+ALTER TABLE public.distribution_transactions
+    ADD COLUMN IF NOT EXISTS voided_at TIMESTAMPTZ;
+
 CREATE TABLE IF NOT EXISTS public.distribution_items (
     distribution_item_id BIGSERIAL PRIMARY KEY,
     distribution_transaction_id BIGINT NOT NULL
@@ -106,6 +109,15 @@ CREATE POLICY "Staff can view distribution transactions"
             WHERE profile.id = (SELECT auth.uid())
               AND LOWER(profile.role) IN ('personnel', 'admin')
         )
+        OR EXISTS (
+            SELECT 1
+              FROM public.beneficiaries AS beneficiary
+              JOIN public.profiles AS profile
+                ON profile.id = (SELECT auth.uid())
+             WHERE beneficiary.beneficiary_id = distribution_transactions.beneficiary_id
+               AND beneficiary.profile_id = profile.id
+               AND LOWER(profile.role) = 'beneficiary'
+        )
     );
 
 DROP POLICY IF EXISTS "Staff can view distribution items"
@@ -122,6 +134,18 @@ CREATE POLICY "Staff can view distribution items"
             WHERE dist.distribution_transaction_id =
                     distribution_items.distribution_transaction_id
               AND LOWER(profile.role) IN ('personnel', 'admin')
+        )
+        OR EXISTS (
+            SELECT 1
+              FROM public.distribution_transactions AS dist
+              JOIN public.beneficiaries AS beneficiary
+                ON beneficiary.beneficiary_id = dist.beneficiary_id
+              JOIN public.profiles AS profile
+                ON profile.id = (SELECT auth.uid())
+             WHERE dist.distribution_transaction_id =
+                    distribution_items.distribution_transaction_id
+               AND beneficiary.profile_id = profile.id
+               AND LOWER(profile.role) = 'beneficiary'
         )
     );
 
@@ -300,6 +324,7 @@ DECLARE
     v_user_id UUID := auth.uid();
     v_role TEXT;
     v_returned_at TIMESTAMPTZ;
+    v_voided_at TIMESTAMPTZ;
     v_transaction_id BIGINT;
     v_item RECORD;
     v_returned_count INTEGER := 0;
@@ -317,8 +342,8 @@ BEGIN
         RAISE EXCEPTION 'You are not authorized to return medicines.';
     END IF;
 
-    SELECT distribution_transaction_id, returned_at
-      INTO v_transaction_id, v_returned_at
+    SELECT distribution_transaction_id, returned_at, voided_at
+      INTO v_transaction_id, v_returned_at, v_voided_at
       FROM public.distribution_transactions
      WHERE distribution_transaction_id = p_distribution_transaction_id
      FOR UPDATE;
@@ -329,6 +354,10 @@ BEGIN
 
     IF v_returned_at IS NOT NULL THEN
         RAISE EXCEPTION 'Medicines in this distribution have already been returned.';
+    END IF;
+
+    IF v_voided_at IS NOT NULL THEN
+        RAISE EXCEPTION 'This distribution has already been voided.';
     END IF;
 
     FOR v_item IN
@@ -364,4 +393,87 @@ $$;
 REVOKE ALL ON FUNCTION public.return_distribution_transaction(BIGINT)
     FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.return_distribution_transaction(BIGINT)
+    TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.void_distribution_transaction(
+    p_distribution_transaction_id BIGINT
+)
+RETURNS BIGINT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_user_id UUID := auth.uid();
+    v_role TEXT;
+    v_returned_at TIMESTAMPTZ;
+    v_voided_at TIMESTAMPTZ;
+    v_transaction_id BIGINT;
+    v_item RECORD;
+    v_restored_count INTEGER := 0;
+BEGIN
+    IF v_user_id IS NULL THEN
+        RAISE EXCEPTION 'Authentication is required to void a distribution.';
+    END IF;
+
+    SELECT LOWER(profile.role)
+      INTO v_role
+      FROM public.profiles AS profile
+     WHERE profile.id = v_user_id;
+
+    IF v_role IS NULL OR v_role NOT IN ('personnel', 'admin') THEN
+        RAISE EXCEPTION 'You are not authorized to void distributions.';
+    END IF;
+
+    SELECT distribution_transaction_id, returned_at, voided_at
+      INTO v_transaction_id, v_returned_at, v_voided_at
+      FROM public.distribution_transactions
+     WHERE distribution_transaction_id = p_distribution_transaction_id
+     FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Distribution transaction was not found.';
+    END IF;
+
+    IF v_returned_at IS NOT NULL THEN
+        RAISE EXCEPTION 'A returned distribution cannot be voided.';
+    END IF;
+
+    IF v_voided_at IS NOT NULL THEN
+        RAISE EXCEPTION 'This distribution has already been voided.';
+    END IF;
+
+    FOR v_item IN
+        SELECT medicine.id, distribution_item.quantity
+          FROM public.distribution_items AS distribution_item
+          JOIN public.medicines AS medicine
+            ON medicine.id = distribution_item.medicine_id
+         WHERE distribution_item.distribution_transaction_id = v_transaction_id
+         ORDER BY medicine.id
+         FOR UPDATE OF medicine
+    LOOP
+        UPDATE public.medicines
+           SET quantity = quantity + v_item.quantity
+         WHERE id = v_item.id;
+
+        v_restored_count := v_restored_count + 1;
+    END LOOP;
+
+    IF v_restored_count = 0 THEN
+        RAISE EXCEPTION 'This distribution has no medicines to restore.';
+    END IF;
+
+    UPDATE public.distribution_transactions
+       SET voided_at = NOW(),
+           updated_by = v_user_id,
+           updated_at = NOW()
+     WHERE distribution_transaction_id = v_transaction_id;
+
+    RETURN v_transaction_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.void_distribution_transaction(BIGINT)
+    FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.void_distribution_transaction(BIGINT)
     TO authenticated;

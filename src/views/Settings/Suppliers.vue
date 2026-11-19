@@ -8,6 +8,7 @@ const searchQuery = ref('')
 const isLoading = ref(false)
 const isSaving = ref(false)
 const errorMessage = ref('')
+const successMessage = ref('')
 const isModalOpen = ref(false)
 const viewedSupplier = ref(null)
 const supplierForm = ref(createEmptySupplier())
@@ -54,12 +55,14 @@ async function loadSuppliers() {
 function openCreateModal() {
     supplierForm.value = createEmptySupplier()
     errorMessage.value = ''
+    successMessage.value = ''
     isModalOpen.value = true
 }
 
 function openEditModal(supplier) {
     supplierForm.value = { ...supplier }
     errorMessage.value = ''
+    successMessage.value = ''
     isModalOpen.value = true
 }
 
@@ -67,9 +70,15 @@ async function submitSupplier() {
     if (isSaving.value) return
     isSaving.value = true
     errorMessage.value = ''
+    successMessage.value = ''
     try {
-        await saveSupplier(supplierForm.value)
+        const savedSupplier = await saveSupplier(supplierForm.value)
+        suppliers.value = [
+            savedSupplier,
+            ...suppliers.value.filter((supplier) => supplier.id !== savedSupplier.id)
+        ]
         isModalOpen.value = false
+        successMessage.value = 'Supplier saved successfully.'
         await loadSuppliers()
     } catch (error) {
         console.error('Unable to save supplier:', error)
@@ -118,6 +127,7 @@ async function handleArchive(supplier) {
         </section>
 
         <p v-if="errorMessage && !isModalOpen" role="alert" class="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ errorMessage }}</p>
+        <p v-if="successMessage" role="status" class="mb-3 rounded-lg bg-green-50 p-3 text-sm text-green-700">{{ successMessage }}</p>
 
         <section class="overflow-x-auto rounded-lg bg-white shadow-sm">
             <table class="w-full min-w-[900px] text-left text-sm">
@@ -134,9 +144,14 @@ async function handleArchive(supplier) {
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    <tr v-if="isLoading || !filteredSuppliers.length">
+                    <tr v-if="isLoading">
                         <td colspan="8" class="px-5 py-8 text-center text-sm text-slate-500">
-                            {{ isLoading ? 'Loading suppliers...' : 'No suppliers found.' }}
+                            Loading suppliers...
+                        </td>
+                    </tr>
+                    <tr v-else-if="!filteredSuppliers.length">
+                        <td colspan="8" class="px-5 py-8 text-center text-sm text-slate-500">
+                            No suppliers found.
                         </td>
                     </tr>
                     <tr v-for="supplier in filteredSuppliers" :key="supplier.id" class="hover:bg-slate-50">
