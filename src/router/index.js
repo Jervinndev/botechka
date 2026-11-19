@@ -35,6 +35,7 @@ import SettingsSuppliers from '../views/Settings/Suppliers.vue'
 import BeneficiaryDashboard from '../views/beneficiary/BeneficiaryDashboard.vue'
 import AvailableMedicines from '../views/beneficiary/AvailableMedicines.vue'
 import Beneficiarylayout from '../components/layout/Beneficiarylayout.vue'
+import SuperAdminLayout from '../components/layout/superadmin.vue'
 import Notificationbene from '../views/beneficiary/Notificationbene.vue'
 import Requestmedicines from '../views/beneficiary/Requestmedicines.vue'
 import BeneficiarySettings from '../views/beneficiary/BeneficiarySettings.vue'
@@ -137,7 +138,7 @@ const router = createRouter({
             path: '/Adminlayout',
             name: 'Adminlayout',
             component: Adminlayout,
-            meta: { requiresAuth: true, hideHeader: true },
+            meta: { requiresAuth: true, hideHeader: true, allowedRoles: ['personnel', 'admin'] },
             redirect: { name: 'dashboard' },
             children: [
                 {
@@ -160,6 +161,7 @@ const router = createRouter({
                     path: '/reports',
                     name: 'reports',
                     component: Reports,
+                    meta: { adminOnly: true },
                 },
                 {
                     path: '/notification',
@@ -175,6 +177,7 @@ const router = createRouter({
                     path: '/beneficiaries',
                     name: 'beneficiaries',
                     component: Beneficiary,
+                    meta: { adminOnly: true },
                 },
                 {
                     path: '/beneficiaryrequest',
@@ -185,17 +188,13 @@ const router = createRouter({
                     path: '/settings',
                     name: 'settings',
                     component: Settings,
+                    meta: { adminOnly: true },
                     redirect: { name: 'settings-appearance' },
                     children: [
                         {
                             path: 'appearance',
                             name: 'settings-appearance',
                             component: SettingsAppearance
-                        },
-                        {
-                            path: 'account-management',
-                            name: 'settings-account-management',
-                            component: SettingsAccountManagement
                         },
                         {
                             path: 'backup-recovery',
@@ -218,6 +217,21 @@ const router = createRouter({
                             component: SettingsSuppliers
                         }
                     ]
+                }
+            ]
+        },
+        {
+            path: '/super-admin',
+            name: 'super-admin',
+            component: SuperAdminLayout,
+            meta: { requiresAuth: true, hideHeader: true, allowedRoles: ['super_admin'] },
+            redirect: { name: 'settings-account-management' },
+            children: [
+                {
+                    path: 'account-management',
+                    name: 'settings-account-management',
+                    component: SettingsAccountManagement,
+                    meta: { requiresAuth: true, allowedRoles: ['super_admin'] }
                 }
             ]
         }
@@ -277,17 +291,24 @@ router.beforeEach(async (to, from) => {
         return { name: role ? 'dashboard' : 'login' }
     }
 
-    if (to.name === 'settings-account-management' && role !== 'super_admin') {
-        return { name: role === 'beneficiary' ? 'beneficiary-dashboard' : 'dashboard' }
-    }
-
-    if (role === 'super_admin' && to.meta.requiresAuth
-        && to.name !== 'settings-account-management') {
+    if (role === 'super_admin' && to.name !== 'settings-account-management') {
         return { name: 'settings-account-management' }
     }
 
     if (isAuthenticated && role === 'beneficiary' && to.meta.requiresAuth && !to.meta.beneficiaryOnly) {
         return { name: 'beneficiary-dashboard' }
+    }
+
+    if (to.name === 'settings-account-management' && role !== 'super_admin') {
+        return { name: role === 'beneficiary' ? 'beneficiary-dashboard' : 'dashboard' }
+    }
+
+    if (to.meta.adminOnly && role !== 'admin') {
+        return { name: 'dashboard' }
+    }
+
+    if (to.meta.allowedRoles && !to.meta.allowedRoles.includes(role)) {
+        return { name: role === 'beneficiary' ? 'beneficiary-dashboard' : 'dashboard' }
     }
 
     if (isAuthenticated && (to.name === 'login' || to.name === 'register')) {

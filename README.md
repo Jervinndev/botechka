@@ -4,6 +4,8 @@
 
 After creating the medicines and suppliers tables, run [medicine_batches.sql](./medicine_batches.sql) in the Supabase SQL Editor. It creates the batch table, adds staff access policies and atomic stock functions, and backfills the existing medicine batch details.
 
+For beneficiary dashboard links and dispensing dates, run [beneficiary_dashboard.sql](./beneficiary_dashboard.sql) after the `profiles` and `beneficiaries` tables exist. It adds a profile link (backfilled only for unique name-and-contact matches), a next dispensing date, and own-record access. Then rerun [distribution.sql](./distribution.sql) to add beneficiary history access and the atomic distribution-void function.
+
 Run this SQL in the Supabase SQL Editor to configure medicine image storage:
 
 ```sql

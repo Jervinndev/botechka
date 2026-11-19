@@ -32,7 +32,8 @@ function resetForm() {
     barangay: '',
     registration_date: getLocalDateString(),
     status: 'Active',
-    eligibility: 'Pending'
+    eligibility: 'Pending',
+    next_dispensing_date: ''
   })
   errorMessage.value = ''
 }
@@ -63,8 +64,8 @@ async function saveBeneficiary() {
       birth_date: form.birth_date || null,
       sex: form.sex || null,
       registration_date: form.registration_date,
-      status: form.status,
       eligibility: form.eligibility,
+      next_dispensing_date: form.next_dispensing_date || null,
       contact_number: form.contact_number.trim() || null,
       address: form.address.trim() || null,
       barangay: form.barangay.trim() || null
@@ -192,15 +193,10 @@ async function saveBeneficiary() {
                 <input type="date" v-model="form.registration_date" readonly
                   class="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-100 p-2 text-slate-600">
               </div>
-            </div>
-            <div class="mt-1 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div class="grid gap-1">
-                <label class="font-inter text-sm font-medium text-[#404040]">Status</label>
-                <select v-model="form.status"
-                  class="w-full cursor-pointer rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
-                  <option>Active</option>
-                  <option>Inactive</option>
-                </select>
+                <label class="font-inter text-sm font-medium text-[#404040]">Next dispensing date</label>
+                <input type="date" v-model="form.next_dispensing_date"
+                  class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
               </div>
             </div>
           </section>

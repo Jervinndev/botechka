@@ -147,7 +147,7 @@ onMounted(() => {
                     class="bg-white p-2 px-3 2xl:w-2xl w-full rounded-xl">
 
             </div>
-            <div class="flex justify-between items-center gap-3">
+            <div class="flex justify-between items-center gap-3 mt-2">
                 <div>
                     <button @click="isCategoryModalOpen = true"
                         class="w-full p-2 bg-blue-700 text-white rounded-xl px-4 font-inter">Add
