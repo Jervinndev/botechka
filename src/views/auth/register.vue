@@ -3,7 +3,7 @@ import { Eye, EyeOff, MoveLeft } from '@lucide/vue'
 import botikaLogo from '../../assets/BotikaWHITE-B0wYbg7D.png'
 import botikaBackground from '../../assets/Botikangbayan.jpg'
 import { registerUser } from '../../services/Authservices';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter()
@@ -14,15 +14,30 @@ const firstName = ref('')
 const middleName = ref('')
 const lastName = ref('')
 const contactNumber = ref('')
-const barangay = ref('')
+const selectedBarangay = ref('')
 const agree = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
 const confirmPassword = ref('')
 const showPassword = ref(false)
+const barangays = ref([])
 
 function togglePassword() {
     showPassword.value = !showPassword.value
+}
+
+async function fetchBinangonanBarangays() {
+    isLoading.value = true
+    try {
+        const response = await fetch('https://psgc.gitlab.io/api/cities-municipalities/045804000/barangays/')
+        const data = await response.json()
+
+        barangays.value = data.sort((a, b) => a.name.localeCompare(b.name))
+    } catch (error) {
+        console.error('Error fetching barangays:', error)
+    } finally {
+        isLoading.value = false
+    }
 }
 
 async function handleSubmit() {
@@ -47,7 +62,7 @@ async function handleSubmit() {
             middleName: middleName.value,
             lastName: lastName.value,
             contactNumber: contactNumber.value,
-            barangay: barangay.value
+            barangay: selectedBarangay.value
         })
 
         if (!result.success) {
@@ -62,6 +77,10 @@ async function handleSubmit() {
         isLoading.value = false
     }
 }
+
+onMounted(() => {
+    fetchBinangonanBarangays()
+})
 </script>
 
 <template>
@@ -71,7 +90,7 @@ async function handleSubmit() {
                 <img :src="botikaBackground" alt="" class="h-full">
             </div>
             <div
-                class="w-full absolute 2xl:h-screen h-fit bg-blue-800/88 backdrop-blur-xl 2xl:flex hidden flex-col justify-between items-center 2xl:p-10 p-4">
+                class="w-full absolute 2xl:h-screen h-fit bg-blue-900/90 2xl:flex hidden flex-col justify-between items-center 2xl:p-10 p-4">
                 <div class="text-white w-full flex flex-col justify-center items-center gap-6 h-full">
                     <router-link to="/">
                         <div class="flex flex-col items-start justify-start">
@@ -125,14 +144,14 @@ async function handleSubmit() {
                                 name <span class="text-red-500">*</span></label>
                             <input v-model="firstName" type="text" id="firstName"
                                 class="bg-gray-50 w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:border-none focus:ring-2 focus:ring-blue-700"
-                                placeholder="John Juan" required>
+                                placeholder="eg. John Juan" required>
                         </div>
                         <div class="flex flex-col gap-1">
                             <label for="middleName" class="text-[#404040] font-inter text-sm font-medium">Middle
                                 name <span class="text-red-500">*</span></label>
                             <input v-model="middleName" type="text" id="middleName"
                                 class="bg-gray-50 w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:border-none focus:ring-2 focus:ring-blue-700"
-                                placeholder="Anain">
+                                placeholder="eg. Anain">
                         </div>
                     </div>
                     <div class="flex flex-col gap-1 col-span-2 2xl:col-span-1">
@@ -140,28 +159,33 @@ async function handleSubmit() {
                             name <span class="text-red-500">*</span></label>
                         <input v-model="lastName" type="text" id="lastName"
                             class="bg-gray-50 w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:border-none focus:ring-2 focus:ring-blue-700"
-                            placeholder="Dela Cruz" required>
+                            placeholder="eg. Dela Cruz" required>
                     </div>
                     <div class="flex flex-col gap-1">
                         <label for="contact_number" class="text-[#404040] font-inter text-sm font-medium">Contact
                             Number <span class="text-red-500">*</span></label>
                         <input v-model="contactNumber" type="tel" id="contact_number"
                             class="bg-gray-50 border border-gray-200 rounded-lg p-2 focus:outline-none focus:border-none focus:ring-2 focus:ring-blue-700"
-                            placeholder="09123456789" required>
+                            placeholder="eg. 09XXXXXXXXX" required>
                     </div>
                     <div class="flex flex-col gap-1">
                         <label for="barangay" class="text-[#404040] font-inter text-sm font-medium">Barangay <span
                                 class="text-red-500">*</span></label>
-                        <input v-model="barangay" type="text" id="barangay"
+                        <select v-model="selectedBarangay" id="barangay"
                             class="bg-gray-50 border border-gray-200 rounded-lg p-2 focus:outline-none focus:border-none focus:ring-2 focus:ring-blue-700"
-                            placeholder="Ilagay ang pangalan ng Barangay" required>
+                            required>
+                            <option value="">Select Barangay</option>
+                            <option v-for="barangay in barangays" :key="barangay.code" :value="barangay.name">
+                                {{ barangay.name }}
+                            </option>
+                        </select>
                     </div>
                     <div class=" flex flex-col gap-1">
                         <label for="email" class="text-[#404040] font-inter text-sm font-medium">Email <span
                                 class="text-red-500">*</span></label>
                         <input v-model="email" type="email" id="email"
                             class="bg-gray-50 border border-gray-200 rounded-lg p-2 focus:outline-none focus:border-none focus:ring-2 focus:ring-blue-700"
-                            placeholder="Example@gmail.com" required>
+                            placeholder="eg. Example@gmail.com" required>
                     </div>
                     <div class="grid gap-1">
                         <label for="pass" class="text-[#404040] text-[14px] font-medium">Password <span
@@ -169,7 +193,7 @@ async function handleSubmit() {
                         <div class="relative">
                             <input v-model="password" :type="showPassword ? 'text' : 'password'" id="pass" required
                                 class="bg-gray-50 border border-gray-200 rounded-lg p-2 pr-10 w-full focus:outline-none focus:border-none focus:ring-2 focus:ring-blue-700"
-                                placeholder="•••••••">
+                                placeholder="eg. •••••••">
                             <button type="button" @click="togglePassword"
                                 class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600">
                                 <EyeOff v-if="!showPassword" size="18" />
@@ -182,7 +206,7 @@ async function handleSubmit() {
                             Password <span class="text-red-500">*</span></label>
                         <input v-model="confirmPassword" type="password" id="confirmPassword"
                             class="bg-gray-50 border border-gray-200 rounded-lg p-2 focus:outline-none focus:border-none focus:ring-2 focus:ring-blue-700"
-                            placeholder="•••••••" required>
+                            placeholder="eg. •••••••" required>
                     </div>
                     <div class=" flex items-center justify-start gap-2">
                         <input v-model="agree" type="checkbox" id="agree">

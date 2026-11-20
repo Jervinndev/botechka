@@ -216,14 +216,14 @@ const avatars = [
         </div>
     </section>
 
-    <section class="w-full flex items-center justify-center px-6 md:px-10 2xl:py-20 py-10 transition-all duration-100">
+    <section class="w-full flex items-center justify-center px-6 md:px-10 2xl:py-20 py-6 transition-all duration-100">
         <div class="max-w-7xl mx-auto w-full flex item-center justify-center gap-2">
             <img src="/src/assets/Screenshot 2026-08-04 113304(2).png" alt=""
-                class="h-18 mt-1.5 object-contain opacity-30 hover:opacity-100 transition-all duration-300">
+                class="2xl:h-18 h-14 mt-1.5 object-contain opacity-60 hover:opacity-100 transition-all duration-300">
             <img src="/src/assets/514063935_748733631005529_1252534846408288334_n(1).jpg" alt=""
-                class="h-20 opacity-30 hover:opacity-100 transition-all duration-300">
+                class="2xl:h-20 h-16 opacity-60 hover:opacity-100 transition-all duration-300">
             <img src="/src/assets/Logos-CMuNcTmc.png" alt=""
-                class="h-20 opacity-30 hover:opacity-100 transition-all duration-300">
+                class="2xl:h-20 h-16 opacity-60 hover:opacity-100 transition-all duration-300">
         </div>
     </section>
 
@@ -265,7 +265,7 @@ const avatars = [
     <section ref="built" id="community"
         class="w-full flex flex-col items-center justify-center 2xl:py-20 py-14 px-6 lg:px-16 overflow-hidden bg-gray-50 scroll-mt-24">
         <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div class="lg:col-span-6 grid 2xl:grid-cols-2 sm:grid-cols-1 gap-6 relative py-6 order-1">
+            <div class="lg:col-span-6 grid 2xl:grid-cols-2 sm:grid-cols-1 2xl:gap-4 gap-4 relative py-6 order-1">
                 <div v-for="value in forWhom" :key="value.title"
                     class="bg-white grid gap-4 p-6 rounded-3xl border border-black/5 transform transition-transform hover:rotate-0 duration-300">
                     <div class="h-11 w-11 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700"
@@ -303,7 +303,7 @@ const avatars = [
 
                 <!-- Photo card -->
                 <div class="relative min-h-[460px] overflow-hidden rounded-3xl lg:col-span-2">
-                    <img src="/dist/assets/Botikangbayan-BlXzJ0En.jpg" alt="Botika ng Bayan staff assisting a patient"
+                    <img src="/src/assets/Botikangbayan-BlXzJ0En.jpg" alt="Botika ng Bayan staff assisting a patient"
                         class="absolute inset-0 h-full w-full object-cover" />
                     <!-- gradient overlay: transparent sa taas, solid blue sa baba -->
                     <div class="absolute inset-0 bg-gradient-to-t from-blue-800 via-blue-800/90 via-45% to-transparent">
@@ -327,7 +327,7 @@ const avatars = [
                 </div>
 
                 <!-- Guidelines grid -->
-                <div class="grid gap-4 sm:grid-cols-2 lg:col-span-3">
+                <div class="grid 2xl:gap-4 gap-4 sm:grid-cols-2 lg:col-span-3">
                     <article class="rounded-2xl border border-black/5 bg-white p-6">
                         <div
                             class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-700/10 text-blue-700">
@@ -377,78 +377,166 @@ const avatars = [
         </div>
     </section>
 
-    <section id="how-it-works" class="scroll-mt-24 bg-gray-50 px-6 py-16 md:px-10 lg:py-20">
-        <div class="mx-auto max-w-7xl">
-            <div class="mb-10 max-w-2xl">
-                <p class="font-inter text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">How it works</p>
-                <h2 class="mt-2 text-3xl font-bold font-FiraSans text-gray-900 sm:text-4xl">A simple, clear
-                    process</h2>
-                <p class="mt-3 font-poppins leading-relaxed text-gray-700">RHUBoTechka supports both medicine
-                    distribution
-                    and the day-to-day operations of Botika ng Bayan.</p>
-            </div>
-            <div class="grid gap-6 lg:grid-cols-2">
-                <div class="rounded-3xl border border-black/5 bg-white p-6 sm:p-8">
-                    <div class="mb-6 flex items-center gap-3">
-                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-700 text-white">
-                            <Stethoscope class="h-5 w-5" />
-                        </div>
-                        <div>
-                            <p class="font-poppins text-sm font-semibold uppercase tracking-wider text-blue-700">For
-                                beneficiaries</p>
-                            <h3 class="font-outfit text-xl font-bold text-gray-900">Receiving medicine</h3>
-                        </div>
+    <!-- How it works -->
+    <section id="how-it-works" class="w-full flex items-center justify-center px-6 md:px-10 py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto w-full grid 2xl:grid-cols-2 md:grid-cols-2 grid-cols-1 gap-4">
+            <!-- Left: For Beneficiaries -->
+            <div class="bg-white rounded-3xl p-8 flex flex-col border border-black/5">
+                <span
+                    class="inline-block text-xs font-semibold text-blue-700 bg-blue-100 rounded-full px-4 py-1.5 mb-5 w-fit">
+                    Gabay para sa Benepisyaryo
+                </span>
+
+                <h2 class="text-2xl font-extrabold text-gray-900 mb-3">For Beneficiaries</h2>
+                <p class="text-gray-500 leading-relaxed mb-8">
+                    Alamin kung paano makakakuha ng gamot ang mga benepisyaryo mula consultation hanggang sa pag-monitor
+                    ng
+                    supply.
+                </p>
+
+                <div class="flex flex-col gap-3">
+                    <div class="border border-black/5 rounded-2xl p-5">
+                        <p class="text-blue-600 font-extrabold text-xl mb-1">01</p>
+                        <p class="font-semibold text-gray-900 mb-1">Consult</p>
+                        <p class="text-gray-500 text-sm leading-relaxed">
+                            Present your prescription or health record at the Botika ng Bayan.
+                        </p>
                     </div>
-                    <ol class="space-y-4">
-                        <li v-for="step in benepisyaryoSteps.slice(0, 2)" :key="step.num" class="flex gap-4">
-                            <span
-                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full  bg-blue-50 font-inter text-sm font-bold text-blue-700">{{
-                                    step.num }}</span>
-                            <div>
-                                <h4 class="font-outfit font-semibold text-gray-900">{{ step.title }}</h4>
-                                <p class="mt-1 font-inter text-sm leading-relaxed text-gray-700">{{ step.desc }}</p>
-                            </div>
-                        </li>
-                    </ol>
+
+                    <div class="border border-black/5 rounded-2xl p-5">
+                        <p class="text-blue-600 font-extrabold text-xl mb-1">02</p>
+                        <p class="font-semibold text-gray-900 mb-1">Recieve</p>
+                        <p class="text-gray-500 text-sm leading-relaxed">
+                            Medicines are dispensed FEFO ( nearest expiry first) and recorded.
+                        </p>
+                    </div>
+
+                    <div class="border border-black/5 rounded-2xl p-5">
+                        <p class="text-blue-600 font-extrabold text-xl mb-1">03</p>
+                        <p class="font-semibold text-gray-900 mb-1">Monitor</p>
+                        <p class="text-gray-500 text-sm leading-relaxed">
+                            Every release updates stock, analytics and the demand forecast.
+                        </p>
+                    </div>
+
+                    <div class="border border-black/5 rounded-2xl p-5">
+                        <p class="text-blue-600 font-extrabold text-xl mb-1">04</p>
+                        <p class="font-semibold text-gray-900 mb-1">Monitor</p>
+                        <p class="text-gray-500 text-sm leading-relaxed">
+                            Every release updates stock, analytics and the demand forecast.
+                        </p>
+                    </div>
+
+                    <div class="border border-black/5 rounded-2xl p-5">
+                        <p class="text-blue-600 font-extrabold text-xl mb-1">05</p>
+                        <p class="font-semibold text-gray-900 mb-1">Monitor</p>
+                        <p class="text-gray-500 text-sm leading-relaxed">
+                            Every release updates stock, analytics and the demand forecast.
+                        </p>
+                    </div>
                 </div>
-                <div class="rounded-3xl border border-black/5 bg-white p-6 sm:p-8">
-                    <div class="mb-6 flex items-center gap-3">
-                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-700/10 text-blue-700">
-                            <Activity class="h-5 w-5" />
+            </div>
+
+            <!-- Right: Paano Gamitin ang Sistema -->
+            <div class="bg-white rounded-3xl p-8 flex flex-col border border-black/5">
+                <span
+                    class="inline-block text-xs font-semibold text-blue-700 bg-blue-100 rounded-full px-4 py-1.5 mb-5 w-fit">
+                    Gabay sa Paggamit
+                </span>
+
+                <h2 class="text-2xl font-extrabold text-gray-900 mb-3">Paano Gamitin ang Sistema</h2>
+                <p class="text-gray-500 leading-relaxed mb-8">
+                    Sundin ang mga sumusunod na hakbang para sa mabilis at maayos na pamamahala ng imbentaryo at
+                    forecasting.
+                </p>
+
+                <div class=" flex flex-col gap-3">
+                    <div class="border border-black/5 rounded-2xl p-5 flex gap-4">
+                        <div
+                            class="h-11 w-11 shrink-0 rounded-xl bg-blue-700 text-white font-bold flex items-center justify-center">
+                            01
                         </div>
                         <div>
-                            <p class="font-inter text-sm font-semibold uppercase tracking-wider text-blue-700">For staff
+                            <p class="font-semibold text-gray-900 mb-1">Mag-log in sa Sistema</p>
+                            <p class="text-gray-500 text-sm leading-relaxed">
+                                Ilagay ang iyong Admin credentials upang makapasok sa pangunahing dashboard.
                             </p>
-                            <h3 class="font-outfit text-xl font-bold text-gray-900">System management</h3>
                         </div>
                     </div>
-                    <ol class="space-y-4">
-                        <li v-for="step in sistemaSteps" :key="step.num" class="flex gap-4">
-                            <span
-                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 font-inter text-sm font-bold text-blue-700">{{
-                                    step.num }}</span>
-                            <div>
-                                <h4 class="font-outfit font-semibold text-gray-900">{{ step.title }}</h4>
-                                <p class="mt-1 font-inter text-sm leading-relaxed text-gray-700">{{ step.desc }}</p>
-                            </div>
-                        </li>
-                    </ol>
+
+                    <div class="border border-black/5 rounded-2xl p-5 flex gap-4">
+                        <div
+                            class="h-11 w-11 shrink-0 rounded-xl bg-blue-700 text-white font-bold flex items-center justify-center">
+                            02
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900 mb-1">I-check ang Inventory</p>
+                            <p class="text-gray-500 text-sm leading-relaxed">
+                                Tingnan ang listahan ng mga gamot, kasama ang batch numbers, quantity, at expiration
+                                dates.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="border border-black/5 rounded-2xl p-5 flex gap-4">
+                        <div
+                            class="h-11 w-11 shrink-0 rounded-xl bg-blue-700 text-white font-bold flex items-center justify-center">
+                            03
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900 mb-1">Magdagdag ng Bagong Stock</p>
+                            <p class="text-gray-500 text-sm leading-relaxed">
+                                Pindutin ang "Add New Item" button para i-encode ang mga bagong dating na gamot.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="border border-black/5 rounded-2xl p-5 flex gap-4">
+                        <div
+                            class="h-11 w-11 shrink-0 rounded-xl bg-blue-700 text-white font-bold flex items-center justify-center">
+                            04
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900 mb-1">Suriin ang Forecasting</p>
+                            <p class="text-gray-500 text-sm leading-relaxed">
+                                Abangan ang mga gamot na malapit nang maubos o abot sa low-stock threshold.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="border border-black/5 rounded-2xl p-5 flex gap-4">
+                        <div
+                            class="h-11 w-11 shrink-0 rounded-xl bg-blue-700 text-white font-bold flex items-center justify-center">
+                            05
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900 mb-1">Mag-submit ng Requisition</p>
+                            <p class="text-gray-500 text-sm leading-relaxed">
+                                Gumawa at magpasa ng restock request para sa mga kinakailangang suplay patungo sa RHU.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section>
-        <section id="contact" class="scroll-mt-24 bg-blue-800 px-6 py-16 text-white md:px-10 lg:py-20">
-            <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center">
+    <section class="relative 2xl:h-fit h-full overflow-hidden">
+        <section class="h-fit">
+            <img src="/src/assets/Botikangbayan-BlXzJ0En.jpg" alt="Botika ng Bayan staff assisting a patient"
+                class="2xl:h-80 h-130 w-full object-cover" />
+        </section>
+        <section id="contact"
+            class="absolute top-0 w-full 2xl:h-80 h-full scroll-mt-24 bg-blue-900/90 px-6 py-16 text-white md:px-10 lg:py-20">
+            <div class=" mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center">
                 <div>
                     <p class="font-inter text-sm font-semibold uppercase tracking-[0.18em] text-white">Contact</p>
                     <h2 class="mt-2 font-FiraSans text-3xl font-bold sm:text-4xl">Questions about Botika ng Bayan?</h2>
                     <p class="mt-4 max-w-xl font-inter leading-relaxed text-white">
-                        Contact the Rural Health Unit for questions about services, eligibility, or using RHUBoTechka.
+                        Contact the Rural Health Unit for questions about services, eligibility, or using BoTechka.
                     </p>
                 </div>
-                <div class="rounded-2xl border border-white/10 bg-white/10 p-6 sm:p-8">
+                <div class="rounded-2xl border border-white/10 bg-blue-50/10 backdrop-blur-2xl p-6 sm:p-6">
                     <div class="flex items-start gap-4">
                         <div
                             class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
