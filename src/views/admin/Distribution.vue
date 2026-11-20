@@ -649,7 +649,7 @@ onMounted(() => {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colspan="8" class="bg-blue-50/50 px-6 py-0">
+                                    <td colspan="8" class="bg-gray-100 px-6 py-0">
                                         <Transition enter-active-class="transition duration-200 ease-out"
                                             enter-from-class="opacity-0 -translate-y-2"
                                             enter-to-class="opacity-100 translate-y-0"
