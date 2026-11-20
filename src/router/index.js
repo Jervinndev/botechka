@@ -44,8 +44,10 @@ import BeneficiarySettings from '../views/beneficiary/BeneficiarySettings.vue'
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     scrollBehavior(to, from, savedPosition) {
-        if (savedPosition) return savedPosition
-        if (to.hash) return { el: to.hash, top: 96, behavior: 'smooth' }
+        if (savedPosition)
+            return savedPosition
+        if (to.hash)
+            return { el: to.hash, top: 96, behavior: 'smooth' }
         return { top: 0 }
     },
     routes: [
@@ -235,19 +237,7 @@ const router = createRouter({
                 }
             ]
         }
-
-    ],
-    scrollBehavior(to, from, Saveposition) {
-        if (Saveposition) {
-            return Saveposition
-        } else {
-            return {
-                top: 0,
-                left: 0,
-                behavior: 'instant'
-            }
-        }
-    }
+    ]
 })
 
 

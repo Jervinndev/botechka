@@ -72,7 +72,7 @@ async function handleSubmit() {
             beneficiary: '/beneficiary-dashboard',
             personnel: '/dashboard',
             admin: '/dashboard',
-            super_admin: '/settings/account-management'
+            super_admin: '/super-admin/account-management'
         }
 
         await router.replace(dashboardRoutes[role])
@@ -101,7 +101,7 @@ onMounted(() => {
                 <img :src="botikaBackground" alt="" class="h-full">
             </div>
             <div
-                class="w-full absolute 2xl:h-screen h-fit bg-blue-800/88 backdrop-blur-xl 2xl:flex hidden flex-col justify-between items-center 2xl:p-10 p-4">
+                class="w-full absolute 2xl:h-screen h-fit bg-blue-900/90 2xl:flex hidden flex-col justify-between items-center 2xl:p-10 p-4">
                 <div class="text-white w-full flex flex-col justify-center items-center gap-6 h-full">
                     <router-link to="/">
                         <div class="flex flex-col items-start justify-start">
