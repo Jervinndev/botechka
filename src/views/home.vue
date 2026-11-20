@@ -169,11 +169,11 @@ const avatars = [
                         <p class="text-gray-700 text-sm">Rural Health Unit &middot; Botika ng Bayan</p>
                     </div>
 
-                    <h1 class="text-4xl 2xl:text-6xl font-black font-poppins leading-10 2xl:leading-18 text-black/70">
+                    <h1 class="text-4xl 2xl:text-6xl font-black font-FiraSans leading-10 2xl:leading-18 text-black/70">
                         Smart <span class="text-blue-700">Medicine Management</span> for Botika ng Bayan.
                     </h1>
 
-                    <p class="text-gray-700 leading-7 font-inter 2xl:text-lg text-md ">
+                    <p class="text-gray-700 leading-7 font-poppins 2xl:text-lg text-md ">
                         BoTechka simplifies medicine inventory management and distribution for Botika ng Bayan in
                         Binangonan, Rizal.
                     </p>
@@ -209,9 +209,8 @@ const avatars = [
                     </div>
                 </div>
 
-                <div class="flex flex-1 items-center justify-center [perspective:1000px] 2xl:pt-0 pt-8 p-4">
-                    <img :src="homeIllustration" alt="Botika ng Bayan illustration"
-                        class="hero-image w-full max-w-[600px] object-cover" />
+                <div class="flex flex-1 items-center justify-center 2xl:pt-0 pt-8 p-4">
+                    <img :src="homeIllustration" alt="Botika ng Bayan illustration" class="w-full object-cover" />
                 </div>
             </div>
         </div>
@@ -243,13 +242,13 @@ const avatars = [
             </div> -->
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div v-for="(feature, index) in features" :key="index"
-                    class="group grid gap-2.5 bg-white rounded-3xl p-6 border border-black/5 shadow-md shadow-gray-100 hover:-translate-y-1 transition-all duration-300">
+                    class="group grid gap-2.5 bg-white rounded-3xl p-6 border border-black/5  hover:-translate-y-1 transition-all duration-300">
                     <div
                         class="bg-blue-700/10 h-11 w-11 rounded-xl flex items-center justify-center text-blue-700 mb-3 group-hover:scale-110 transition-transform duration-300">
                         <component :is="feature.icon" class="w-5 h-5" />
                     </div>
                     <h3 class="font-semibold text-gray-900">{{ feature.title }}</h3>
-                    <p class="text-gray-700 font-inter text-md leading-relaxed">
+                    <p class="text-gray-700 font-poppins text-md leading-relaxed">
                         {{ feature.description }}
                     </p>
                 </div>
@@ -272,23 +271,23 @@ const avatars = [
                     <div class="h-11 w-11 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700"
                         v-html="value.icon"></div>
                     <h3 class="font-bold text-gray-900 text-lg tracking-wide">{{ value.title }}</h3>
-                    <p class="text-md text-gray-700 font-inter leading-relaxed">{{ value.description }}</p>
+                    <p class="text-md text-gray-700 font-poppins leading-relaxed">{{ value.description }}</p>
                 </div>
             </div>
-            <div class="lg:col-span-6 flex flex-col gap-3 2xl:order-2">
-                <h2 class="text-4xl 2xl:text-5xl font-extrabold text-gray-900 leading-tight">
+            <div class="lg:col-span-6 flex flex-col gap-2 2xl:order-2">
+                <h2 class="text-4xl 2xl:text-5xl font-FiraSans font-extrabold text-gray-900 leading-tight">
                     Serving the <span class="text-blue-700">health of our community</span>
                 </h2>
-                <p class="2xl:text-lg text-md font-inter text-gray-700 leading-relaxed">
-                    RHUBoTechka is a comprehensive system for inventory management, distribution monitoring, and
+                <p class="2xl:text-lg text-md font-poppins text-gray-700 leading-relaxed">
+                    Botechka is a comprehensive system for inventory management, distribution monitoring, and
                     forecasting. It helps Botika ng Bayan in Binangonan, Rizal maintain a dependable medicine supply
                     for the community.
                 </p>
-                <div class="space-y-4 pt-2">
+                <div class="flex flex-col gap-2">
                     <div v-for="faq in faqs" :key="faq.question"
                         class="bg-white p-4 rounded-3xl border border-black/5 flex items-center justify-between cursor-pointer transition-all"
                         @click="faq.open = !faq.open">
-                        <span class="text-md font-regular font-inter text-gray-700">{{ faq.question }}</span>
+                        <span class="text-md font-regular font-poppins text-gray-700">{{ faq.question }}</span>
                         <span
                             class="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm shrink-0 transition-transform"
                             :class="{ 'rotate-45': faq.open }">+</span>
@@ -335,7 +334,7 @@ const avatars = [
                             <NotebookPen class="h-5 w-5" />
                         </div>
                         <h3 class="font-outfit text-lg font-semibold text-gray-900">Bring your prescription</h3>
-                        <p class="mt-2 font-inter text-sm leading-relaxed text-gray-700">
+                        <p class="mt-2 font-poppins text-md leading-relaxed text-gray-700">
                             Bring your prescription or health record for review by Botika ng Bayan staff.
                         </p>
                     </article>
@@ -346,7 +345,7 @@ const avatars = [
                             <CircleUser class="h-5 w-5" />
                         </div>
                         <h3 class="font-outfit text-lg font-semibold text-gray-900">Confirm eligibility</h3>
-                        <p class="mt-2 font-inter text-sm leading-relaxed text-gray-700">
+                        <p class="mt-2 font-poppins text-md leading-relaxed text-gray-700">
                             Ask staff whether you qualify as a beneficiary and if any additional documents are needed.
                         </p>
                     </article>
@@ -357,7 +356,7 @@ const avatars = [
                             <Pill class="h-5 w-5" />
                         </div>
                         <h3 class="font-outfit text-lg font-semibold text-gray-900">Check medicine availability</h3>
-                        <p class="mt-2 font-inter text-sm leading-relaxed text-gray-700">
+                        <p class="mt-2 font-poppins text-md leading-relaxed text-gray-700">
                             Staff will confirm the medicine and available stock before processing distribution.
                         </p>
                     </article>
@@ -368,7 +367,7 @@ const avatars = [
                             <ShieldCheck class="h-5 w-5" />
                         </div>
                         <h3 class="font-outfit text-lg font-semibold text-gray-900">Record the distribution</h3>
-                        <p class="mt-2 font-inter text-sm leading-relaxed text-gray-700">
+                        <p class="mt-2 font-poppins text-md leading-relaxed text-gray-700">
                             Staff will record distributed medicine to keep inventory records accurate.
                         </p>
                     </article>
@@ -382,8 +381,10 @@ const avatars = [
         <div class="mx-auto max-w-7xl">
             <div class="mb-10 max-w-2xl">
                 <p class="font-inter text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">How it works</p>
-                <h2 class="mt-2 font-outfit text-3xl font-bold text-gray-900 sm:text-4xl">A simple, clear process</h2>
-                <p class="mt-3 font-inter leading-relaxed text-gray-700">RHUBoTechka supports both medicine distribution
+                <h2 class="mt-2 text-3xl font-bold font-FiraSans text-gray-900 sm:text-4xl">A simple, clear
+                    process</h2>
+                <p class="mt-3 font-poppins leading-relaxed text-gray-700">RHUBoTechka supports both medicine
+                    distribution
                     and the day-to-day operations of Botika ng Bayan.</p>
             </div>
             <div class="grid gap-6 lg:grid-cols-2">
@@ -393,7 +394,7 @@ const avatars = [
                             <Stethoscope class="h-5 w-5" />
                         </div>
                         <div>
-                            <p class="font-inter text-sm font-semibold uppercase tracking-wider text-blue-700">For
+                            <p class="font-poppins text-sm font-semibold uppercase tracking-wider text-blue-700">For
                                 beneficiaries</p>
                             <h3 class="font-outfit text-xl font-bold text-gray-900">Receiving medicine</h3>
                         </div>
@@ -437,33 +438,38 @@ const avatars = [
         </div>
     </section>
 
-    <section id="contact" class="scroll-mt-24 bg-blue-700 px-6 py-16 text-white md:px-10 lg:py-20">
-        <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center">
-            <div>
-                <p class="font-inter text-sm font-semibold uppercase tracking-[0.18em] text-white">Contact</p>
-                <h2 class="mt-2 font-outfit text-3xl font-bold sm:text-4xl">Questions about Botika ng Bayan?</h2>
-                <p class="mt-4 max-w-xl font-inter leading-relaxed text-white">
-                    Contact the Rural Health Unit for questions about services, eligibility, or using RHUBoTechka.
-                </p>
-            </div>
-            <div class="rounded-2xl border border-white/10 bg-white/10 p-6 sm:p-8">
-                <div class="flex items-start gap-4">
-                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
-                        <Mail class="h-5 w-5" />
-                    </div>
-                    <div>
-                        <h3 class="font-outfit text-lg font-semibold">Botika ng Bayan · RHU</h3>
-                        <p class="mt-1 font-inter text-sm leading-relaxed text-gray-50">Barangay Calumpang, Binangonan,
-                            Rizal</p>
-                        <a href="mailto:support@rhubotechka.local"
-                            class="mt-4 inline-flex rounded-lg bg-white px-4 py-2.5 font-inter text-sm font-semibold text-black transition hover:bg-blue-800 hover:text-white">
-                            Email us
-                        </a>
+    <section>
+        <section id="contact" class="scroll-mt-24 bg-blue-800 px-6 py-16 text-white md:px-10 lg:py-20">
+            <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center">
+                <div>
+                    <p class="font-inter text-sm font-semibold uppercase tracking-[0.18em] text-white">Contact</p>
+                    <h2 class="mt-2 font-FiraSans text-3xl font-bold sm:text-4xl">Questions about Botika ng Bayan?</h2>
+                    <p class="mt-4 max-w-xl font-inter leading-relaxed text-white">
+                        Contact the Rural Health Unit for questions about services, eligibility, or using RHUBoTechka.
+                    </p>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/10 p-6 sm:p-8">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
+                            <Mail class="h-5 w-5" />
+                        </div>
+                        <div>
+                            <h3 class="font-outfit text-lg font-semibold">Botika ng Bayan · RHU</h3>
+                            <p class="mt-1 font-inter text-sm leading-relaxed text-gray-50">Barangay Calumpang,
+                                Binangonan,
+                                Rizal</p>
+                            <a href="mailto:support@rhubotechka.local"
+                                class="mt-4 inline-flex rounded-lg bg-white px-4 py-2.5 font-inter text-sm font-semibold text-black transition hover:bg-blue-800 hover:text-white">
+                                Email us
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     </section>
+
 </template>
 
 

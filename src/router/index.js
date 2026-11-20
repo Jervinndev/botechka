@@ -25,7 +25,7 @@ import Beneficiaryrequest from '../views/admin/BeneficiaryRequest.vue'
 // Settings
 import Settings from '../views/admin/Settings.vue'
 import SettingsAppearance from '../views/Settings/Appearance.vue'
-import SettingsAccountManagement from '../views/Settings/AccountManagement.vue'
+import SettingsAccountManagement from '../views/Superadmin/AccountManagement.vue'
 import SettingsBackupRecovery from '../views/Settings/BackupRecovery.vue'
 import SettingsArchive from '../views/Settings/Archive.vue'
 import SettingsConfiguration from '../views/Settings/Configuration.vue'
