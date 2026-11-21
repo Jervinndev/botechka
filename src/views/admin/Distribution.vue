@@ -883,9 +883,11 @@ watch(() => route.query.requestId, (requestId) => {
     <Addnewpurpose :IsOpen="Isaddpurposeopen" @close="Isaddpurposeopen = false" @saved="handlePurposeSaved" />
     <AddNewBeneficiary :IsOpen="IsbeneficiaryOpen" @close="IsbeneficiaryOpen = false" @saved="handleBeneficiarySaved" />
 
-    <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
-        enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100"
-        leave-to-class="opacity-0">
+
+<!-- Modals pare -->
+    <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2"
+    enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
+    leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
         <section v-if="isTransactionViewOpen && viewedTransaction"
             class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
             <div role="dialog" aria-modal="true" aria-labelledby="distribution-view-title"
@@ -945,9 +947,9 @@ watch(() => route.query.requestId, (requestId) => {
         </section>
     </Transition>
 
-    <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
-        enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100"
-        leave-to-class="opacity-0">
+    <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2"
+    enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
+    leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
         <section v-if="isVoidConfirmOpen && transactionToVoid"
             class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
             <div role="alertdialog" aria-modal="true" aria-labelledby="void-distribution-title"
@@ -983,9 +985,9 @@ watch(() => route.query.requestId, (requestId) => {
         </section>
     </Transition>
 
-    <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
-        enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100"
-        leave-to-class="opacity-0">
+    <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2"
+    enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
+    leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
         <section v-if="isReturnConfirmOpen && transactionToReturn"
             class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
             <div role="alertdialog" aria-modal="true" aria-labelledby="return-distribution-title"
@@ -1049,9 +1051,9 @@ watch(() => route.query.requestId, (requestId) => {
         </section>
     </Transition>
 
-    <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
-        enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100"
-        leave-to-class="opacity-0">
+    <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2"
+    enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
+    leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
         <section v-if="alertMessage" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
             <div role="alertdialog" aria-modal="true" class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
                 <h2 class="text-lg font-bold text-red-700">Unable to Dispense</h2>
@@ -1064,9 +1066,9 @@ watch(() => route.query.requestId, (requestId) => {
         </section>
     </Transition>
 
-    <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
-        enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100"
-        leave-to-class="opacity-0">
+    <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2"
+    enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
+    leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
         <section v-if="isConfirmDispenseOpen"
             class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
             <div role="alertdialog" aria-modal="true" class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
@@ -1085,4 +1087,6 @@ watch(() => route.query.requestId, (requestId) => {
             </div>
         </section>
     </Transition>
+
+    <!-- Modals end -->
 </template>
