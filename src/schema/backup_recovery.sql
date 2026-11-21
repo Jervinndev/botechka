@@ -44,7 +44,10 @@ BEGIN
             ('distribution_purposes', 'purpose_id'),
             ('distribution_transactions', 'distribution_transaction_id'),
             ('distribution_items', 'distribution_item_id'),
-            ('medicine_requests', 'request_id')
+            ('medicine_requests', 'request_id'),
+            ('medicine_request_items', 'request_item_id'),
+            ('distribution_returns', 'return_id'),
+            ('audit_logs', 'audit_log_id')
         ) AS tables(table_name, column_name)
     LOOP
         v_sequence := pg_get_serial_sequence(

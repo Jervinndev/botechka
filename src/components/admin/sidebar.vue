@@ -178,7 +178,7 @@ const visibleSettings = computed(() => {
     if (isBeneficiary.value) {
         return [{ label: 'Settings', to: { name: 'beneficiary-settings' }, Icon: Bolt }]
     }
-    if (isPersonnel.value || isSuperAdmin.value) return []
+    if (isSuperAdmin.value) return []
     return settings
 })
 
@@ -419,6 +419,12 @@ onUnmounted(() => {
                     <hr class="mt-4 border-gray-200" />
 
                     <div class="mt-4 flex flex-col gap-2">
+                        <router-link :to="{ name: 'user-profile' }"
+                            class="flex items-center gap-2 rounded-lg p-2.5 text-sm font-medium text-[#808080] transition-all hover:bg-slate-100 hover:text-blue-700"
+                            active-class="!bg-blue-700 !text-white" @click="closeMobileMenu">
+                            <UserRound :size="22" />
+                            <span v-if="isExpanded" class="font-inter">My Profile</span>
+                        </router-link>
                         <router-link v-for="item in visibleSettings" :key="item.label" :to="item.to"
                             class="flex items-center gap-2 rounded-lg p-2.5 text-sm font-medium text-[#808080] transition-all hover:bg-slate-100 hover:text-blue-700"
                             active-class="!bg-blue-700 !text-white" @click="closeMobileMenu">

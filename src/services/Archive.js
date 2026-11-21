@@ -1,6 +1,7 @@
 import { supabase } from '../supabase/supabase'
 
 const archiveTables = {
+    Categories: { table: 'medicine_categories', idColumn: 'category_id' },
     Medicines: { table: 'medicines', idColumn: 'id' },
     Beneficiaries: { table: 'beneficiaries', idColumn: 'beneficiary_id' },
     Suppliers: { table: 'suppliers', idColumn: 'id' }
@@ -16,7 +17,9 @@ export async function getArchivedRecords() {
         if (error) throw new Error(`Unable to load archived ${type.toLowerCase()}: ${error.message}`)
 
         for (const row of data || []) {
-            const name = type === 'Medicines'
+            const name = type === 'Categories'
+                ? row.category_name
+                : type === 'Medicines'
                 ? row.medicine_name
                 : type === 'Beneficiaries'
                     ? [row.first_name, row.middle_name, row.last_name, row.suffix].filter(Boolean).join(' ')
@@ -25,7 +28,7 @@ export async function getArchivedRecords() {
                 id: row[config.idColumn],
                 type,
                 name: name || row.email || 'Unnamed record',
-                code: row.medicine_id || row.beneficiary_code || row.supplier_code || row[config.idColumn],
+                code: row.medicine_id || row.beneficiary_code || row.supplier_code || row.category_id || row[config.idColumn],
                 archivedAt: row.archived_at,
                 row
             })

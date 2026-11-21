@@ -71,17 +71,12 @@ ALTER TABLE public.distribution_items ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Staff can view distribution purposes"
     ON public.distribution_purposes;
-CREATE POLICY "Staff can view distribution purposes"
+DROP POLICY IF EXISTS "Authenticated users can view distribution purposes"
+    ON public.distribution_purposes;
+CREATE POLICY "Authenticated users can view distribution purposes"
     ON public.distribution_purposes
     FOR SELECT TO authenticated
-    USING (
-        EXISTS (
-            SELECT 1
-            FROM public.profiles AS profile
-            WHERE profile.id = (SELECT auth.uid())
-              AND LOWER(profile.role) IN ('personnel', 'admin')
-        )
-    );
+    USING (public.is_current_user_not_super_admin());
 
 DROP POLICY IF EXISTS "Staff can add distribution purposes"
     ON public.distribution_purposes;

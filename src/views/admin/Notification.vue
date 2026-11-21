@@ -17,7 +17,7 @@ const notificationPreferences = ref({
     requests: true,
     distributions: true
 })
-const alertThresholds = ref({ lowStock: 10, expiryDays: 30 })
+const alertThresholds = ref({ expiryDays: 30 })
 const storageKey = 'botechka_notifications_read'
 const readIds = ref([])
 
@@ -65,7 +65,7 @@ async function loadNotifications() {
     try {
         const [medicinesResult, requestsResult, distributionsResult] = await Promise.all([
             notificationPreferences.value.inventory
-                ? supabase.from('medicines').select('id, medicine_name, quantity, expiration_date, created_at')
+                ? supabase.from('medicines').select('id, medicine_name, quantity, restock_level, expiration_date, created_at')
                     .is('archived_at', null)
                 : Promise.resolve({ data: [], error: null }),
             notificationPreferences.value.requests
@@ -88,7 +88,7 @@ async function loadNotifications() {
         for (const medicine of medicinesResult.data || []) {
             const quantity = Number(medicine.quantity) || 0
             const expiry = medicine.expiration_date ? new Date(`${medicine.expiration_date}T00:00:00`) : null
-            if (quantity <= alertThresholds.value.lowStock) {
+            if (quantity <= Math.max(0, Number(medicine.restock_level) || 0)) {
                 alerts.push(makeNotification(
                     'Inventory',
                     `low-${medicine.id}`,
@@ -176,12 +176,8 @@ onMounted(() => {
         const savedPreferences = JSON.parse(localStorage.getItem('botechka_notification_preferences') || '{}')
         notificationPreferences.value = { ...notificationPreferences.value, ...savedPreferences }
         const savedConfiguration = JSON.parse(localStorage.getItem('botechka_configuration') || '{}')
-        alertThresholds.value = {
-            lowStock: Number.isFinite(Number(savedConfiguration.lowStockThreshold))
-                ? Math.max(0, Number(savedConfiguration.lowStockThreshold)) : 10,
-            expiryDays: Number.isFinite(Number(savedConfiguration.expiryAlertDays))
-                ? Math.max(0, Number(savedConfiguration.expiryAlertDays)) : 30
-        }
+        alertThresholds.value.expiryDays = Number.isFinite(Number(savedConfiguration.expiryAlertDays))
+            ? Math.max(0, Number(savedConfiguration.expiryAlertDays)) : 30
     } catch (error) {
         console.error('Unable to read saved notification preferences:', error)
     }

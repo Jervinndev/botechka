@@ -31,12 +31,17 @@ export async function getDistributionTransactions() {
         .from('distribution_transactions')
         .select(`
             distribution_transaction_id,
+            medicine_request_id,
             distribution_date,
             purpose,
             beneficiaries(first_name, middle_name, last_name, suffix, beneficiary_type),
             returned_at,
             voided_at,
-            distribution_items(quantity, medicine_name, medicine_image_url, unit, medicine:medicines(category))
+            distribution_items(
+                distribution_item_id, quantity, unit_price, medicine_name, medicine_image_url, unit,
+                medicine:medicines(category),
+                distribution_returns(quantity, medicine_condition, beneficiary_credit)
+            )
         `)
         .order('distribution_date', { ascending: false })
 
@@ -45,9 +50,14 @@ export async function getDistributionTransactions() {
     return data
 }
 
-export async function returnDistributionTransaction(transactionId) {
-    const { data, error } = await supabase.rpc('return_distribution_transaction', {
-        p_distribution_transaction_id: transactionId
+export async function returnDistributionItems({ transactionId, items }) {
+    const { data, error } = await supabase.rpc('return_distribution_items', {
+        p_distribution_transaction_id: transactionId,
+        p_items: items.map(({ distributionItemId, quantity, condition }) => ({
+            distribution_item_id: distributionItemId,
+            quantity: Number(quantity),
+            medicine_condition: condition
+        }))
     })
 
     if (error) throw new Error(error.message)
@@ -56,7 +66,7 @@ export async function returnDistributionTransaction(transactionId) {
 }
 
 export async function voidDistributionTransaction(transactionId) {
-    const { data, error } = await supabase.rpc('void_distribution_transaction', {
+    const { data, error } = await supabase.rpc('void_distribution_with_benefit_credit', {
         p_distribution_transaction_id: transactionId
     })
 
@@ -65,11 +75,12 @@ export async function voidDistributionTransaction(transactionId) {
     return data
 }
 
-export async function dispenseDistribution({ beneficiaryId, distributionDate, purpose, items }) {
-    const { data, error } = await supabase.rpc('dispense_distribution', {
+export async function dispenseDistribution({ beneficiaryId, distributionDate, purpose, items, medicineRequestId = null }) {
+    const { data, error } = await supabase.rpc('dispense_distribution_workflow', {
         p_beneficiary_id: beneficiaryId,
         p_distribution_date: distributionDate,
         p_purpose: purpose,
+        p_medicine_request_id: medicineRequestId,
         p_items: items.map(({ id, quantity }) => ({
             medicine_id: id,
             quantity

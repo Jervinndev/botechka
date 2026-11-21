@@ -291,7 +291,7 @@ onMounted(() => {
                 <div>
                     <h2 class="font-semibold">Backup contents and recovery</h2>
                     <p class="text-xs text-slate-500">
-                        Includes inventory, supplier, beneficiary, distribution, and medicine request records. Does not include Auth credentials or uploaded prescription/image files.
+                        Includes inventory batches, suppliers, beneficiaries, annual benefit usage, requests, distributions, returns, and audit history. Does not include Auth credentials or uploaded prescription/image files.
                     </p>
                 </div>
                 <span class="flex items-center gap-1.5 text-xs font-medium text-blue-600">

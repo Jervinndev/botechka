@@ -1,29 +1,34 @@
-# Vue 3 + Vite
+# BOTECHKA
 
-## Inventory Supabase setup
+## Supabase database setup
 
-After creating the medicines and suppliers tables, run [medicine_batches.sql](./medicine_batches.sql) in the Supabase SQL Editor. It creates the batch table, adds staff access policies and atomic stock functions, and backfills the existing medicine batch details.
+Run [`src/schema/botechka_complete.sql`](./src/schema/botechka_complete.sql) in the Supabase SQL Editor. It combines the required schema, access policies, database functions, storage buckets, audit trail, annual beneficiary benefits, and backup/recovery setup in dependency order. It expects Supabase's standard `auth` and `storage` schemas.
 
-For beneficiary dashboard links and dispensing dates, run [beneficiary_dashboard.sql](./beneficiary_dashboard.sql) after the `profiles` and `beneficiaries` tables exist. It adds a profile link (backfilled only for unique name-and-contact matches), a next dispensing date, and own-record access. Then rerun [distribution.sql](./distribution.sql) to add beneficiary history access and the atomic distribution-void function.
+The script is safe to rerun for its supported schema changes. Take a database backup before applying it to an existing deployment and review any SQL Editor errors before using the updated application.
 
-Run this SQL in the Supabase SQL Editor to configure medicine image storage:
+## Account management function
 
-```sql
-insert into storage.buckets (id, name, public)
-values ('medicine-images', 'medicine-images', true)
-on conflict (id) do update set public = true;
+Deploy the included account-management Edge Function so Admin and Super Admin account creation and role updates can use the server-side Auth Admin API:
 
-drop policy if exists "Public medicine images are readable" on storage.objects;
-create policy "Public medicine images are readable"
-on storage.objects for select
-using (bucket_id = 'medicine-images');
-
-drop policy if exists "Authenticated users can upload medicine images" on storage.objects;
-create policy "Authenticated users can upload medicine images"
-on storage.objects for insert to authenticated
-with check (bucket_id = 'medicine-images');
+```powershell
+supabase link --project-ref YOUR_PROJECT_REF
+supabase functions deploy manage-accounts
 ```
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+The function uses the Supabase URL, anon key, and service-role key from the Edge Function environment. Keep the service-role key server-side; never add it to the Vue app.
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## Inventory workbook upload
+
+Batch Upload accepts `.xlsx` workbooks. Use the first worksheet with these required columns:
+
+`medicine_name`, `category`, `quantity`, `dosage`, `unit`, `batch_number`, `supplier`, `manufacturing_date`, `expiration_date`
+
+Optional columns are `medicine_id`, `price` (or `price_per_unit`), and `restock_level`. Enter dates as Excel date cells or `YYYY-MM-DD`. Each valid row is saved as a medicine and stock batch; if a later row fails, the error reports how many earlier rows were saved.
+
+## Annual beneficiary medicine limit
+
+Each linked beneficiary account has a ₱20,000 limit per calendar year in the Asia/Manila timezone. Submitted requests reserve their medicine cost; rejected or cancelled requests and verified returns release the corresponding amount.
+
+## Backups
+
+Backup restore merges records and does not delete records absent from a backup. Backups do not include Supabase Auth credentials or uploaded images and prescriptions.

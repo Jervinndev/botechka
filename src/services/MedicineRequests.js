@@ -11,21 +11,55 @@ const requestFields = `
     medicine_unit,
     quantity,
     purpose,
+    pickup_instructions,
     prescription_path,
     status,
     created_at,
     reviewed_at,
-    rejection_reason
+    rejection_reason,
+    rejection_reason_code,
+    rejection_reason_other,
+    medicine_request_items (
+        medicine_id,
+        medicine_name,
+        medicine_dosage,
+        medicine_unit,
+        quantity,
+        unit_price
+    )
 `
+
+function withRequestItems(request) {
+    return {
+        ...request,
+        items: request.medicine_request_items?.length
+            ? request.medicine_request_items
+            : [{
+                medicine_id: request.medicine_id,
+                medicine_name: request.medicine_name,
+                medicine_dosage: request.medicine_dosage,
+                medicine_unit: request.medicine_unit,
+                quantity: request.quantity,
+                unit_price: 0
+            }]
+    }
+}
 
 export async function getAvailableRequestMedicines() {
     const { data, error } = await supabase
         .from('medicines')
-        .select('id, medicine_name, dosage, unit, quantity')
+        .select('id, medicine_name, dosage, unit, quantity, price')
         .is('archived_at', null)
         .gt('quantity', 0)
         .order('medicine_name', { ascending: true })
 
+    if (error) throw new Error(error.message)
+
+    return data || []
+}
+
+export async function getMyAnnualAllowance() {
+    const { data, error } = await supabase.rpc('get_my_annual_benefit')
     if (error) throw new Error(error.message)
 
     return data
@@ -45,7 +79,7 @@ export async function getMyMedicineRequests() {
 
     if (error) throw new Error(error.message)
 
-    return data
+    return (data || []).map(withRequestItems)
 }
 
 export async function getAllMedicineRequests() {
@@ -56,10 +90,10 @@ export async function getAllMedicineRequests() {
 
     if (error) throw new Error(error.message)
 
-    return data
+    return (data || []).map(withRequestItems)
 }
 
-export async function submitMedicineRequest({ medicineId, quantity, purpose, beneficiaryType, prescriptionFile }) {
+export async function submitMedicineRequest({ items, purpose, beneficiaryType, prescriptionFile }) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError) throw new Error(authError.message)
@@ -87,9 +121,11 @@ export async function submitMedicineRequest({ medicineId, quantity, purpose, ben
 
     if (uploadError) throw new Error(uploadError.message)
 
-    const { data, error } = await supabase.rpc('submit_medicine_request', {
-        p_medicine_id: medicineId,
-        p_quantity: Number(quantity),
+    const { data, error } = await supabase.rpc('submit_medicine_request_multi', {
+        p_medicines: items.map(({ medicineId, quantity }) => ({
+            medicine_id: medicineId,
+            quantity: Number(quantity)
+        })),
         p_purpose: purpose.trim() || null,
         p_beneficiary_type: beneficiaryType,
         p_prescription_path: prescriptionPath
@@ -114,31 +150,43 @@ export async function cancelMedicineRequest(requestId) {
     if (error) throw new Error(error.message)
 }
 
-export async function updateMedicineRequestStatus(requestId, status) {
+export async function updateMedicineRequestStatus(requestId, {
+    status,
+    rejectionReasonCode = null,
+    rejectionReasonOther = null,
+    pickupInstructions = null
+}) {
     if (!['approved', 'rejected'].includes(status)) {
         throw new Error('Choose a valid request status.')
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { error } = await supabase.rpc('review_medicine_request', {
+        p_request_id: requestId,
+        p_status: status,
+        p_rejection_reason_code: rejectionReasonCode,
+        p_rejection_reason_other: rejectionReasonOther,
+        p_pickup_instructions: pickupInstructions
+    })
+    if (error) throw new Error(error.message)
+}
 
-    if (authError) throw new Error(authError.message)
-    if (!user) throw new Error('You must be signed in to review requests.')
+export async function markMedicineRequestReady(requestId) {
+    const { error } = await supabase.rpc('mark_medicine_request_ready', {
+        p_request_id: requestId
+    })
+    if (error) throw new Error(error.message)
+}
 
+export async function getDispensableMedicineRequests() {
     const { data, error } = await supabase
         .from('medicine_requests')
-        .update({
-            status,
-            reviewed_at: new Date().toISOString(),
-            reviewed_by: user.id,
-            rejection_reason: null
-        })
-        .eq('request_id', requestId)
-        .eq('status', 'pending')
-        .select('request_id')
-        .maybeSingle()
+        .select(requestFields)
+        .in('status', ['approved', 'ready_to_dispense'])
+        .order('created_at', { ascending: false })
 
     if (error) throw new Error(error.message)
-    if (!data) throw new Error('This request has already been reviewed or is no longer available.')
+
+    return (data || []).map(withRequestItems)
 }
 
 export async function getPrescriptionUrl(path) {

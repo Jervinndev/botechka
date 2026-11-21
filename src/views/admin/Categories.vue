@@ -5,6 +5,7 @@ import Categorymodal from '../../components/modals/Categorymodal.vue'
 import CategoryMedicinesModal from '../../components/modals/CategoryMedicinesModal.vue'
 import CategorySkeliton from '../../Skelitonloader/CategorySkeliton.vue'
 import { getCategories, getMedicines } from '../../services/Fetches'
+import { setRecordArchived } from '../../services/Archive'
 import AdminTopActions from '../../components/admin/AdminTopActions.vue'
 
 const categories = ref([]);
@@ -15,6 +16,7 @@ const selectedCategory = ref(null)
 const categorySearch = ref('')
 const isLoading = ref(true);
 const errorMessage = ref('');
+const actionMessage = ref('')
 
 async function fetchCategories() {
     isLoading.value = true;
@@ -39,6 +41,7 @@ const categoriesWithStock = computed(() => {
     const query = categorySearch.value.trim().toLowerCase()
 
     return categories.value
+        .filter(category => !category.archived_at)
         .filter(category => category.status !== 'archived')
         .filter(category => !query || category.category_name?.toLowerCase().includes(query))
         .map(category => {
@@ -90,6 +93,22 @@ function closeCategoryModal() {
     selectedCategory.value = null
 }
 
+async function archiveCategory() {
+    if (!selectedCategory.value) return
+    const category = selectedCategory.value
+    if (!window.confirm(`Archive ${category.category_name}?`)) return
+
+    errorMessage.value = ''
+    try {
+        await setRecordArchived('Categories', category.category_id, true)
+        selectedCategory.value = null
+        actionMessage.value = `${category.category_name} was archived.`
+        await fetchCategories()
+    } catch (error) {
+        console.error('Unable to archive category:', error)
+        errorMessage.value = error.message || 'Unable to archive this category.'
+    }
+}
 onMounted(() => {
     fetchCategories()
 });
@@ -103,6 +122,9 @@ onMounted(() => {
                 <h1 class="font-inter font-bold text-gray-800 text-lg">Category</h1>
                 <p class="text-sm text-gray-500">Manage your medicine resources</p>
             </div>
+            <p v-if="actionMessage" role="status" class="mt-3 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">
+                {{ actionMessage }}
+            </p>
             <AdminTopActions />
         </div>
 
@@ -173,7 +195,7 @@ onMounted(() => {
         </div>
         <div v-else class="grid gap-4 mt-4 rounded-xl transition-all duration-100"
             :class="Isflex ? 'grid grid-cols-3' : 'flex'">
-            <div v-for="cat in categoriesWithStock" :key="cat.id" role="button" tabindex="0" @click="openCategory(cat)"
+            <div v-for="cat in categoriesWithStock" :key="cat.category_id" role="button" tabindex="0" @click="openCategory(cat)"
                 @keydown.enter="openCategory(cat)" @keydown.space.prevent="openCategory(cat)"
                 class="flex flex-col justify-center gap-3 font-inter p-4 bg-white rounded-xl w-full cursor-pointer hover:ring-2 hover:ring-blue-200 transition">
                 <div>
@@ -197,5 +219,5 @@ onMounted(() => {
     <Categorymodal :IsOpen="isCategoryModalOpen" @close="isCategoryModalOpen = false"
         @category-added="fetchCategories" />
     <CategoryMedicinesModal :IsOpen="Boolean(selectedCategory)" :category="selectedCategory"
-        :medicines="selectedCategoryMedicines" @close="closeCategoryModal" />
+        :medicines="selectedCategoryMedicines" @close="closeCategoryModal" @archive="archiveCategory" />
 </template>

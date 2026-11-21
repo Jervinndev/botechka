@@ -28,7 +28,15 @@ ON public.medicine_batches
 FOR INSERT TO authenticated
 WITH CHECK (public.is_current_user_staff());
 
+DROP POLICY IF EXISTS "Staff can restore medicine batches" ON public.medicine_batches;
+CREATE POLICY "Staff can restore medicine batches"
+ON public.medicine_batches
+FOR ALL TO authenticated
+USING (public.is_current_user_staff())
+WITH CHECK (public.is_current_user_staff());
+
 GRANT SELECT, INSERT ON public.medicine_batches TO authenticated;
+GRANT UPDATE ON public.medicine_batches TO authenticated;
 
 INSERT INTO public.medicine_batches (
     medicine_id,
@@ -68,6 +76,8 @@ BEGIN
         medicine_name,
         category,
         quantity,
+        price,
+        restock_level,
         dosage,
         unit,
         batch_number,
@@ -81,6 +91,8 @@ BEGIN
         p_medicine ->> 'medicine_name',
         p_medicine ->> 'category',
         (p_medicine ->> 'quantity')::INTEGER,
+        COALESCE((p_medicine ->> 'price')::NUMERIC, 0),
+        COALESCE((p_medicine ->> 'restock_level')::INTEGER, 10),
         p_medicine ->> 'dosage',
         p_medicine ->> 'unit',
         p_medicine ->> 'batch_number',

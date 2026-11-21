@@ -9,8 +9,10 @@ import {
     getManagedAccounts,
     updateManagedAccountRole
 } from '../../services/AccountManagement'
+import { getMyProfile } from '../../services/Authservices'
 
 const accounts = ref([])
+const currentRole = ref('')
 const searchQuery = ref('')
 const selectedRole = ref('All roles')
 const isLoading = ref(false)
@@ -31,6 +33,14 @@ const newAccount = ref({
     role: 'personnel'
 })
 const newRole = ref('')
+const roleOptions = computed(() => currentRole.value === 'admin'
+    ? [{ value: 'personnel', label: 'Personnel' }, { value: 'beneficiary', label: 'Beneficiary' }]
+    : [
+        { value: 'personnel', label: 'Personnel' },
+        { value: 'admin', label: 'Admin' },
+        { value: 'beneficiary', label: 'Beneficiary' },
+        { value: 'super_admin', label: 'Super Admin' }
+    ])
 
 const filteredAccounts = computed(() => {
     const query = searchQuery.value.trim().toLowerCase()
@@ -149,7 +159,15 @@ async function saveRole() {
     }
 }
 
-onMounted(loadAccounts)
+onMounted(async () => {
+    const profileResult = await getMyProfile()
+    if (!profileResult.success) {
+        errorMessage.value = profileResult.error
+        return
+    }
+    currentRole.value = profileResult.data.role?.toLowerCase() || ''
+    await loadAccounts()
+})
 </script>
 
 <template>
@@ -270,7 +288,8 @@ onMounted(loadAccounts)
                             </td>
                             <td class="px-5 py-4 font-medium text-slate-500">{{ formatCreatedAt(account.created_at) }}</td>
                             <td class="px-5 py-4 text-right">
-                                <button type="button" @click="openRoleModal(account)"
+                                <button v-if="currentRole === 'super_admin' || account.role === 'personnel'"
+                                    type="button" @click="openRoleModal(account)"
                                     class="rounded-lg p-2 text-slate-500 hover:bg-slate-100" aria-label="Change account role">
                                     <EllipsisVertical :size="18" />
                                 </button>
@@ -328,10 +347,7 @@ onMounted(loadAccounts)
                     <label class="text-sm font-medium text-slate-700">Role *
                         <select v-model="newAccount.role" required
                             class="mt-1 w-full rounded-lg border border-slate-200 bg-gray-50 p-2.5 outline-none focus:border-blue-500">
-                            <option value="personnel">Personnel</option>
-                            <option value="admin">Admin</option>
-                            <option value="beneficiary">Beneficiary</option>
-                            <option value="super_admin">Super Admin</option>
+                            <option v-for="role in roleOptions" :key="role.value" :value="role.value">{{ role.label }}</option>
                         </select>
                     </label>
                 </div>
@@ -359,10 +375,7 @@ onMounted(loadAccounts)
                 <p v-if="errorMessage" role="alert" class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ errorMessage }}</p>
                 <label class="mt-5 block text-sm font-medium text-slate-700">Role
                     <select v-model="newRole" class="mt-1 w-full rounded-lg border border-slate-200 p-2.5">
-                        <option value="personnel">Personnel</option>
-                        <option value="admin">Admin</option>
-                        <option value="beneficiary">Beneficiary</option>
-                        <option value="super_admin">Super Admin</option>
+                        <option v-for="role in roleOptions" :key="role.value" :value="role.value">{{ role.label }}</option>
                     </select>
                 </label>
                 <div class="mt-6 flex justify-end gap-3">

@@ -4,10 +4,12 @@ import { useRouter } from 'vue-router'
 import { signOutUser } from '../../services/Authservices'
 
 const Isloading = ref(false)
+const errorMessage = ref('')
 const router = useRouter()
 
 async function Logout() {
     Isloading.value = true
+    errorMessage.value = ''
 
     try {
         const result = await signOutUser()
@@ -16,6 +18,7 @@ async function Logout() {
         router.push('/')
     } catch (error) {
         console.error(error)
+        errorMessage.value = error.message || 'Unable to log out.'
     } finally {
         Isloading.value = false
     }
@@ -33,6 +36,7 @@ const emit = defineEmits(['close'])
         <div class="bg-white p-4 rounded-xl shadow-md w-sm">
             <h1 class="text-xl font-bold"> Sign out </h1>
             <p class="text-gray-600 mt-2"> Are you sure you want to logout? </p>
+            <p v-if="errorMessage" role="alert" class="mt-3 text-sm text-red-600">{{ errorMessage }}</p>
             <div class="flex gap-2 mt-4 items-end justify-end">
                 <button @click="emit('close')"
                     class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded"> Cancel

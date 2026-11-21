@@ -1,5 +1,6 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router'
 import {
     Search,
     RotateCcw,
@@ -14,11 +15,12 @@ import Selectmedicines from '../../components/modals/Selectmedicines.vue'
 import Addnewpurpose from '../../components/modals/Addnewpurpose.vue'
 import AddNewBeneficiary from '../../components/modals/AddNewBeneficiary.vue';
 import { getBeneficiaries } from '../../services/Beneficiaries'
+import { getDispensableMedicineRequests } from '../../services/MedicineRequests'
 import {
     dispenseDistribution,
     getDistributionPurposes,
     getDistributionTransactions,
-    returnDistributionTransaction,
+    returnDistributionItems,
     voidDistributionTransaction
 } from '../../services/Distribution'
 import { getMedicines } from '../../services/Fetches'
@@ -27,14 +29,20 @@ import TablePagination from '../../components/TablePagination.vue'
 import { usePagination } from '../../composable/usePagination.js'
 import { isWithinDateRange } from '../../utils/dateRange.js'
 
+const route = useRoute()
+const router = useRouter()
 const IsmodalOpen = ref(false)
 const Isaddpurposeopen = ref(false)
 const IsbeneficiaryOpen = ref(false)
 const selectedMedicines = ref([])
 const beneficiaries = ref([])
+const dispensableRequests = ref([])
 const purposes = ref([])
 const selectedBeneficiaryId = ref('')
+const beneficiaryQuery = ref('')
+const isBeneficiarySearchFocused = ref(false)
 const selectedPurposeId = ref('')
+const activeMedicineRequest = ref(null)
 const isConfirmDispenseOpen = ref(false)
 const isDispensing = ref(false)
 const alertMessage = ref('')
@@ -55,6 +63,10 @@ const transactionToReturn = ref(null)
 const isReturnConfirmOpen = ref(false)
 const isReturning = ref(false)
 const returnError = ref('')
+const returnQuantities = ref({})
+const returnConditions = ref({})
+const hasReturnSelection = computed(() => Object.values(returnQuantities.value)
+    .some((quantity) => Number(quantity) > 0))
 const transactionToVoid = ref(null)
 const isVoidConfirmOpen = ref(false)
 const isVoiding = ref(false)
@@ -63,6 +75,12 @@ const totalMedicineQuantity = computed(() => selectedMedicines.value.reduce((tot
 const selectedBeneficiary = computed(() => beneficiaries.value.find(
     (beneficiary) => beneficiary.beneficiary_id === selectedBeneficiaryId.value
 ))
+const filteredBeneficiaries = computed(() => {
+    const query = beneficiaryQuery.value.trim().toLowerCase()
+    return beneficiaries.value.filter((beneficiary) =>
+        !query || getBeneficiaryName(beneficiary).toLowerCase().includes(query)
+    ).slice(0, 8)
+})
 const selectedPurpose = computed(() => purposes.value.find(
     (purpose) => purpose.purpose_id === selectedPurposeId.value
 ))
@@ -82,7 +100,10 @@ const filteredTransactions = computed(() => {
                 item.medicine?.category
             ])
         ]
-        const status = transaction.voided_at ? 'voided' : transaction.returned_at ? 'returned' : 'dispensed'
+        const status = transaction.voided_at ? 'voided'
+            : transaction.returned_at ? 'returned'
+                : transaction.distribution_items.some((item) => item.distribution_returns?.length)
+                    ? 'partially returned' : 'dispensed'
         const matchesQuery = !query || searchValues.some((value) => String(value || '').toLowerCase().includes(query))
         const matchesCategory = !transactionCategory.value
             || getTransactionCategories(transaction).includes(transactionCategory.value)
@@ -103,6 +124,26 @@ function getBeneficiaryName(beneficiary) {
         beneficiary.last_name,
         beneficiary.suffix
     ].filter(Boolean).join(' ')
+}
+
+function selectBeneficiary(beneficiary) {
+    selectedBeneficiaryId.value = beneficiary.beneficiary_id
+    beneficiaryQuery.value = getBeneficiaryName(beneficiary)
+    isBeneficiarySearchFocused.value = false
+    activeMedicineRequest.value = null
+    selectedMedicines.value = []
+}
+
+function handleBeneficiarySearchInput() {
+    selectedBeneficiaryId.value = ''
+    activeMedicineRequest.value = null
+    selectedMedicines.value = []
+}
+
+function hideBeneficiaryMatches() {
+    window.setTimeout(() => {
+        isBeneficiarySearchFocused.value = false
+    }, 100)
 }
 
 function formatDistributionDate(date) {
@@ -133,8 +174,27 @@ function showTransaction(transaction) {
 function askReturnTransaction(transaction) {
     if (transaction.returned_at || transaction.voided_at) return
     transactionToReturn.value = transaction
+    returnQuantities.value = Object.fromEntries(transaction.distribution_items.map((item) => [
+        item.distribution_item_id,
+        0
+    ]))
+    returnConditions.value = Object.fromEntries(transaction.distribution_items.map((item) => [
+        item.distribution_item_id,
+        'Good'
+    ]))
     returnError.value = ''
     isReturnConfirmOpen.value = true
+}
+
+function getRemainingReturnQuantity(item) {
+    const returned = (item.distribution_returns || []).reduce(
+        (total, record) => total + Number(record.quantity || 0), 0
+    )
+    return Math.max(0, Number(item.quantity || 0) - returned)
+}
+
+function hasRecordedReturns(transaction) {
+    return transaction.distribution_items.some((item) => item.distribution_returns?.length)
 }
 
 function askVoidTransaction(transaction) {
@@ -169,11 +229,22 @@ async function confirmReturnTransaction() {
     isReturning.value = true
     returnError.value = ''
     try {
-        await returnDistributionTransaction(transactionToReturn.value.distribution_transaction_id)
+        const items = transactionToReturn.value.distribution_items
+            .filter((item) => Number(returnQuantities.value[item.distribution_item_id]) > 0)
+            .map((item) => ({
+                distributionItemId: item.distribution_item_id,
+                quantity: Number(returnQuantities.value[item.distribution_item_id]),
+                condition: returnConditions.value[item.distribution_item_id]
+            }))
+        if (!items.length) throw new Error('Enter a return quantity for at least one medicine.')
+        await returnDistributionItems({
+            transactionId: transactionToReturn.value.distribution_transaction_id,
+            items
+        })
         await fetchTransactions()
         isReturnConfirmOpen.value = false
         transactionToReturn.value = null
-        successMessage.value = 'Medicines from the selected distribution were returned to inventory.'
+        successMessage.value = 'Verified returns were recorded. Good-condition stock and beneficiary benefit were restored.'
     } catch (error) {
         console.error('Error returning distribution medicines:', error)
         returnError.value = error.message || 'Unable to return these medicines. Please try again.'
@@ -188,7 +259,10 @@ async function fetchBeneficiaries(preselect = null) {
 
     beneficiaries.value = result.data || []
     optionsError.value = ''
-    if (preselect) selectedBeneficiaryId.value = preselect.beneficiary_id
+    if (preselect) {
+        selectedBeneficiaryId.value = preselect.beneficiary_id
+        beneficiaryQuery.value = getBeneficiaryName(preselect)
+    }
 }
 
 async function fetchPurposes(preselect = null) {
@@ -197,11 +271,15 @@ async function fetchPurposes(preselect = null) {
     if (preselect) selectedPurposeId.value = preselect.purpose_id
 }
 
+async function fetchDispensableRequests() {
+    dispensableRequests.value = await getDispensableMedicineRequests()
+}
+
 async function fetchFormOptions() {
     isLoadingOptions.value = true
     optionsError.value = ''
 
-    const results = await Promise.allSettled([fetchBeneficiaries(), fetchPurposes()])
+    const results = await Promise.allSettled([fetchBeneficiaries(), fetchPurposes(), fetchDispensableRequests()])
     const failedResult = results.find((result) => result.status === 'rejected')
     if (failedResult) {
         console.error('Error fetching distribution form options:', failedResult.reason)
@@ -209,6 +287,62 @@ async function fetchFormOptions() {
     }
 
     isLoadingOptions.value = false
+}
+
+async function loadRequestForDispensing(requestId) {
+    if (!requestId) {
+        activeMedicineRequest.value = null
+        return
+    }
+
+    if (!dispensableRequests.value.length) await fetchDispensableRequests()
+    const request = dispensableRequests.value.find((item) => String(item.request_id) === String(requestId))
+    if (!request) {
+        optionsError.value = 'This request is not approved or is no longer available for dispensing.'
+        return
+    }
+
+    const beneficiary = beneficiaries.value.find((item) => item.profile_id === request.requester_id)
+    const purpose = purposes.value.find((item) => item.purpose_name.toLowerCase() === request.purpose?.toLowerCase())
+    if (!beneficiary || !purpose) {
+        optionsError.value = !beneficiary
+            ? 'The beneficiary account is not linked to an active beneficiary record.'
+            : 'The approved request purpose is no longer available.'
+        return
+    }
+
+    try {
+        const inventory = await getMedicines()
+        const requestItems = request.items.map((item) => {
+            const medicine = inventory.find((entry) => entry.id === item.medicine_id)
+            if (!medicine) throw new Error(`${item.medicine_name} is no longer in inventory.`)
+            const stock = Math.max(0, Number(medicine.quantity) || 0)
+            if (Number(item.quantity) > stock) {
+                throw new Error(`${item.medicine_name}: requested quantity ${item.quantity} exceeds available stock ${stock}.`)
+            }
+            return {
+                id: medicine.id,
+                medicineId: medicine.medicine_id,
+                name: medicine.medicine_name,
+                image_url: medicine.image_url,
+                category: medicine.category || '',
+                strength: [medicine.dosage, medicine.unit].filter(Boolean).join(' '),
+                unit: medicine.unit || 'units',
+                stock,
+                quantity: Number(item.quantity)
+            }
+        })
+        activeMedicineRequest.value = request
+        selectedBeneficiaryId.value = beneficiary.beneficiary_id
+        beneficiaryQuery.value = getBeneficiaryName(beneficiary)
+        selectedPurposeId.value = purpose.purpose_id
+        selectedMedicines.value = requestItems
+        optionsError.value = ''
+        successMessage.value = `REQ-${String(request.request_id).padStart(4, '0')} loaded for dispensing.`
+    } catch (error) {
+        console.error('Unable to load approved request medicines:', error)
+        optionsError.value = error.message || 'Unable to load approved request medicines.'
+    }
 }
 
 async function fetchTransactions() {
@@ -226,6 +360,7 @@ async function fetchTransactions() {
 }
 
 function addMedicines(medicines) {
+    if (activeMedicineRequest.value) return
     for (const medicine of medicines) {
         const existingMedicine = selectedMedicines.value.find((item) => item.id === medicine.id)
         if (!existingMedicine && medicine.stock > 0) selectedMedicines.value.push({ ...medicine, quantity: 1 })
@@ -233,10 +368,15 @@ function addMedicines(medicines) {
 }
 
 function changeMedicineQuantity(medicine, amount) {
+    if (activeMedicineRequest.value) return
     medicine.quantity = Math.min(medicine.stock, Math.max(1, medicine.quantity + amount))
 }
 
 function setMedicineQuantity(medicine, event) {
+    if (activeMedicineRequest.value) {
+        event.target.value = medicine.quantity
+        return
+    }
     const enteredQuantity = Number(event.target.value)
     if (!Number.isInteger(enteredQuantity) || enteredQuantity < 1) {
         event.target.value = medicine.quantity
@@ -252,6 +392,7 @@ function setMedicineQuantity(medicine, event) {
 }
 
 function removeMedicine(medicineId) {
+    if (activeMedicineRequest.value) return
     selectedMedicines.value = selectedMedicines.value.filter((medicine) => medicine.id !== medicineId)
 }
 
@@ -294,19 +435,28 @@ async function confirmDispense() {
             beneficiaryId: selectedBeneficiaryId.value,
             distributionDate: new Date().toISOString(),
             purpose: selectedPurpose.value.purpose_name,
-            items: selectedMedicines.value
+            items: selectedMedicines.value,
+            medicineRequestId: activeMedicineRequest.value?.request_id || null
         })
 
         isConfirmDispenseOpen.value = false
         selectedMedicines.value = []
-        successMessage.value = 'Medicines dispensed and inventory updated.'
+        successMessage.value = activeMedicineRequest.value
+            ? 'Approved request dispensed and inventory updated.'
+            : 'Medicines dispensed and inventory updated.'
+        activeMedicineRequest.value = null
+        if (route.query.requestId) {
+            const query = { ...route.query }
+            delete query.requestId
+            await router.replace({ query })
+        }
         await fetchTransactions()
     } catch (error) {
         console.error('Error dispensing medicines:', error)
         const message = error.message || ''
         alertMessage.value = message.includes('Insufficient Quantity:')
             ? message
-            : 'Unable to dispense these medicines. Please try again.'
+            : message || 'Unable to dispense these medicines. Please try again.'
         isConfirmDispenseOpen.value = false
     } finally {
         isDispensing.value = false
@@ -328,8 +478,16 @@ function handlePurposeSaved(purpose) {
 }
 
 onMounted(() => {
-    fetchFormOptions()
+    fetchFormOptions().then(() => loadRequestForDispensing(route.query.requestId)).catch((error) => {
+        console.error('Error preparing distribution form:', error)
+        optionsError.value = error.message || 'Unable to load distribution form.'
+    })
+
     fetchTransactions()
+})
+
+watch(() => route.query.requestId, (requestId) => {
+    if (requestId) loadRequestForDispensing(requestId)
 })
 </script>
 
@@ -360,17 +518,40 @@ onMounted(() => {
                             </button>
                         </div>
                         <div class="relative mt-3">
-                            <select v-model="selectedBeneficiaryId" :disabled="isLoadingOptions"
-                                class="appearance-none w-full border border-black/10 rounded-xl p-2.5 pr-9 text-sm text-gray-600 outline-none focus:border-blue-500 bg-white">
-                                <option value="">Select Beneficiary</option>
-                                <option v-for="beneficiary in beneficiaries" :key="beneficiary.beneficiary_id"
-                                    :value="beneficiary.beneficiary_id">
-                                    {{ getBeneficiaryName(beneficiary) }}
-                                </option>
-                            </select>
-                            <ChevronDown :size="16"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                            <input v-model="beneficiaryQuery" type="search" :disabled="isLoadingOptions"
+                                placeholder="Search beneficiary by name..."
+                                @focus="isBeneficiarySearchFocused = true" @blur="hideBeneficiaryMatches"
+                                @input="handleBeneficiarySearchInput"
+                                class="w-full rounded-xl border border-black/10 bg-white p-2.5 text-sm text-gray-600 outline-none focus:border-blue-500">
+                            <ul v-if="isBeneficiarySearchFocused && filteredBeneficiaries.length"
+                                class="absolute z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+                                <li v-for="beneficiary in filteredBeneficiaries" :key="beneficiary.beneficiary_id">
+                                    <button type="button" @mousedown.prevent="selectBeneficiary(beneficiary)"
+                                        class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-blue-50">
+                                        {{ getBeneficiaryName(beneficiary) }}
+                                        <span class="ml-1 text-xs text-gray-400">{{ beneficiary.beneficiary_code }}</span>
+                                    </button>
+                                </li>
+                            </ul>
                         </div>
+                        <p v-if="selectedBeneficiary" class="mt-2 text-xs text-emerald-700">
+                            Selected: {{ getBeneficiaryName(selectedBeneficiary) }}
+                        </p>
+                    </div>
+                    <div class="mt-4 p-4 border border-black/10 rounded-xl">
+                        <label class="block text-sm font-medium text-gray-700">Approved medicine request</label>
+                        <select :value="activeMedicineRequest?.request_id || ''"
+                            @change="loadRequestForDispensing($event.target.value)"
+                            class="mt-2 w-full rounded-xl border border-black/10 bg-white p-2.5 text-sm text-gray-600 outline-none focus:border-blue-500">
+                            <option value="">Direct dispensing (no request)</option>
+                            <option v-for="request in dispensableRequests" :key="request.request_id"
+                                :value="request.request_id">
+                                REQ-{{ String(request.request_id).padStart(4, '0') }} · {{ request.beneficiary_name }} · {{ request.status }}
+                            </option>
+                        </select>
+                        <p v-if="activeMedicineRequest" class="mt-2 text-xs text-blue-700">
+                            Approved items and quantities are loaded from this request and cannot be changed.
+                        </p>
                     </div>
                     <div class="mt-4 p-4 border border-black/10 rounded-xl">
                         <div class="flex justify-between items-center gap-2">
@@ -399,12 +580,14 @@ onMounted(() => {
                     <div class="mt-4 p-4 border border-black/10 rounded-xl">
                         <div class="flex justify-between items-center gap-2">
                             <h2 class="text-sm font-medium text-gray-700">Medicines</h2>
-                            <button type="button" @click="IsmodalOpen = true"
+                            <button type="button" @click="IsmodalOpen = true" :disabled="Boolean(activeMedicineRequest)"
+                                :class="{ 'cursor-not-allowed opacity-50': activeMedicineRequest }"
                                 class="flex items-center justify-center gap-2 rounded-md bg-blue-700 p-2 px-4 text-sm text-white transition hover:bg-blue-800 whitespace-nowrap">
                                 Add Item
                             </button>
                         </div>
-                        <button type="button" @click="IsmodalOpen = true"
+                        <button type="button" @click="IsmodalOpen = true" :disabled="Boolean(activeMedicineRequest)"
+                            :class="{ 'cursor-not-allowed opacity-50': activeMedicineRequest }"
                             class="mt-3 flex w-full items-center justify-between rounded-xl border border-black/10 bg-white p-2.5 text-left text-sm text-gray-600 transition hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
                             <span>{{ selectedMedicines.length ? `${selectedMedicines.length} medicine(s) selected` :
                                 'Select Medicine' }}</span>
@@ -439,17 +622,18 @@ onMounted(() => {
                                         <td class="px-3 py-2">
                                             <div class="flex items-center gap-2">
                                                 <button type="button" :aria-label="`Decrease ${medicine.name} quantity`"
-                                                    :disabled="medicine.quantity <= 1"
+                                                    :disabled="Boolean(activeMedicineRequest) || medicine.quantity <= 1"
                                                     @click="changeMedicineQuantity(medicine, -1)"
                                                     class="flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 text-gray-600 transition hover:bg-blue-50 hover:text-blue-700 disabled:opacity-40">
                                                     <Minus :size="14" />
                                                 </button>
                                                 <input type="number" min="1" :max="medicine.stock"
                                                     :value="medicine.quantity" :aria-label="`${medicine.name} quantity`"
+                                                    :disabled="Boolean(activeMedicineRequest)"
                                                     @change="setMedicineQuantity(medicine, $event)"
                                                     class="w-16 rounded border border-gray-200 px-2 py-1 text-center font-medium outline-none focus:border-blue-500">
                                                 <button type="button" :aria-label="`Increase ${medicine.name} quantity`"
-                                                    :disabled="medicine.quantity >= medicine.stock"
+                                                    :disabled="Boolean(activeMedicineRequest) || medicine.quantity >= medicine.stock"
                                                     @click="changeMedicineQuantity(medicine, 1)"
                                                     class="flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 text-gray-600 transition hover:bg-blue-50 hover:text-blue-700 disabled:opacity-40">
                                                     <Plus :size="14" />
@@ -472,7 +656,7 @@ onMounted(() => {
                         <p v-if="successMessage" role="status" class="mr-auto text-sm text-green-700">
                             {{ successMessage }}
                         </p>
-                        <button type="button" @click="selectedMedicines = []"
+                        <button type="button" @click="selectedMedicines = []; activeMedicineRequest = null"
                             class="rounded-md border border-gray-200 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50">
                             Clear
                         </button>
@@ -554,6 +738,7 @@ onMounted(() => {
                             class="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600 outline-none focus:border-blue-500">
                             <option value="all">All Statuses</option>
                             <option value="dispensed">Dispensed</option>
+                            <option value="partially returned">Partially returned</option>
                             <option value="returned">Returned</option>
                             <option value="voided">Voided</option>
                         </select>
@@ -619,9 +804,11 @@ onMounted(() => {
                                             ? 'bg-red-50 text-red-700'
                                             : transaction.returned_at
                                                 ? 'bg-amber-50 text-amber-700'
+                                                : hasRecordedReturns(transaction)
+                                                    ? 'bg-amber-50 text-amber-700'
                                                 : 'bg-green-50 text-green-700'"
                                             class="rounded-full px-2.5 py-1 text-xs font-medium">
-                                            {{ transaction.voided_at ? 'Voided' : transaction.returned_at ? 'Returned' : 'Dispensed' }}
+                                            {{ transaction.voided_at ? 'Voided' : transaction.returned_at ? 'Returned' : hasRecordedReturns(transaction) ? 'Partially returned' : 'Dispensed' }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-3">
@@ -639,8 +826,8 @@ onMounted(() => {
                                                 <RotateCcw :size="15" />
                                             </button>
                                             <button type="button"
-                                                :title="transaction.returned_at || transaction.voided_at ? 'Already reconciled' : 'Void this distribution'"
-                                                :disabled="Boolean(transaction.returned_at || transaction.voided_at)"
+                                                :title="transaction.returned_at || transaction.voided_at || hasRecordedReturns(transaction) ? 'Returns already recorded' : 'Void this distribution'"
+                                                :disabled="Boolean(transaction.returned_at || transaction.voided_at || hasRecordedReturns(transaction))"
                                                 @click="askVoidTransaction(transaction)"
                                                 class="flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 text-gray-500 transition hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-40">
                                                 <X :size="15" />
@@ -805,7 +992,7 @@ onMounted(() => {
                 class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
                 <h2 id="return-distribution-title" class="text-lg font-bold text-gray-800">Return Medicines</h2>
                 <p class="mt-2 text-sm text-gray-600">
-                    Ibalik ang lahat ng gamot mula sa napiling distribution sa inventory?
+                    Piliin ang eksaktong gamot at quantity na ibinabalik. I-verify kung maayos o damaged ang bawat item.
                 </p>
                 <div class="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-gray-600">
                     <p class="font-medium text-gray-800">
@@ -817,6 +1004,34 @@ onMounted(() => {
                         {{ getTransactionQuantity(transactionToReturn) }} total units
                     </p>
                 </div>
+                <div class="mt-4 max-h-64 space-y-3 overflow-y-auto">
+                    <div v-for="item in transactionToReturn.distribution_items" :key="item.distribution_item_id"
+                        v-show="getRemainingReturnQuantity(item) > 0"
+                        class="rounded-lg border border-gray-200 p-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-800">{{ item.medicine_name }}</p>
+                                <p class="text-xs text-gray-500">
+                                    {{ getRemainingReturnQuantity(item) }} remaining · ₱{{ Number(item.unit_price || 0).toFixed(2) }} per unit
+                                </p>
+                            </div>
+                            <input v-model.number="returnQuantities[item.distribution_item_id]" type="number" min="0"
+                                :max="getRemainingReturnQuantity(item)" :aria-label="`Return quantity for ${item.medicine_name}`"
+                                class="w-20 rounded-lg border border-gray-200 px-2 py-1 text-center text-sm">
+                        </div>
+                        <label class="mt-2 block text-xs font-medium text-gray-600">
+                            Verified condition
+                            <select v-model="returnConditions[item.distribution_item_id]"
+                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm">
+                                <option value="Good">Good — return to inventory</option>
+                                <option value="Damaged">Damaged — do not return to inventory</option>
+                            </select>
+                        </label>
+                        <p v-if="Number(returnQuantities[item.distribution_item_id]) > 0" class="mt-1 text-xs text-emerald-700">
+                            Beneficiary benefit credit: ₱{{ (Number(item.unit_price || 0) * Number(returnQuantities[item.distribution_item_id])).toFixed(2) }}
+                        </p>
+                    </div>
+                </div>
                 <p v-if="returnError" role="alert" class="mt-3 text-sm text-red-600">{{ returnError }}</p>
                 <div class="mt-6 flex justify-end gap-3">
                     <button type="button" :disabled="isReturning"
@@ -824,7 +1039,7 @@ onMounted(() => {
                         class="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50">
                         Cancel
                     </button>
-                    <button type="button" :disabled="isReturning" @click="confirmReturnTransaction"
+                    <button type="button" :disabled="isReturning || !hasReturnSelection" @click="confirmReturnTransaction"
                         class="flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50">
                         <RotateCcw :size="15" />
                         {{ isReturning ? 'Returning...' : 'Confirm Return' }}

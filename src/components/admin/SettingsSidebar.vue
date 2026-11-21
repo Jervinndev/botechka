@@ -10,7 +10,7 @@ import {
 import { computed, onMounted, ref } from 'vue'
 import { getMyProfile } from '../../services/Authservices'
 
-const isSuperAdmin = ref(false)
+const accountRole = ref('')
 const isProfileLoaded = ref(false)
 const allSettingsLinks = [
     { label: 'Appearance', to: { name: 'settings-appearance' }, Icon: Brush },
@@ -22,9 +22,11 @@ const allSettingsLinks = [
 ]
 const settingsLinks = computed(() => {
     if (!isProfileLoaded.value) return []
-    return allSettingsLinks.filter((item) => isSuperAdmin.value
-        ? item.label === 'Account Management'
-        : item.label !== 'Account Management')
+    if (accountRole.value === 'super_admin') {
+        return allSettingsLinks.filter((item) => item.label === 'Account Management')
+    }
+    return allSettingsLinks.filter((item) => item.label !== 'Account Management'
+        || accountRole.value === 'admin')
 })
 
 onMounted(async () => {
@@ -34,7 +36,7 @@ onMounted(async () => {
         isProfileLoaded.value = true
         return
     }
-    isSuperAdmin.value = result.data.role?.toLowerCase() === 'super_admin'
+    accountRole.value = result.data.role?.toLowerCase() || ''
     isProfileLoaded.value = true
 })
 </script>
