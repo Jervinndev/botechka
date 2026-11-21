@@ -140,8 +140,10 @@ async function sendToDispensing(request) {
 function requestItems(request) {
   return request.items?.length
     ? request.items
-    : [{ medicine_name: request.medicine_name, medicine_dosage: request.medicine_dosage,
-      medicine_unit: request.medicine_unit, quantity: request.quantity }]
+    : [{
+      medicine_name: request.medicine_name, medicine_dosage: request.medicine_dosage,
+      medicine_unit: request.medicine_unit, quantity: request.quantity
+    }]
 }
 
 function requestQuantity(request) {
@@ -304,7 +306,8 @@ onMounted(loadRequests)
               <p class="text-xs text-slate-400">{{ request.beneficiary_type }}</p>
             </td>
             <td class="px-6 py-4">
-              <div v-for="item in requestItems(request)" :key="`${request.request_id}-${item.medicine_id || item.medicine_name}`"
+              <div v-for="item in requestItems(request)"
+                :key="`${request.request_id}-${item.medicine_id || item.medicine_name}`"
                 class="mb-1 flex items-center gap-3 last:mb-0">
                 <span class="font-semibold leading-tight text-slate-600">
                   {{ item.medicine_name }} {{ item.medicine_dosage || '' }}
@@ -341,8 +344,7 @@ onMounted(loadRequests)
                   </button>
                 </template>
                 <button v-else-if="request.status === 'approved' || request.status === 'ready_to_dispense'"
-                  type="button" @click="sendToDispensing(request)"
-                  :disabled="updatingRequestId === request.request_id"
+                  type="button" @click="sendToDispensing(request)" :disabled="updatingRequestId === request.request_id"
                   class="rounded-md bg-blue-700 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
                   {{ request.status === 'approved' ? 'Ready to Dispense' : 'Continue Dispensing' }}
                 </button>
@@ -358,92 +360,99 @@ onMounted(loadRequests)
         </tbody>
       </table>
 
+
       <TablePagination v-model="requestPage" :total-items="filteredRequests.length" item-label="requests"
         aria-label="Beneficiary request pagination" class="border-t border-gray-100 px-4 py-3" />
     </section>
   </div>
 
-  <div v-if="isRequestViewOpen && selectedRequest"
-    class="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4"
-    @click.self="closeRequestDetails">
-    <section role="dialog" aria-modal="true" aria-labelledby="request-details-title"
-      class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h2 id="request-details-title" class="text-lg font-bold text-slate-900">Request Details</h2>
-          <p class="mt-1 text-sm text-slate-500">{{ requestCode(selectedRequest.request_id) }}</p>
+  <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2"
+    enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
+    leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
+    <div v-if="isRequestViewOpen && selectedRequest"
+      class="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4" @click.self="closeRequestDetails">
+      <section role="dialog" aria-modal="true" aria-labelledby="request-details-title"
+        class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h2 id="request-details-title" class="text-lg font-bold text-slate-900">Request Details</h2>
+            <p class="mt-1 text-sm text-slate-500">{{ requestCode(selectedRequest.request_id) }}</p>
+          </div>
+          <button type="button" aria-label="Close request details" @click="closeRequestDetails"
+            class="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+            <X :size="18" />
+          </button>
         </div>
-        <button type="button" aria-label="Close request details" @click="closeRequestDetails"
-          class="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
-          <X :size="18" />
-        </button>
-      </div>
 
-      <dl class="mt-5 grid gap-4 border-b border-gray-100 pb-5 sm:grid-cols-2">
-        <div>
-          <dt class="text-xs text-slate-400">Beneficiary</dt>
-          <dd class="mt-1 text-sm font-medium text-slate-700">{{ selectedRequest.beneficiary_name }}</dd>
-        </div>
-        <div>
-          <dt class="text-xs text-slate-400">Status</dt>
-          <dd class="mt-1 text-sm font-medium capitalize text-slate-700">{{ selectedRequest.status }}</dd>
-        </div>
-        <div>
-          <dt class="text-xs text-slate-400">Beneficiary type</dt>
-          <dd class="mt-1 text-sm font-medium text-slate-700">{{ selectedRequest.beneficiary_type }}</dd>
-        </div>
-        <div>
-          <dt class="text-xs text-slate-400">Medicine</dt>
-          <dd class="mt-1 text-sm font-medium text-slate-700">
-            <span v-for="item in requestItems(selectedRequest)" :key="item.medicine_id || item.medicine_name" class="block">
-              {{ item.medicine_name }} {{ item.medicine_dosage || '' }} × {{ item.quantity }} {{ item.medicine_unit || '' }}
-            </span>
-          </dd>
-        </div>
-        <div>
-          <dt class="text-xs text-slate-400">Quantity</dt>
-          <dd class="mt-1 text-sm font-medium text-slate-700">
-            {{ requestQuantity(selectedRequest) }} units
-          </dd>
-        </div>
-        <div>
-          <dt class="text-xs text-slate-400">Purpose</dt>
-          <dd class="mt-1 text-sm font-medium text-slate-700">{{ selectedRequest.purpose || '—' }}</dd>
-        </div>
-        <div>
-          <dt class="text-xs text-slate-400">Requested</dt>
-          <dd class="mt-1 text-sm font-medium text-slate-700">{{ formatDate(selectedRequest.created_at) }}</dd>
-        </div>
-        <div v-if="selectedRequest.rejection_reason" class="sm:col-span-2">
-          <dt class="text-xs text-slate-400">Rejection reason</dt>
-          <dd class="mt-1 text-sm font-medium text-red-700">{{ selectedRequest.rejection_reason }}</dd>
-        </div>
-        <div v-if="selectedRequest.pickup_instructions" class="sm:col-span-2">
-          <dt class="text-xs text-slate-400">Pickup instructions</dt>
-          <dd class="mt-1 text-sm font-medium text-slate-700">{{ selectedRequest.pickup_instructions }}</dd>
-        </div>
-      </dl>
+        <dl class="mt-5 grid gap-4 border-b border-gray-100 pb-5 sm:grid-cols-2">
+          <div>
+            <dt class="text-xs text-slate-400">Beneficiary</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-700">{{ selectedRequest.beneficiary_name }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs text-slate-400">Status</dt>
+            <dd class="mt-1 text-sm font-medium capitalize text-slate-700">{{ selectedRequest.status }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs text-slate-400">Beneficiary type</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-700">{{ selectedRequest.beneficiary_type }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs text-slate-400">Medicine</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-700">
+              <span v-for="item in requestItems(selectedRequest)" :key="item.medicine_id || item.medicine_name"
+                class="block">
+                {{ item.medicine_name }} {{ item.medicine_dosage || '' }} × {{ item.quantity }} {{ item.medicine_unit ||
+                  '' }}
+              </span>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-xs text-slate-400">Quantity</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-700">
+              {{ requestQuantity(selectedRequest) }} units
+            </dd>
+          </div>
+          <div>
+            <dt class="text-xs text-slate-400">Purpose</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-700">{{ selectedRequest.purpose || '—' }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs text-slate-400">Requested</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-700">{{ formatDate(selectedRequest.created_at) }}</dd>
+          </div>
+          <div v-if="selectedRequest.rejection_reason" class="sm:col-span-2">
+            <dt class="text-xs text-slate-400">Rejection reason</dt>
+            <dd class="mt-1 text-sm font-medium text-red-700">{{ selectedRequest.rejection_reason }}</dd>
+          </div>
+          <div v-if="selectedRequest.pickup_instructions" class="sm:col-span-2">
+            <dt class="text-xs text-slate-400">Pickup instructions</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-700">{{ selectedRequest.pickup_instructions }}</dd>
+          </div>
+        </dl>
 
-      <div class="mt-5">
-        <h3 class="mb-2 text-sm font-semibold text-slate-800">Prescription</h3>
-        <p v-if="isLoadingPrescription" class="rounded-lg bg-slate-50 p-6 text-center text-sm text-slate-500">
-          Loading prescription...
-        </p>
-        <p v-else-if="prescriptionError" role="alert" class="rounded-lg bg-red-50 p-3 text-sm text-red-700">
-          {{ prescriptionError }}
-        </p>
-        <button v-else-if="prescriptionUrl && isImagePrescription(selectedRequest.prescription_path)" type="button"
-          @click="isPrescriptionPreviewOpen = true"
-          class="block max-h-80 w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-2">
-          <img :src="prescriptionUrl" alt="Beneficiary prescription"
-            class="mx-auto max-h-72 max-w-full object-contain">
-          <span class="mt-2 block text-xs text-slate-500">Click image to enlarge</span>
-        </button>
-        <iframe v-else-if="prescriptionUrl" :src="prescriptionUrl" title="Beneficiary prescription PDF"
-          class="h-[55vh] w-full rounded-lg border border-slate-200"></iframe>
-      </div>
-    </section>
-  </div>
+        <div class="mt-5">
+          <h3 class="mb-2 text-sm font-semibold text-slate-800">Prescription</h3>
+          <p v-if="isLoadingPrescription" class="rounded-lg bg-slate-50 p-6 text-center text-sm text-slate-500">
+            Loading prescription...
+          </p>
+          <p v-else-if="prescriptionError" role="alert" class="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            {{ prescriptionError }}
+          </p>
+          <button v-else-if="prescriptionUrl && isImagePrescription(selectedRequest.prescription_path)" type="button"
+            @click="isPrescriptionPreviewOpen = true"
+            class="block max-h-80 w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-2">
+            <img :src="prescriptionUrl" alt="Beneficiary prescription"
+              class="mx-auto max-h-72 max-w-full object-contain">
+            <span class="mt-2 block text-xs text-slate-500">Click image to enlarge</span>
+          </button>
+          <iframe v-else-if="prescriptionUrl" :src="prescriptionUrl" title="Beneficiary prescription PDF"
+            class="h-[55vh] w-full rounded-lg border border-slate-200"></iframe>
+        </div>
+      </section>
+    </div>
+  </Transition>
+
 
   <div v-if="isPrescriptionPreviewOpen && prescriptionUrl"
     class="fixed inset-0 z-[80] flex items-center justify-center bg-black/90 p-4"
@@ -452,8 +461,7 @@ onMounted(loadRequests)
       class="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20">
       <X :size="22" />
     </button>
-    <img :src="prescriptionUrl" alt="Enlarged beneficiary prescription"
-      class="max-h-full max-w-full object-contain">
+    <img :src="prescriptionUrl" alt="Enlarged beneficiary prescription" class="max-h-full max-w-full object-contain">
   </div>
 
   <div v-if="reviewTarget" class="fixed inset-0 z-[75] flex items-center justify-center bg-black/40 p-4"
@@ -462,7 +470,8 @@ onMounted(loadRequests)
       <h2 class="text-lg font-bold text-slate-900">
         {{ reviewStatus === 'approved' ? 'Approve request' : 'Reject request' }}
       </h2>
-      <p class="mt-1 text-sm text-slate-500">{{ requestCode(reviewTarget.request_id) }} · {{ reviewTarget.beneficiary_name }}</p>
+      <p class="mt-1 text-sm text-slate-500">{{ requestCode(reviewTarget.request_id) }} · {{
+        reviewTarget.beneficiary_name }}</p>
       <label v-if="reviewStatus === 'rejected'" class="mt-5 block text-sm font-medium text-slate-700">
         Rejection reason
         <select v-model="rejectionReasonCode" required class="mt-1 w-full rounded-lg border border-slate-200 p-2.5">
