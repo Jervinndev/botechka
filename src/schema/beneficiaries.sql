@@ -76,9 +76,6 @@ SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
 BEGIN
-    IF NOT public.is_current_user_staff() THEN
-        RAISE EXCEPTION 'Only staff can view the beneficiary count.';
-    END IF;
     RETURN (
         SELECT COUNT(*)
           FROM public.beneficiaries
@@ -88,4 +85,4 @@ END;
 $$;
 
 REVOKE ALL ON FUNCTION public.get_beneficiary_count() FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.get_beneficiary_count() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_beneficiary_count() TO anon, authenticated;

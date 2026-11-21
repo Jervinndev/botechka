@@ -372,7 +372,7 @@ onMounted(() => {
             </div>
             <template v-else>
                 <article v-for="med in paginatedMedicines" :key="med.id"
-                    class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                    class="rounded-xl border border-gray-100 bg-white p-4">
                     <div class="flex items-start gap-3">
                         <img v-if="med.image_url" :src="med.image_url" :alt="`${med.medicine_name} image`"
                             class="h-12 w-12 shrink-0 rounded-lg object-cover">

@@ -16,8 +16,6 @@ onMounted(async () => {
     total.value = count ?? 0
 })
 
-// ilang bilog ang ipapakita (hindi lalampas sa total)
-const shown = computed(() => Math.min(total.value, MAX_AVATARS))
 const extra = computed(() => Math.max(total.value - MAX_AVATARS, 0))
 
 const forWhom = [
@@ -189,21 +187,19 @@ const avatars = [
                         </router-link>
                     </div>
 
-                    <!-- Floating avatars -->
-                    <!-- Floating avatars -->
-                    <div v-if="total > 0" class="flex items-center gap-3 pt-2">
+                    <div class="flex items-center gap-3 pt-2">
                         <div class="flex items-center -space-x-3">
-                            <img v-for="i in shown" :key="i" :src="avatars[i - 1]" alt="Beneficiary"
+                            <img v-for="(avatar, index) in avatars" :key="avatar" :src="avatar" alt="Beneficiary"
                                 class="avatar-float h-11 w-11 rounded-full border-2 border-white object-cover shadow-md bg-gray-200"
-                                :style="{ animationDelay: `${i * 0.4}s` }" />
+                                :style="{ animationDelay: `${(index + 1) * 0.4}s` }" />
 
                             <div v-if="extra > 0"
                                 class="avatar-float flex h-11 w-11 items-center justify-center rounded-full border-2 border-white bg-blue-700 text-xs font-semibold text-white shadow-md"
-                                :style="{ animationDelay: `${shown * 0.4}s` }">
+                                :style="{ animationDelay: `${MAX_AVATARS * 0.4}s` }">
                                 +{{ extra }}
                             </div>
                         </div>
-                        <p class="font-inter text-sm text-gray-700">
+                        <p v-if="total > 0" class="font-inter text-sm text-gray-700">
                             {{ total }} beneficiaries served in Binangonan
                         </p>
                     </div>
