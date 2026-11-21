@@ -6,6 +6,8 @@ Run [`src/schema/botechka_complete.sql`](./src/schema/botechka_complete.sql) in 
 
 The script is safe to rerun for its supported schema changes. Take a database backup before applying it to an existing deployment and review any SQL Editor errors before using the updated application.
 
+The public homepage calls `get_beneficiary_count()` without requiring a session. That function exposes only the count of non-archived beneficiaries—not their personal data—and is executable by the `anon` and `authenticated` roles. Run the updated schema script in Supabase to apply this permission change to an existing project.
+
 ## Account management function
 
 Deploy the included account-management Edge Function so Admin and Super Admin account creation and role updates can use the server-side Auth Admin API:
