@@ -1,7 +1,11 @@
 <script setup>
-import { onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { getMyProfile } from '../../services/Authservices'
-import { getAvailableRequestMedicines, submitMedicineRequest } from '../../services/MedicineRequests'
+import {
+    getAvailableRequestMedicines,
+    getMyAnnualAllowance,
+    submitMedicineRequest
+} from '../../services/MedicineRequests'
 
 const props = defineProps({
     IsOpen: Boolean,
@@ -17,12 +21,33 @@ const medicines = ref([])
 const loading = ref(false)
 const submitting = ref(false)
 const errorMessage = ref('')
-const selectedMedicine = ref('')
-const quantity = ref(1)
+const selectedMedicineIds = ref([])
+const quantities = ref({})
+const allowance = ref({ limit: 20000, used: 0, remaining: 20000 })
 const beneficiaryType = ref('Senior Citizen')
 const purpose = ref('')
 const prescriptionFile = ref(null)
 const prescriptionPreview = ref(null)
+const purposes = [
+    'Fever',
+    'Cough and colds',
+    'Pain relief',
+    'Hypertension',
+    'Diabetes',
+    'Vitamin supplementation',
+    'Other'
+]
+
+const selectedMedicines = computed(() => medicines.value
+    .filter((medicine) => selectedMedicineIds.value.includes(medicine.id))
+    .map((medicine) => ({
+        ...medicine,
+        requestedQuantity: Number(quantities.value[medicine.id]) || 1
+    })))
+const requestTotal = computed(() => selectedMedicines.value.reduce(
+    (total, medicine) => total + Number(medicine.price || 0) * medicine.requestedQuantity,
+    0
+))
 
 watch(() => props.IsOpen, async (isOpen) => {
     if (!isOpen) return
@@ -31,16 +56,19 @@ watch(() => props.IsOpen, async (isOpen) => {
     errorMessage.value = ''
 
     try {
-        const [profileResult, medicineData] = await Promise.all([
+        const [profileResult, medicineData, allowanceData] = await Promise.all([
             getMyProfile(),
-            getAvailableRequestMedicines()
+            getAvailableRequestMedicines(),
+            getMyAnnualAllowance()
         ])
         if (!profileResult.success) throw new Error(profileResult.error)
         profile.value = profileResult.data
         medicines.value = medicineData
-        selectedMedicine.value = medicineData.some((medicine) => medicine.id === props.initialMedicineId)
-            ? props.initialMedicineId
-            : medicineData[0]?.id ?? ''
+        allowance.value = allowanceData
+        selectedMedicineIds.value = medicineData.some((medicine) => medicine.id === props.initialMedicineId)
+            ? [props.initialMedicineId]
+            : []
+        quantities.value = Object.fromEntries(medicineData.map((medicine) => [medicine.id, 1]))
     } catch (error) {
         console.error('Failed to load medicine request form:', error)
         errorMessage.value = error.message || 'Unable to load the request form.'
@@ -98,12 +126,17 @@ function closeModal() {
 async function submitRequest() {
     errorMessage.value = ''
 
-    if (!selectedMedicine.value) {
-        errorMessage.value = 'Choose an available medicine.'
+    if (!selectedMedicineIds.value.length) {
+        errorMessage.value = 'Choose at least one available medicine.'
         return
     }
-    if (!Number.isInteger(Number(quantity.value)) || Number(quantity.value) < 1) {
-        errorMessage.value = 'Enter a quantity of at least one.'
+    if (selectedMedicines.value.some((medicine) => !Number.isInteger(medicine.requestedQuantity)
+        || medicine.requestedQuantity < 1 || medicine.requestedQuantity > Number(medicine.quantity))) {
+        errorMessage.value = 'Enter a valid quantity within the available stock for each selected medicine.'
+        return
+    }
+    if (requestTotal.value > allowance.value.remaining) {
+        errorMessage.value = 'This request exceeds your remaining annual medicine benefit.'
         return
     }
     if (!prescriptionFile.value) {
@@ -114,16 +147,18 @@ async function submitRequest() {
     submitting.value = true
     try {
         await submitMedicineRequest({
-            medicineId: selectedMedicine.value,
-            quantity: quantity.value,
+            items: selectedMedicines.value.map((medicine) => ({
+                medicineId: medicine.id,
+                quantity: medicine.requestedQuantity
+            })),
             purpose: purpose.value,
             beneficiaryType: beneficiaryType.value,
             prescriptionFile: prescriptionFile.value
         })
 
         removeFile()
-        selectedMedicine.value = ''
-        quantity.value = 1
+        selectedMedicineIds.value = []
+        quantities.value = {}
         purpose.value = ''
         emit('saved')
     } catch (error) {
@@ -168,7 +203,7 @@ async function submitRequest() {
                         class="w-full bg-gray-50 text-xs text-gray-800 placeholder-gray-400 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
 
-                <!-- Beneficiary Type & Quantity (2 columns) -->
+                <!-- Beneficiary Type -->
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-1.5">
                         <label class="text-xs font-semibold text-gray-700">Beneficiary Type</label>
@@ -179,24 +214,31 @@ async function submitRequest() {
                             <option value="General">General</option>
                         </select>
                     </div>
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-semibold text-gray-700">Quantity (pcs)</label>
-                        <input v-model.number="quantity" type="number" min="1" step="1" required
-                            class="w-full bg-gray-50 text-xs text-gray-800 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                    </div>
                 </div>
 
                 <!-- Medicine Name Selection -->
                 <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-gray-700">Select Medicine <span
+                    <label class="text-xs font-semibold text-gray-700">Select Medicines <span
                             class="text-red-500">*</span></label>
-                    <select v-model="selectedMedicine" required :disabled="loading || medicines.length === 0"
-                        class="w-full bg-gray-50 text-xs text-gray-800 px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                        <option value="" disabled>-- Choose Medicine --</option>
-                        <option v-for="medicine in medicines" :key="medicine.id" :value="medicine.id">
-                            {{ medicine.medicine_name }} ({{ medicine.dosage }} {{ medicine.unit }}) — {{ medicine.quantity }} in stock
-                        </option>
-                    </select>
+                    <div class="max-h-48 space-y-2 overflow-y-auto rounded-xl border border-gray-200 bg-gray-50 p-3">
+                        <label v-for="medicine in medicines" :key="medicine.id"
+                            class="flex items-center gap-3 rounded-lg bg-white p-2.5 text-xs">
+                            <input v-model="selectedMedicineIds" type="checkbox" :value="medicine.id"
+                                :disabled="loading || medicine.quantity <= 0"
+                                class="h-4 w-4 accent-blue-700">
+                            <span class="min-w-0 flex-1">
+                                <span class="block font-semibold text-gray-800">{{ medicine.medicine_name }} ({{ medicine.dosage }} {{ medicine.unit }})</span>
+                                <span class="text-gray-500">{{ medicine.quantity }} in stock · ₱{{ Number(medicine.price || 0).toFixed(2) }} per unit</span>
+                            </span>
+                            <input v-if="selectedMedicineIds.includes(medicine.id)" v-model.number="quantities[medicine.id]"
+                                type="number" min="1" :max="medicine.quantity" :aria-label="`Quantity for ${medicine.medicine_name}`"
+                                class="w-20 rounded-lg border border-gray-200 px-2 py-1.5 text-center">
+                        </label>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-600">
+                        <span>Annual benefit remaining: ₱{{ Number(allowance.remaining).toFixed(2) }}</span>
+                        <span>Request total: ₱{{ requestTotal.toFixed(2) }}</span>
+                    </div>
                     <p v-if="!loading && !medicines.length" class="text-[11px] text-gray-500">No medicines are currently available.</p>
                 </div>
 
@@ -257,8 +299,11 @@ async function submitRequest() {
                 <!-- Purpose / Ailment -->
                 <div class="space-y-1.5">
                     <label class="text-xs font-semibold text-gray-700">Purpose / Ailment</label>
-                    <textarea v-model="purpose" rows="2" placeholder="State your reason or symptoms (e.g., Fever and severe headache)..."
-                        class="w-full bg-gray-50 text-xs text-gray-800 placeholder-gray-400 p-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"></textarea>
+                    <select v-model="purpose" required
+                        class="w-full bg-gray-50 text-xs text-gray-800 px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <option value="" disabled>-- Select Purpose --</option>
+                        <option v-for="item in purposes" :key="item" :value="item">{{ item }}</option>
+                    </select>
                 </div>
 
             </div>

@@ -8,7 +8,7 @@ export async function addCategory(categoryData) {
                 {
                     category_name: categoryData.name,
                     description: categoryData.description,
-                    status: 'active'
+                    status: 'Active'
                 }
             ])
             .select()
@@ -25,7 +25,7 @@ export async function updateCategoryStatus(categoryId, status) {
     const { data, error } = await supabase
         .from('medicine_categories')
         .update({ status })
-        .eq('id', categoryId)
+        .eq('category_id', categoryId)
         .select()
         .single()
 
@@ -74,11 +74,26 @@ export async function AddMedicine(MedicineData, imageFile = null) {
     }
 }
 
-export async function updateMedicine(medicineId, medicineData) {
+export async function updateMedicine(medicineId, medicineData, imageFile = null) {
+    let uploadedPath = null
     try {
+        let payload = { ...medicineData }
+        if (imageFile) {
+            const ext = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }[imageFile.type]
+            if (!ext) throw new Error('Choose a JPG, PNG, or WebP image.')
+            if (imageFile.size > 2 * 1024 * 1024) throw new Error('Image must be 2 MB or smaller.')
+
+            uploadedPath = `${crypto.randomUUID()}.${ext}`
+            const { error: uploadError } = await supabase.storage
+                .from('medicine-images')
+                .upload(uploadedPath, imageFile)
+            if (uploadError) throw uploadError
+            payload.image_url = supabase.storage.from('medicine-images').getPublicUrl(uploadedPath).data.publicUrl
+        }
+
         const { data, error } = await supabase
             .from('medicines')
-            .update(medicineData)
+            .update(payload)
             .eq('id', medicineId)
             .select()
             .single()
@@ -86,6 +101,10 @@ export async function updateMedicine(medicineId, medicineData) {
         if (error) throw error
         return { data, error: null }
     } catch (error) {
+        if (uploadedPath) {
+            const { error: cleanupError } = await supabase.storage.from('medicine-images').remove([uploadedPath])
+            if (cleanupError) console.error('Failed to remove an unlinked medicine image:', cleanupError.message)
+        }
         console.error('Error in updateMedicine service:', error.message)
         return { data: null, error }
     }

@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { Archive, Search, Building2, Pill, User, RotateCcw, Trash } from '@lucide/vue'
+import { Archive, Search, Building2, Pill, User, RotateCcw, Trash, Layers3 } from '@lucide/vue'
 import { getArchivedRecords, permanentlyDeleteSupplier, setRecordArchived } from '../../services/Archive'
 
 const records = ref([])
@@ -33,6 +33,7 @@ async function loadArchive() {
 }
 
 function getRecordIcon(type) {
+    if (type === 'Categories') return Layers3
     if (type === 'Medicines') return Pill
     if (type === 'Beneficiaries') return User
     return Building2
@@ -83,7 +84,7 @@ onMounted(loadArchive)
         </div>
 
         <div class="mb-4 flex flex-wrap gap-2">
-            <button v-for="type in ['All', 'Medicines', 'Beneficiaries', 'Suppliers']" :key="type"
+            <button v-for="type in ['All', 'Categories', 'Medicines', 'Suppliers', 'Beneficiaries']" :key="type"
                 type="button" @click="selectedType = type"
                 :class="selectedType === type
                     ? 'bg-blue-600 text-white'

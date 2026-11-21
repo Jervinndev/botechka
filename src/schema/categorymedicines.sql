@@ -1,4 +1,4 @@
-create table medicine_categories (
+create table if not exists public.medicine_categories (
   category_id bigserial primary key,
   category_name varchar(100) not null,
   description text,

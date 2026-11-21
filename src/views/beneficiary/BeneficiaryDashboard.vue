@@ -151,7 +151,7 @@ onMounted(loadDashboard)
                 <AlignVerticalSpaceAround size="22" class="text-blue-700" />
             </div>
             <div class="relative flex min-w-0 flex-col">
-                <p class="text-xs font-medium text-gray-500 sm:text-sm">Next Dispensing Date</p>
+                <p class="text-xs font-medium text-gray-500 sm:text-sm">Next Eligible Date</p>
                 <h1 class="text-lg font-bold text-gray-900 sm:text-2xl">{{ nextDispensingLabel }}</h1>
                 <p class="text-xs text-gray-500">{{ formatDispensingDate(beneficiary?.next_dispensing_date) }}</p>
             </div>
@@ -177,7 +177,8 @@ onMounted(loadDashboard)
         {{ fetchError }}
     </p>
     <p v-else-if="!isLoading && !beneficiary" class="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
-        Walang beneficiary record na naka-link sa account na ito. Ipa-link ito sa admin para makita ang iyong status at history.
+        Walang beneficiary record na naka-link sa account na ito. Ipa-link ito sa admin para makita ang iyong status at
+        history.
     </p>
     <p v-if="requestSuccess" role="status" class="mt-3 rounded-lg bg-green-50 p-3 text-sm text-green-700">
         {{ requestSuccess }}
@@ -209,8 +210,7 @@ onMounted(loadDashboard)
 
                 </div>
             </div>
-            <button type="button" @click="openRequestModal"
-                aria-label="Request medicine"
+            <button type="button" @click="openRequestModal" aria-label="Request medicine"
                 class="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-700 px-3 py-2 text-sm text-white hover:bg-blue-800">
                 <Plus />
                 <span class="hidden sm:inline">Request Medicine</span>
@@ -220,7 +220,8 @@ onMounted(loadDashboard)
         <!-- Table Container -->
         <!-- MOBILE: cards -->
         <div class="space-y-3 md:hidden">
-            <p v-if="isLoading" class="rounded-xl bg-white p-6 text-center text-sm text-gray-500">Loading release history...</p>
+            <p v-if="isLoading" class="rounded-xl bg-white p-6 text-center text-sm text-gray-500">Loading release
+                history...</p>
             <p v-else-if="!filteredHistory.length" class="rounded-xl bg-white p-6 text-center text-sm text-gray-500">
                 No release history found.
             </p>
@@ -231,7 +232,8 @@ onMounted(loadDashboard)
                         <p class="text-sm font-semibold text-gray-900">
                             {{ `DIST-${String(transaction.distribution_transaction_id).padStart(4, '0')}` }}
                         </p>
-                        <p class="mt-0.5 text-xs text-gray-500">{{ formatDistributionDate(transaction.distribution_date) }}</p>
+                        <p class="mt-0.5 text-xs text-gray-500">{{ formatDistributionDate(transaction.distribution_date)
+                        }}</p>
                     </div>
                     <span class="shrink-0 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
                         {{ getTransactionQuantity(transaction) }} total
@@ -272,13 +274,15 @@ onMounted(loadDashboard)
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         <tr v-if="isLoading">
-                            <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-500">Loading release history...</td>
+                            <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-500">Loading release
+                                history...</td>
                         </tr>
                         <tr v-else-if="fetchError">
                             <td colspan="6" class="px-4 py-8 text-center text-sm text-red-600">{{ fetchError }}</td>
                         </tr>
                         <tr v-else-if="!filteredHistory.length">
-                            <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-500">No release history found.</td>
+                            <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-500">No release history
+                                found.</td>
                         </tr>
                         <tr v-for="transaction in filteredHistory" :key="transaction.distribution_transaction_id"
                             class="transition hover:bg-gray-50/50">
@@ -286,7 +290,8 @@ onMounted(loadDashboard)
                                 {{ `DIST-${String(transaction.distribution_transaction_id).padStart(4, '0')}` }}
                             </td>
                             <td class="whitespace-nowrap px-4 py-4">
-                                <p class="text-sm text-gray-700">{{ formatDistributionDate(transaction.distribution_date) }}</p>
+                                <p class="text-sm text-gray-700">{{
+                                    formatDistributionDate(transaction.distribution_date) }}</p>
                             </td>
                             <td class="px-4 py-4">
                                 <p v-for="(item, index) in transaction.distribution_items"
@@ -295,7 +300,8 @@ onMounted(loadDashboard)
                                 </p>
                             </td>
                             <td class="whitespace-nowrap px-4 py-4 text-sm font-medium text-gray-800">
-                                {{ transaction.distribution_items.map(item => `${item.quantity} ${item.unit || 'units'}`).join(', ') }}
+                                {{transaction.distribution_items.map(item => `${item.quantity} ${item.unit ||
+                                    'units'}`).join(', ')}}
                             </td>
                             <td class="px-4 py-4 text-sm text-gray-700">{{ transaction.purpose || '—' }}</td>
                             <td class="px-4 py-4 text-sm text-gray-700">Dispensed</td>

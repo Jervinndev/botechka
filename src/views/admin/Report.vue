@@ -13,11 +13,11 @@ const reportData = ref({
     medicines: [],
     transactions: [],
     beneficiaries: [],
-    requests: []
+    requests: [],
+    auditLogs: []
 })
 const isLoading = ref(false)
 const errorMessage = ref('')
-const lowStockThreshold = ref(10)
 
 function printReport() {
     window.print()
@@ -27,7 +27,7 @@ async function fetchReportData() {
     isLoading.value = true
     errorMessage.value = ''
     try {
-        const [medicinesResult, transactionsResult, beneficiariesResult, requestsResult] = await Promise.all([
+        const [medicinesResult, transactionsResult, beneficiariesResult, requestsResult, auditResult] = await Promise.all([
             supabase.from('medicines').select('*').is('archived_at', null).order('created_at', { ascending: false }),
             supabase.from('distribution_transactions').select(`
                 distribution_transaction_id, distribution_date, purpose, returned_at,
@@ -36,16 +36,21 @@ async function fetchReportData() {
             `).order('distribution_date', { ascending: false }),
             supabase.from('beneficiaries').select('*').is('archived_at', null).order('created_at', { ascending: false }),
             supabase.from('medicine_requests').select('request_id, status, created_at, beneficiary_name, medicine_name, quantity')
+                .order('created_at', { ascending: false }),
+            supabase.from('audit_logs')
+                .select('audit_log_id, user_name, user_email, user_role, action, entity_type, entity_id, details, created_at')
                 .order('created_at', { ascending: false })
+                .limit(500)
         ])
-        const failed = [medicinesResult, transactionsResult, beneficiariesResult, requestsResult].find((result) => result.error)
+        const failed = [medicinesResult, transactionsResult, beneficiariesResult, requestsResult, auditResult].find((result) => result.error)
         if (failed?.error) throw failed.error
 
         reportData.value = {
             medicines: medicinesResult.data || [],
             transactions: transactionsResult.data || [],
             beneficiaries: beneficiariesResult.data || [],
-            requests: requestsResult.data || []
+            requests: requestsResult.data || [],
+            auditLogs: auditResult.data || []
         }
     } catch (error) {
         console.error('Unable to load report data:', error)
@@ -84,7 +89,7 @@ const reportRows = computed(() => {
             const stock = Number(medicine.quantity) || 0
             row.medicineCount += 1
             row.stock += stock
-            if (stock > 0 && stock <= lowStockThreshold.value) row.lowStock += 1
+            if (stock > 0 && stock <= Math.max(0, Number(medicine.restock_level) || 0)) row.lowStock += 1
             if (stock === 0) row.outOfStock += 1
             if (medicine.expiration_date && new Date(medicine.expiration_date) < new Date()) row.expired += 1
             grouped.set(category, row)
@@ -101,7 +106,7 @@ const reportRows = computed(() => {
             stock: medicine.quantity,
             unit: medicine.unit,
             expiry: medicine.expiration_date,
-            status: Number(medicine.quantity) === 0 ? 'Out of stock' : Number(medicine.quantity) <= lowStockThreshold.value ? 'Low stock' : 'Available'
+            status: Number(medicine.quantity) === 0 ? 'Out of stock' : Number(medicine.quantity) <= Math.max(0, Number(medicine.restock_level) || 0) ? 'Low stock' : 'Available'
         }))
     } else if (selectedReport.value === 'Dispensing' || selectedReport.value === 'Return') {
         rows = reportData.value.transactions
@@ -143,12 +148,13 @@ const reportRows = computed(() => {
         }
         rows = [...grouped.values()]
     } else if (selectedReport.value === 'Audit Trail') {
-        rows = reportData.value.requests.filter((request) => inDateRange(request.created_at)).map((request) => ({
-            id: `REQ-${request.request_id}`,
-            date: request.created_at,
-            activity: `Medicine request ${request.status}`,
-            user: request.beneficiary_name,
-            details: `${request.medicine_name} × ${request.quantity}`
+        rows = reportData.value.auditLogs.filter((activity) => inDateRange(activity.created_at)).map((activity) => ({
+            id: activity.audit_log_id,
+            date: activity.created_at,
+            activity: activity.action,
+            user: `${activity.user_name}${activity.user_email ? ` (${activity.user_email})` : ''}`,
+            details: [activity.entity_type, activity.details?.name, activity.entity_id]
+                .filter(Boolean).join(' · ')
         }))
     }
 
@@ -163,7 +169,7 @@ const reportColumns = computed(() => {
         Dispensing: [['id', 'Transaction'], ['date', 'Date & Time'], ['beneficiary', 'Beneficiary'], ['items', 'Medicines'], ['quantity', 'Quantity'], ['purpose', 'Purpose'], ['status', 'Status']],
         Beneficiary: [['id', 'Beneficiary ID'], ['name', 'Name'], ['type', 'Type'], ['barangay', 'Barangay'], ['eligibility', 'Eligibility'], ['status', 'Status'], ['registered', 'Registered']],
         Supplier: [['supplier', 'Supplier'], ['medicineCount', 'No. of Medicines'], ['stock', 'Total Stock']],
-        'Audit Trail': [['id', 'Reference'], ['date', 'Date & Time'], ['activity', 'Activity'], ['user', 'Requested by'], ['details', 'Details']],
+        'Audit Trail': [['id', 'Reference'], ['date', 'Date & Time'], ['activity', 'Activity'], ['user', 'User account'], ['details', 'Details']],
         Return: [['id', 'Transaction'], ['date', 'Date & Time'], ['beneficiary', 'Beneficiary'], ['items', 'Medicines'], ['quantity', 'Quantity'], ['purpose', 'Purpose'], ['status', 'Status']]
     }
     return columns[selectedReport.value]
@@ -192,14 +198,6 @@ function exportCsv() {
 }
 
 onMounted(() => {
-    try {
-        const configuration = JSON.parse(localStorage.getItem('botechka_configuration') || '{}')
-        const configuredThreshold = Number(configuration.lowStockThreshold)
-        lowStockThreshold.value = Number.isFinite(configuredThreshold)
-            ? Math.max(0, configuredThreshold) : 10
-    } catch (error) {
-        console.error('Unable to load report configuration:', error)
-    }
     fetchReportData()
 })
 </script>
@@ -260,10 +258,6 @@ onMounted(() => {
             </div>
 
             <p v-if="errorMessage" role="alert" class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ errorMessage }}</p>
-            <p v-if="selectedReport === 'Audit Trail'" class="mb-4 text-xs text-slate-500">
-                Audit activity shows medicine requests. Other actions are not recorded because this project does not yet have a general audit log.
-            </p>
-
             <div class="overflow-x-auto rounded-xl border border-slate-200">
                 <table class="w-full min-w-[800px] text-left text-xs">
                     <thead>

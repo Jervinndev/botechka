@@ -4,8 +4,12 @@ ALTER TABLE public.medicines
 ALTER TABLE public.beneficiaries
     ADD COLUMN IF NOT EXISTS archived_at TIMESTAMPTZ;
 
+ALTER TABLE public.medicine_categories
+    ADD COLUMN IF NOT EXISTS archived_at TIMESTAMPTZ;
+
 GRANT UPDATE (archived_at) ON public.medicines TO authenticated;
 GRANT UPDATE (archived_at) ON public.beneficiaries TO authenticated;
+GRANT UPDATE (archived_at) ON public.medicine_categories TO authenticated;
 
 DROP POLICY IF EXISTS "Staff can view beneficiaries for archive" ON public.beneficiaries;
 CREATE POLICY "Staff can view beneficiaries for archive"
@@ -16,6 +20,19 @@ USING (public.is_current_user_staff());
 DROP POLICY IF EXISTS "Staff can archive beneficiaries" ON public.beneficiaries;
 CREATE POLICY "Staff can archive beneficiaries"
 ON public.beneficiaries
+FOR UPDATE TO authenticated
+USING (public.is_current_user_staff())
+WITH CHECK (public.is_current_user_staff());
+
+DROP POLICY IF EXISTS "Staff can view categories for archive" ON public.medicine_categories;
+CREATE POLICY "Staff can view categories for archive"
+ON public.medicine_categories
+FOR SELECT TO authenticated
+USING (public.is_current_user_staff());
+
+DROP POLICY IF EXISTS "Staff can archive categories" ON public.medicine_categories;
+CREATE POLICY "Staff can archive categories"
+ON public.medicine_categories
 FOR UPDATE TO authenticated
 USING (public.is_current_user_staff())
 WITH CHECK (public.is_current_user_staff());
@@ -47,5 +64,11 @@ EXECUTE FUNCTION public.prevent_non_staff_archive_change();
 DROP TRIGGER IF EXISTS prevent_non_staff_beneficiary_archive_change ON public.beneficiaries;
 CREATE TRIGGER prevent_non_staff_beneficiary_archive_change
 BEFORE UPDATE OF archived_at ON public.beneficiaries
+FOR EACH ROW
+EXECUTE FUNCTION public.prevent_non_staff_archive_change();
+
+DROP TRIGGER IF EXISTS prevent_non_staff_category_archive_change ON public.medicine_categories;
+CREATE TRIGGER prevent_non_staff_category_archive_change
+BEFORE UPDATE OF archived_at ON public.medicine_categories
 FOR EACH ROW
 EXECUTE FUNCTION public.prevent_non_staff_archive_change();

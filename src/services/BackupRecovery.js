@@ -3,6 +3,37 @@ import { supabase } from '../supabase/supabase'
 const tableNames = [
     'medicine_categories',
     'medicines',
+    'medicine_batches',
+    'suppliers',
+    'beneficiaries',
+    'distribution_purposes',
+    'beneficiary_annual_benefits',
+    'medicine_requests',
+    'medicine_request_items',
+    'distribution_transactions',
+    'distribution_items',
+    'distribution_returns',
+    'audit_logs'
+]
+
+const conflictColumns = {
+    medicine_categories: 'category_id',
+    medicines: 'id',
+    medicine_batches: 'id',
+    suppliers: 'id',
+    beneficiaries: 'beneficiary_id',
+    beneficiary_annual_benefits: 'requester_id,benefit_year',
+    distribution_purposes: 'purpose_id',
+    distribution_transactions: 'distribution_transaction_id',
+    distribution_items: 'distribution_item_id',
+    distribution_returns: 'return_id',
+    medicine_requests: 'request_id',
+    medicine_request_items: 'request_item_id',
+    audit_logs: 'audit_log_id'
+}
+const legacyRequiredTables = [
+    'medicine_categories',
+    'medicines',
     'suppliers',
     'beneficiaries',
     'distribution_purposes',
@@ -10,17 +41,6 @@ const tableNames = [
     'distribution_items',
     'medicine_requests'
 ]
-
-const conflictColumns = {
-    medicine_categories: 'category_id',
-    medicines: 'id',
-    suppliers: 'id',
-    beneficiaries: 'beneficiary_id',
-    distribution_purposes: 'purpose_id',
-    distribution_transactions: 'distribution_transaction_id',
-    distribution_items: 'distribution_item_id',
-    medicine_requests: 'request_id'
-}
 
 export async function createDataBackup() {
     const tables = {}
@@ -99,9 +119,14 @@ export function validateBackup(backup) {
         throw new Error('This is not a supported RHUBoTechka backup file.')
     }
 
-    for (const tableName of tableNames) {
+    for (const tableName of legacyRequiredTables) {
         if (!Array.isArray(backup.tables[tableName])) {
             throw new Error(`The backup is missing the ${tableName} records.`)
+        }
+    }
+    for (const tableName of tableNames) {
+        if (backup.tables[tableName] !== undefined && !Array.isArray(backup.tables[tableName])) {
+            throw new Error(`The backup has invalid ${tableName} records.`)
         }
     }
 }
@@ -111,13 +136,18 @@ export async function restoreDataBackup(backup) {
     const results = []
 
     for (const tableName of tableNames) {
-        const rows = backup.tables[tableName]
+        const rows = backup.tables[tableName] || []
         if (!rows.length) continue
-        const { error } = await supabase
-            .from(tableName)
-            .upsert(rows, { onConflict: conflictColumns[tableName] })
-        if (error) {
-            throw new Error(`Restore stopped at ${tableName} after ${results.join(', ') || 'no tables'} were merged: ${error.message}`)
+
+        for (let start = 0; start < rows.length; start += 500) {
+            const batch = rows.slice(start, start + 500)
+            const { error } = tableName === 'audit_logs'
+                ? await supabase.rpc('restore_audit_logs', { p_logs: batch })
+                : await supabase.from(tableName)
+                    .upsert(batch, { onConflict: conflictColumns[tableName] })
+            if (error) {
+                throw new Error(`Restore stopped at ${tableName} after ${results.join(', ') || 'no tables'} were merged: ${error.message}`)
+            }
         }
         results.push(tableName)
     }

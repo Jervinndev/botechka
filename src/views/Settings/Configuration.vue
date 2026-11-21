@@ -5,14 +5,13 @@ import { Settings2, Save } from '@lucide/vue'
 const storageKey = 'botechka_configuration'
 const settings = reactive({
     organizationName: 'RHU-BoTechKa',
-    lowStockThreshold: 10,
     expiryAlertDays: 30
 })
 const successMessage = ref('')
 const errorMessage = ref('')
 
 function saveSettings() {
-    if (settings.lowStockThreshold < 0 || settings.expiryAlertDays < 0) {
+    if (settings.expiryAlertDays < 0) {
         errorMessage.value = 'Thresholds cannot be negative.'
         successMessage.value = ''
         return
@@ -54,12 +53,6 @@ onMounted(() => {
                 Organization name
                 <input v-model.trim="settings.organizationName" type="text" required
                     class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 outline-none focus:border-blue-500">
-            </label>
-            <label class="text-sm font-medium text-slate-700">
-                Low stock alert threshold
-                <input v-model.number="settings.lowStockThreshold" type="number" min="0" step="1" required
-                    class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 outline-none focus:border-blue-500">
-                <span class="mt-1 block text-xs font-normal text-slate-500">Notify when on-hand stock is at or below this quantity.</span>
             </label>
             <label class="text-sm font-medium text-slate-700">
                 Expiry alert window (days)

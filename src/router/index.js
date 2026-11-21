@@ -39,6 +39,7 @@ import SuperAdminLayout from '../components/layout/superadmin.vue'
 import Notificationbene from '../views/beneficiary/Notificationbene.vue'
 import Requestmedicines from '../views/beneficiary/Requestmedicines.vue'
 import BeneficiarySettings from '../views/beneficiary/BeneficiarySettings.vue'
+import UserProfile from '../views/UserProfile.vue'
 
 // eto mga routes naman to tanginanyo
 const router = createRouter({
@@ -84,6 +85,12 @@ const router = createRouter({
             name: 'login',
             component: Login,
             meta: { hideHeader: true }
+        },
+        {
+            path: '/user-profile',
+            name: 'user-profile',
+            component: UserProfile,
+            meta: { requiresAuth: true, allowedRoles: ['beneficiary', 'personnel', 'admin', 'super_admin'], hideHeader: true }
         },
         {
             path: '/forgot-password',
@@ -190,7 +197,6 @@ const router = createRouter({
                     path: '/settings',
                     name: 'settings',
                     component: Settings,
-                    meta: { adminOnly: true },
                     redirect: { name: 'settings-appearance' },
                     children: [
                         {
@@ -217,6 +223,12 @@ const router = createRouter({
                             path: 'suppliers',
                             name: 'settings-suppliers',
                             component: SettingsSuppliers
+                        },
+                        {
+                            path: 'account-management',
+                            name: 'settings-account-management',
+                            component: SettingsAccountManagement,
+                            meta: { adminOnly: false, allowedRoles: ['admin', 'super_admin'] }
                         }
                     ]
                 }
@@ -227,15 +239,7 @@ const router = createRouter({
             name: 'super-admin',
             component: SuperAdminLayout,
             meta: { requiresAuth: true, hideHeader: true, allowedRoles: ['super_admin'] },
-            redirect: { name: 'settings-account-management' },
-            children: [
-                {
-                    path: 'account-management',
-                    name: 'settings-account-management',
-                    component: SettingsAccountManagement,
-                    meta: { requiresAuth: true, allowedRoles: ['super_admin'] }
-                }
-            ]
+            redirect: { name: 'settings-account-management' }
         }
     ]
 })
@@ -281,15 +285,16 @@ router.beforeEach(async (to, from) => {
         return { name: role ? 'dashboard' : 'login' }
     }
 
-    if (role === 'super_admin' && to.name !== 'settings-account-management') {
+    if (role === 'super_admin' && !['settings-account-management', 'user-profile'].includes(to.name)) {
         return { name: 'settings-account-management' }
     }
 
-    if (isAuthenticated && role === 'beneficiary' && to.meta.requiresAuth && !to.meta.beneficiaryOnly) {
+    if (isAuthenticated && role === 'beneficiary' && to.meta.requiresAuth && !to.meta.beneficiaryOnly
+        && to.name !== 'user-profile') {
         return { name: 'beneficiary-dashboard' }
     }
 
-    if (to.name === 'settings-account-management' && role !== 'super_admin') {
+    if (to.name === 'settings-account-management' && !['admin', 'super_admin'].includes(role)) {
         return { name: role === 'beneficiary' ? 'beneficiary-dashboard' : 'dashboard' }
     }
 

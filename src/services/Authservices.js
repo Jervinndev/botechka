@@ -17,6 +17,17 @@ export const loginUser = async ({ email, password }) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
         if (error) throw error
+        const { error: auditError } = await supabase.rpc('log_audit_activity', {
+            p_action: 'login',
+            p_entity_type: 'Account',
+            p_entity_id: data.user.id,
+            p_details: {}
+        })
+        if (auditError) {
+            const { error: signOutError } = await supabase.auth.signOut()
+            if (signOutError) console.error('Unable to roll back sign-in after the audit log failed:', signOutError.message)
+            throw new Error(`Unable to record login activity: ${auditError.message}`)
+        }
 
         return { success: true, data }
     } catch (error) {
@@ -66,6 +77,18 @@ export async function getSessionUser() {
 // LOGOUT USER
 export async function signOutUser() {
     try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        if (userError) throw userError
+        if (user) {
+            const { error: auditError } = await supabase.rpc('log_audit_activity', {
+                p_action: 'logout',
+                p_entity_type: 'Account',
+                p_entity_id: user.id,
+                p_details: {}
+            })
+            if (auditError) throw new Error(`Unable to record logout activity: ${auditError.message}`)
+        }
+
         const { error } = await supabase.auth.signOut()
 
         if (error) throw error
@@ -89,7 +112,7 @@ export const getMyProfile = async () => {
 
         const { data, error } = await supabase
             .from('profiles')
-            .select(`id, fname, mname, lname, contactnumber, barangay, email, role`)
+            .select(`id, fname, mname, lname, contactnumber, barangay, email, role, created_at`)
             .eq('id', user.id)
             .single()
 

@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS public.medicines (
     medicine_name TEXT NOT NULL,
     category TEXT NOT NULL,
     quantity INTEGER NOT NULL DEFAULT 0,
+    price NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (price >= 0),
+    restock_level INTEGER NOT NULL DEFAULT 10 CHECK (restock_level >= 0),
     dosage TEXT NOT NULL,
     unit TEXT NOT NULL,
     batch_number TEXT NOT NULL,
@@ -17,6 +19,16 @@ CREATE TABLE IF NOT EXISTS public.medicines (
     image_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+ALTER TABLE public.medicines
+    ADD COLUMN IF NOT EXISTS price NUMERIC(10,2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS restock_level INTEGER NOT NULL DEFAULT 10;
+
+ALTER TABLE public.medicines
+    DROP CONSTRAINT IF EXISTS medicines_price_check,
+    ADD CONSTRAINT medicines_price_check CHECK (price >= 0),
+    DROP CONSTRAINT IF EXISTS medicines_restock_level_check,
+    ADD CONSTRAINT medicines_restock_level_check CHECK (restock_level >= 0);
 
 -- Kung mayroon nang medicines table na wala pang image_url
 ALTER TABLE public.medicines

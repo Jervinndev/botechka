@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { Pencil, Eye, Archive, RotateCcw, X, ChevronDown } from '@lucide/vue'
+import { Pencil, Eye, Archive, RotateCcw, X, ChevronDown, FileSpreadsheet } from '@lucide/vue'
 import { getMedicines } from '../../services/Fetches'
 import AddMedicineModal from '../../components/modals/Addmedicine.vue'
 import Addnewstocks from '../../components/modals/Addnewstocks.vue'
@@ -9,6 +9,7 @@ import InventorySkeleton from '../../Skelitonloader/inventoryskeliton.vue'
 import { setRecordArchived } from '../../services/Archive'
 import AdminTopActions from '../../components/admin/AdminTopActions.vue'
 import { isWithinDateRange } from '../../utils/dateRange.js'
+import readXlsxFile from 'read-excel-file/browser'
 
 const medicines = ref([])
 const dateRange = ref(null)
@@ -23,6 +24,111 @@ const currentPage = ref(1)
 const pageSize = 10
 const actionError = ref('')
 const fetchError = ref('')
+const isImporting = ref(false)
+const importInput = ref(null)
+
+function normalizeHeader(value) {
+    return String(value || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '')
+}
+
+function formatImportDate(value, label) {
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+        const year = value.getFullYear()
+        const month = String(value.getMonth() + 1).padStart(2, '0')
+        const day = String(value.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
+    }
+
+    const date = String(value || '').trim()
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(Date.parse(`${date}T00:00:00`))) {
+        return date
+    }
+
+    throw new Error(`${label} must be an Excel date cell or use YYYY-MM-DD format.`)
+}
+
+async function importMedicines(event) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    actionError.value = ''
+    isImporting.value = true
+    try {
+        if (file.size > 10 * 1024 * 1024) throw new Error('Choose a workbook smaller than 10 MB.')
+        const [headerRow, ...dataRows] = await readXlsxFile(file)
+        if (!headerRow?.length) throw new Error('The workbook does not contain a header row.')
+
+        const headerAliases = {
+            medicinename: 'medicine_name',
+            medicineid: 'medicine_id',
+            category: 'category',
+            quantity: 'quantity',
+            price: 'price',
+            priceperunit: 'price',
+            restocklevel: 'restock_level',
+            dosage: 'dosage',
+            unit: 'unit',
+            batchnumber: 'batch_number',
+            supplier: 'supplier',
+            manufacturingdate: 'manufacturing_date',
+            expirationdate: 'expiration_date'
+        }
+        const headers = headerRow.map((header) => headerAliases[normalizeHeader(header)])
+        const rows = dataRows
+            .filter((row) => row.some((value) => value !== null && value !== ''))
+            .map((row) => Object.fromEntries(row
+                .map((value, index) => [headers[index], value])
+                .filter(([key]) => key)))
+        if (!rows.length) throw new Error('The first worksheet has no medicine rows.')
+
+        let savedCount = 0
+        for (const [index, row] of rows.entries()) {
+            const required = ['medicine_name', 'category', 'quantity', 'dosage', 'unit', 'batch_number',
+                'supplier', 'manufacturing_date', 'expiration_date']
+            const missing = required.filter((key) => row[key] === '' || row[key] === null || row[key] === undefined)
+            if (missing.length) {
+                throw new Error(`Row ${index + 2} is missing: ${missing.join(', ')}. ${savedCount} earlier row(s) were saved.`)
+            }
+
+            const payload = {
+                medicine_name: String(row.medicine_name).trim(),
+                medicine_id: String(row.medicine_id || `MED-${crypto.randomUUID().slice(0, 8).toUpperCase()}`).trim(),
+                category: String(row.category).trim(),
+                quantity: Number(row.quantity),
+                price: Number(row.price || 0),
+                restock_level: Number(row.restock_level || 10),
+                dosage: String(row.dosage).trim(),
+                unit: String(row.unit).trim(),
+                batch_number: String(row.batch_number).trim(),
+                supplier: String(row.supplier).trim(),
+                manufacturing_date: formatImportDate(row.manufacturing_date, 'Manufacturing date'),
+                expiration_date: formatImportDate(row.expiration_date, 'Expiration date')
+            }
+            if (!Number.isInteger(payload.quantity) || payload.quantity < 0
+                || !Number.isFinite(payload.price) || payload.price < 0
+                || !Number.isInteger(payload.restock_level) || payload.restock_level < 0) {
+                throw new Error(`Row ${index + 2} has an invalid quantity, price, or restock level. ${savedCount} earlier row(s) were saved.`)
+            }
+
+            const result = await AddMedicine(payload)
+            if (result.error) {
+                throw new Error(`Row ${index + 2} (${payload.medicine_name}) failed: ${result.error.message}. ${savedCount} earlier row(s) were saved.`)
+            }
+            savedCount += 1
+        }
+
+        actionError.value = ''
+        window.alert(`${savedCount} medicine(s) imported successfully.`)
+        await fetchInventory()
+    } catch (error) {
+        console.error('Unable to import medicine workbook:', error)
+        actionError.value = error.message || 'Unable to import this workbook.'
+        await fetchInventory()
+    } finally {
+        isImporting.value = false
+    }
+}
 
 async function fetchInventory() {
     isLoading.value = true
@@ -131,6 +237,13 @@ onMounted(() => {
                         class="flex items-center justify-center 2xl:w-auto w-full bg-blue-700 text-white p-2 px-4 gap-2 rounded-md hover:bg-blue-800 transition">
                         <span class="2xl:text-md text-sm">Add Medicines</span>
                     </button>
+                    <button type="button" @click="importInput?.click()" :disabled="isImporting"
+                        class="flex items-center justify-center 2xl:w-auto w-full bg-emerald-700 text-white p-2 px-4 gap-2 rounded-md hover:bg-emerald-800 transition disabled:opacity-50">
+                        <FileSpreadsheet :size="16" />
+                        <span class="2xl:text-md text-sm">{{ isImporting ? 'Importing...' : 'Batch Upload' }}</span>
+                    </button>
+                    <input ref="importInput" type="file" accept=".xlsx" class="hidden"
+                        @change="importMedicines">
                     <button @click="IsAddstockOpen = true"
                         class="flex items-center justify-center 2xl:w-auto w-full bg-green-700 text-white p-2 px-4 gap-2 rounded-md">
                         <span class="2xl:text-md text-sm">Add stock</span>
@@ -169,13 +282,14 @@ onMounted(() => {
             <p v-if="actionError" role="alert" class="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ actionError
                 }}</p>
             <!-- Table para sa Dynamic Data galing Supabase -->
-            <table class="2xl:w-full w-200 bg-white border border-gray-100 rounded-xl border-collapse overflow-hidden">
+            <table class="2xl:w-full w-240 bg-white border border-gray-100 rounded-xl border-collapse overflow-hidden">
                 <thead class="bg-blue-700 text-white">
-                    <tr class="grid grid-cols-8 text-left">
+                    <tr class="grid grid-cols-9 text-left">
                         <th class="p-3 font-semibold text-gray-50">Medicine Name</th>
                         <th class="p-3 font-semibold text-gray-50">Medicine ID</th>
                         <th class="p-3 font-semibold text-gray-50">Category</th>
                         <th class="p-3 font-semibold text-gray-50">Quantity</th>
+                        <th class="p-3 font-semibold text-gray-50">Price</th>
                         <th class="p-3 font-semibold text-gray-50">Status</th>
                         <th class="p-3 font-semibold text-gray-50">Dosage</th>
                         <th class="p-3 font-semibold text-gray-50">Unit</th>
@@ -186,7 +300,7 @@ onMounted(() => {
                 <InventorySkeleton v-if="isLoading" />
                 <tbody v-else-if="fetchError">
                     <tr>
-                        <td colspan="8" class="text-center p-6 text-red-600 text-sm">{{ fetchError }}</td>
+                        <td colspan="9" class="text-center p-6 text-red-600 text-sm">{{ fetchError }}</td>
                     </tr>
                 </tbody>
                 <tbody v-else-if="searchfilter.length === 0">
@@ -198,7 +312,7 @@ onMounted(() => {
                 </tbody>
                 <tbody v-else class="divide-y divide-gray-100">
                     <tr v-for="med in paginatedMedicines" :key="med.id"
-                        class="grid grid-cols-8 items-center hover:bg-gray-50">
+                        class="grid grid-cols-9 items-center hover:bg-gray-50">
                         <td class="flex item-center justify-start text-center gap-3 p-3 text-gray-700">
                             <img v-if="med.image_url" :src="med.image_url" :alt="`${med.medicine_name} image`"
                                 class="h-10 w-10 rounded-lg object-cover">
@@ -208,13 +322,15 @@ onMounted(() => {
                         <td class="p-3 text-gray-500">{{ med.medicine_id || 'N/A' }}</td>
                         <td class="p-3 text-gray-600">{{ med.category }}</td>
                         <td class="p-3 text-gray-700 font-medium">{{ med.quantity }}</td>
+                        <td class="p-3 text-gray-700">₱{{ Number(med.price || 0).toFixed(2) }}</td>
                         <td class="p-3">
                             <span :class="{
-                                'bg-green-100 text-green-700': med.quantity > 50,
-                                'bg-yellow-100 text-yellow-700': med.quantity > 0 && med.quantity <= 50,
+                                'bg-green-100 text-green-700': med.quantity > med.restock_level,
+                                'bg-yellow-100 text-yellow-700': med.quantity > 0 && med.quantity <= med.restock_level,
                                 'bg-red-100 text-red-700': med.quantity === 0
                             }" class="px-2 py-1 text-xs rounded-full font-medium">
-                                {{ med.quantity > 50 ? 'Available' : (med.quantity > 0 ? 'Low Stock' : 'Out of Stock')
+                                {{ med.quantity > med.restock_level ? 'Available' : (med.quantity > 0 ? 'Low Stock' :
+                                    'Out of Stock')
                                 }}
                             </span>
                         </td>
@@ -295,6 +411,15 @@ onMounted(() => {
                         <dt class="text-xs text-gray-500">Available stock</dt>
                         <dd class="mt-1 text-sm font-medium">{{ selectedMedicine.quantity }} {{ selectedMedicine.unit }}
                         </dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-gray-500">Price per unit</dt>
+                        <dd class="mt-1 text-sm font-medium">₱{{ Number(selectedMedicine.price || 0).toFixed(2) }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-gray-500">Restock level</dt>
+                        <dd class="mt-1 text-sm font-medium">{{ selectedMedicine.restock_level ?? 10 }} {{
+                            selectedMedicine.unit }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs text-gray-500">Dosage</dt>

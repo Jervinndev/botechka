@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { Pill, Search, X } from '@lucide/vue'
+import { Pill, Search, X, Archive } from '@lucide/vue'
 import { getLocalDateString } from '../../utils/dates'
 
 const props = defineProps({
@@ -16,7 +16,7 @@ const props = defineProps({
     }
 })
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'archive'])
 const router = useRouter()
 const searchQuery = ref('')
 
@@ -119,6 +119,10 @@ function viewInInventory() {
                 </ul>
 
                 <footer class="mt-3 border-t border-gray-100 pt-3">
+                    <button type="button" @click="emit('archive')"
+                        class="mb-2 flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 px-3 py-2.5 text-sm font-semibold text-amber-700 hover:bg-amber-50">
+                        <Archive :size="16" /> Archive Category
+                    </button>
                     <button type="button" @click="viewInInventory"
                         class="w-full rounded-lg bg-blue-700 px-3 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
                         View in Inventory

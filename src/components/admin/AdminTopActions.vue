@@ -15,7 +15,6 @@ const profileError = ref('')
 const actionError = ref('')
 const isLoadingNotifications = ref(false)
 const isSigningOut = ref(false)
-const lowStockThreshold = ref(10)
 const expiryAlertDays = ref(30)
 const notificationPreferences = ref({
     inventory: true,
@@ -60,9 +59,7 @@ function readPreferences() {
         const reads = JSON.parse(localStorage.getItem('botechka_notifications_read') || '[]')
         unreadIds.value = Array.isArray(reads) ? reads : []
         const config = JSON.parse(localStorage.getItem('botechka_configuration') || '{}')
-        const threshold = Number(config.lowStockThreshold)
         const expiryDays = Number(config.expiryAlertDays)
-        lowStockThreshold.value = Number.isFinite(threshold) ? Math.max(0, threshold) : 10
         expiryAlertDays.value = Number.isFinite(expiryDays) ? Math.max(0, expiryDays) : 30
         const savedPreferences = JSON.parse(localStorage.getItem('botechka_notification_preferences') || '{}')
         notificationPreferences.value = { ...notificationPreferences.value, ...savedPreferences }
@@ -78,7 +75,7 @@ async function loadNotifications() {
     try {
         const [medicinesResult, requestsResult, distributionsResult] = await Promise.all([
             notificationPreferences.value.inventory ? supabase.from('medicines')
-                .select('id, medicine_name, quantity, expiration_date, created_at')
+                .select('id, medicine_name, quantity, restock_level, expiration_date, created_at')
                 .is('archived_at', null) : Promise.resolve({ data: [], error: null }),
             notificationPreferences.value.requests ? supabase.from('medicine_requests')
                 .select('request_id, medicine_name, status, created_at')
@@ -96,7 +93,7 @@ async function loadNotifications() {
         const items = []
         for (const medicine of medicinesResult.data || []) {
             const quantity = Number(medicine.quantity) || 0
-            if (quantity <= lowStockThreshold.value) {
+            if (quantity <= Math.max(0, Number(medicine.restock_level) || 0)) {
                 items.push({
                     id: `Inventory-low-${medicine.id}`,
                     title: quantity === 0 ? 'Medicine out of stock' : 'Low medicine stock',

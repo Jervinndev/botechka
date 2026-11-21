@@ -77,12 +77,41 @@ $$;
 REVOKE ALL ON FUNCTION public.is_current_user_staff() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.is_current_user_staff() TO authenticated;
 
+CREATE OR REPLACE FUNCTION public.is_current_user_admin()
+RETURNS BOOLEAN
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public, pg_temp
+SET row_security = off
+AS $$
+    SELECT EXISTS (
+        SELECT 1
+        FROM public.profiles
+        WHERE id = (SELECT auth.uid())
+          AND LOWER(role) = 'admin'
+    );
+$$;
+
+REVOKE ALL ON FUNCTION public.is_current_user_admin() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.is_current_user_admin() TO authenticated;
+
 DROP POLICY IF EXISTS "Super admins can view all profiles" ON public.profiles;
 CREATE POLICY "Super admins can view all profiles"
 ON public.profiles
 FOR SELECT
 TO authenticated
 USING (public.is_current_user_super_admin());
+
+DROP POLICY IF EXISTS "Admins can view staff profiles" ON public.profiles;
+CREATE POLICY "Admins can view staff profiles"
+ON public.profiles
+FOR SELECT
+TO authenticated
+USING (
+    role IN ('admin', 'personnel')
+    AND public.is_current_user_admin()
+);
 
 DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile"
@@ -101,16 +130,49 @@ SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
 BEGIN
-    IF NEW.role IS DISTINCT FROM OLD.role
-       AND auth.uid() IS NOT NULL
-       AND NOT public.is_current_user_super_admin() THEN
-        RAISE EXCEPTION 'Only a super admin can change account roles.';
+    IF NEW.role IS DISTINCT FROM OLD.role AND auth.uid() IS NOT NULL THEN
+        IF public.is_current_user_super_admin() THEN
+            RETURN NEW;
+        END IF;
+        IF OLD.role = 'personnel'
+           AND NEW.role IN ('personnel', 'beneficiary')
+           AND public.is_current_user_admin() THEN
+            RETURN NEW;
+        END IF;
+        RAISE EXCEPTION 'Only a super admin can assign administrator roles.';
     END IF;
     RETURN NEW;
 END;
 $$;
 
 REVOKE ALL ON FUNCTION public.prevent_unauthorized_profile_role_change() FROM PUBLIC, anon, authenticated;
+
+CREATE OR REPLACE FUNCTION public.admin_update_personnel_role(p_user_id UUID, p_role TEXT)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+BEGIN
+    IF auth.uid() IS NULL OR NOT public.is_current_user_admin() THEN
+        RAISE EXCEPTION 'Only an admin can manage personnel accounts.';
+    END IF;
+    IF p_user_id = auth.uid() OR p_role NOT IN ('personnel', 'beneficiary') THEN
+        RAISE EXCEPTION 'Admins can only deactivate or retain personnel accounts.';
+    END IF;
+
+    UPDATE public.profiles
+       SET role = p_role
+     WHERE id = p_user_id
+       AND role = 'personnel';
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Personnel account was not found or is no longer manageable.';
+    END IF;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_update_personnel_role(UUID, TEXT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_update_personnel_role(UUID, TEXT) TO authenticated;
 
 DROP TRIGGER IF EXISTS prevent_unauthorized_profile_role_change ON public.profiles;
 CREATE TRIGGER prevent_unauthorized_profile_role_change

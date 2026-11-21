@@ -12,11 +12,13 @@ const storageKey = ref('botechka_beneficiary_notifications_read')
 
 const notifications = computed(() => requests.value.map((request) => ({
     id: `beneficiary-request-${request.request_id}`,
-    title: request.status === 'pending' ? 'Request pending' : `Request ${request.status}`,
-    description: `${request.medicine_name} · ${request.quantity} ${request.medicine_unit || 'unit(s)'}`,
+    title: request.status === 'pending' ? 'Request pending' : `Request ${request.status.replaceAll('_', ' ')}`,
+    description: (request.items || []).map((item) =>
+        `${item.medicine_name} × ${item.quantity} ${item.medicine_unit || 'unit(s)'}`).join(', '),
     date: request.reviewed_at || request.created_at,
     status: request.status,
-    reason: request.rejection_reason
+    reason: request.rejection_reason,
+    pickupInstructions: request.pickup_instructions
 })))
 const unreadCount = computed(() => notifications.value.filter((item) => !readIds.value.includes(item.id)).length)
 
@@ -118,6 +120,9 @@ onMounted(async () => {
                     </div>
                     <p class="mt-1 text-sm text-gray-600">{{ item.description }}</p>
                     <p v-if="item.reason" class="mt-1 text-xs text-red-600">Reason: {{ item.reason }}</p>
+                    <p v-if="item.pickupInstructions" class="mt-1 text-xs text-blue-700">
+                        Pickup instructions: {{ item.pickupInstructions }}
+                    </p>
                     <p class="mt-2 text-xs text-gray-400">{{ formatDate(item.date) }}</p>
                 </div>
                 <button v-if="!isRead(item.id)" type="button" @click="markRead(item.id)"

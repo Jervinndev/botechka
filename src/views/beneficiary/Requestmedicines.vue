@@ -64,6 +64,19 @@ function requestCode(requestId) {
     return `REQ-${String(requestId).padStart(4, '0')}`
 }
 
+function requestItems(request) {
+    return request.items?.length ? request.items : [{
+        medicine_name: request.medicine_name,
+        medicine_dosage: request.medicine_dosage,
+        medicine_unit: request.medicine_unit,
+        quantity: request.quantity
+    }]
+}
+
+function requestQuantity(request) {
+    return requestItems(request).reduce((total, item) => total + Number(item.quantity || 0), 0)
+}
+
 function formatDate(date) {
     return new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(new Date(date))
 }
@@ -207,10 +220,13 @@ onMounted(() => {
                             <td class="py-4 px-6 font-semibold text-gray-900">{{ requestCode(request.request_id) }}</td>
                             <td class="py-4 px-6 text-gray-500">{{ formatDate(request.created_at) }}</td>
                             <td class="py-4 px-6">
-                                <span class="font-bold text-gray-900">{{ request.medicine_name }}</span>
-                                <p class="text-[11px] text-gray-400">{{ request.medicine_dosage }} {{ request.medicine_unit }}</p>
+                                <span v-for="item in requestItems(request)" :key="item.medicine_id || item.medicine_name"
+                                    class="mb-1 block last:mb-0">
+                                    <span class="font-bold text-gray-900">{{ item.medicine_name }}</span>
+                                    <span class="text-[11px] text-gray-400"> {{ item.medicine_dosage }} {{ item.medicine_unit }}</span>
+                                </span>
                             </td>
-                            <td class="py-4 px-6 font-medium text-gray-700">{{ request.quantity }} {{ request.medicine_unit }}</td>
+                            <td class="py-4 px-6 font-medium text-gray-700">{{ requestQuantity(request) }} units</td>
                             <td class="py-4 px-6 text-gray-600">{{ request.purpose || '—' }}</td>
                             <td class="py-4 px-6">
                                 <span :class="statusClass(request.status)"
@@ -218,6 +234,12 @@ onMounted(() => {
                                     <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
                                     {{ request.status }}
                                 </span>
+                                <p v-if="request.rejection_reason" class="mt-1 max-w-xs text-[11px] text-red-600">
+                                    Rejection reason: {{ request.rejection_reason }}
+                                </p>
+                                <p v-if="request.pickup_instructions" class="mt-1 max-w-xs text-[11px] text-blue-700">
+                                    Pickup: {{ request.pickup_instructions }}
+                                </p>
                             </td>
                             <td class="py-4 px-6 text-right">
                                 <button v-if="request.status === 'pending'" @click="cancelRequest(request)"

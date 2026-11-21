@@ -46,6 +46,8 @@ const createDefaultForm = () => ({
     medicine_id: `MED-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
     category: '',
     quantity: 0,
+    price: 0,
+    restock_level: 10,
     dosage: '',
     unit: '',
     batch_number: '',
@@ -115,11 +117,16 @@ function handleImageSelected(event) {
 
 watch(() => [props.IsOpen, props.medicine], ([isOpen, medicine]) => {
     if (!isOpen) return
+    if (imagePreviewUrl.value) URL.revokeObjectURL(imagePreviewUrl.value)
+    imagePreviewUrl.value = ''
+    selectedImage.value = null
     if (medicine) {
         formData.value = {
             ...createDefaultForm(),
             ...medicine,
-            quantity: Number(medicine.quantity) || 0
+            quantity: Number(medicine.quantity) || 0,
+            price: Number(medicine.price) || 0,
+            restock_level: Number(medicine.restock_level) || 0
         }
         errorMessage.value = ''
     } else {
@@ -144,6 +151,8 @@ async function saveMedicine() {
             medicine_id: formData.value.medicine_id,
             category: formData.value.category,
             quantity: Number(formData.value.quantity),
+            price: Number(formData.value.price),
+            restock_level: Number(formData.value.restock_level),
             dosage: formData.value.dosage,
             unit: formData.value.unit,
             batch_number: formData.value.batch_number.trim(),
@@ -173,7 +182,7 @@ async function saveMedicine() {
         }
 
         const response = props.medicine
-            ? await updateMedicine(props.medicine.id, payload)
+            ? await updateMedicine(props.medicine.id, payload, selectedImage.value)
             : await AddMedicine(payload, selectedImage.value)
 
         if (response.error) {
@@ -233,8 +242,9 @@ async function saveMedicine() {
                     </div>
 
                     <div class="mt-6 grid grid-cols-1 gap-6">
-                        <div v-if="!props.medicine" class="flex items-center gap-3">
-                            <img v-if="imagePreviewUrl" :src="imagePreviewUrl" alt="Medicine image preview"
+                        <div class="flex items-center gap-3">
+                            <img v-if="imagePreviewUrl || props.medicine?.image_url"
+                                :src="imagePreviewUrl || props.medicine.image_url" alt="Medicine image preview"
                                 class="h-20 w-20 rounded-lg object-cover">
                             <div v-else
                                 class="flex h-20 w-20 items-center justify-center rounded-lg bg-gray-100 text-gray-400">
@@ -243,7 +253,7 @@ async function saveMedicine() {
                             <div>
                                 <label for="imageInput"
                                     class="cursor-pointer rounded-xl bg-blue-700 px-4 py-2 text-white hover:bg-blue-800">
-                                    {{ selectedImage ? 'Change Image' : 'Upload Image' }}
+                                    {{ selectedImage || props.medicine?.image_url ? 'Change Image' : 'Upload Image' }}
                                 </label>
                                 <input type="file" class="hidden" id="imageInput"
                                     accept="image/jpeg,image/png,image/webp" @change="handleImageSelected">
@@ -275,7 +285,7 @@ async function saveMedicine() {
                                         class="w-full cursor-pointer rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                         required>
                                         <option value="">-- Select Category --</option>
-                                        <option v-for="category in categories" :key="category.id"
+                                        <option v-for="category in categories" :key="category.category_id"
                                             :value="category.category_name">
                                             {{ category.category_name }}
                                         </option>
@@ -297,6 +307,20 @@ async function saveMedicine() {
                                     <input type="number" v-model="formData.quantity"
                                         class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 placeholder:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-700"
                                         placeholder="e.g. 100" min="0" required>
+                                </div>
+                                <div class="grid gap-1">
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Price per unit (₱) <span
+                                            class="text-red-500">*</span></label>
+                                    <input type="number" v-model.number="formData.price" min="0" step="0.01"
+                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700"
+                                        required>
+                                </div>
+                                <div class="grid gap-1">
+                                    <label class="font-inter text-sm font-medium text-[#404040]">Restock level <span
+                                            class="text-red-500">*</span></label>
+                                    <input type="number" v-model.number="formData.restock_level" min="0" step="1"
+                                        class="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-700"
+                                        required>
                                 </div>
                                 <div class="grid gap-1">
                                     <label class="font-inter text-sm font-medium text-[#404040]">Dosage <span

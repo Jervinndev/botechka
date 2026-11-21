@@ -351,7 +351,7 @@ onMounted(async () => {
                 <h1 class="text-2xl font-black text-gray-700 mt-2">{{ totalDistributionCount.toLocaleString() }}</h1>
                 <div class="flex items-center justify-between gap-2 mt-6">
                     <p class="text-sm">View detailed report</p>
-                    <router-link to="/admin/reports" class="p-2 bg-blue-700 text-white rounded-full">
+                    <router-link to="/distribution" class="p-2 bg-blue-700 text-white rounded-full">
                         <ChevronsRight />
                     </router-link>
                 </div>
@@ -366,7 +366,7 @@ onMounted(async () => {
                 <h1 class="text-2xl font-black text-gray-700 mt-2">{{ medicineShortageCount }}</h1>
                 <div class="flex items-center justify-between gap-2 mt-6">
                     <p class="text-sm">View detailed report</p>
-                    <router-link to="/admin/reports" class="p-2 bg-blue-700 text-white rounded-full">
+                    <router-link to="/Inventory" class="p-2 bg-blue-700 text-white rounded-full">
                         <ChevronsRight />
                     </router-link>
                 </div>
