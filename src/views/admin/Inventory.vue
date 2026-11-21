@@ -242,8 +242,7 @@ onMounted(() => {
                         <FileSpreadsheet :size="16" />
                         <span class="2xl:text-md text-sm">{{ isImporting ? 'Importing...' : 'Batch Upload' }}</span>
                     </button>
-                    <input ref="importInput" type="file" accept=".xlsx" class="hidden"
-                        @change="importMedicines">
+                    <input ref="importInput" type="file" accept=".xlsx" class="hidden" @change="importMedicines">
                     <button @click="IsAddstockOpen = true"
                         class="flex items-center justify-center 2xl:w-auto w-full bg-green-700 text-white p-2 px-4 gap-2 rounded-md">
                         <span class="2xl:text-md text-sm">Add stock</span>
@@ -277,12 +276,12 @@ onMounted(() => {
             </div>
         </div>
 
+        <p v-if="actionError" role="alert" class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ actionError
+            }}</p>
         <div
-            class="w-full h-162 overflow-x-scroll overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] mt-4">
-            <p v-if="actionError" role="alert" class="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ actionError
-                }}</p>
+            class="hidden 2xl:block w-full h-162 rounded-xl overflow-x-scroll overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] mt-4">
             <!-- Table para sa Dynamic Data galing Supabase -->
-            <table class="2xl:w-full w-240 bg-white border border-gray-100 rounded-xl border-collapse overflow-hidden">
+            <table class="w-full bg-white border border-gray-100 rounded-xl border-collapse overflow-x-auto">
                 <thead class="bg-blue-700 text-white">
                     <tr class="grid grid-cols-9 text-left">
                         <th class="p-3 font-semibold text-gray-50">Medicine Name</th>
@@ -310,9 +309,9 @@ onMounted(() => {
                         </td>
                     </tr>
                 </tbody>
-                <tbody v-else class="divide-y divide-gray-100">
+                <tbody v-else class="divide-y divide-gray-100 w-full">
                     <tr v-for="med in paginatedMedicines" :key="med.id"
-                        class="grid grid-cols-9 items-center hover:bg-gray-50">
+                        class="grid grid-cols-9 items-center hover:bg-gray-50 w-full">
                         <td class="flex item-center justify-start text-center gap-3 p-3 text-gray-700">
                             <img v-if="med.image_url" :src="med.image_url" :alt="`${med.medicine_name} image`"
                                 class="h-10 w-10 rounded-lg object-cover">
@@ -329,10 +328,8 @@ onMounted(() => {
                                 'bg-yellow-100 text-yellow-700': med.quantity > 0 && med.quantity <= med.restock_level,
                                 'bg-red-100 text-red-700': med.quantity === 0
                             }" class="px-2 py-1 text-xs rounded-full font-medium">
-                                {{ med.quantity > med.restock_level ? 'Available' : (med.quantity > 0 ? 'Low Stock' :
-                                    'Out of Stock')
-                                }}
-                            </span>
+                                {{ med.quantity > med.restock_level ? 'Available' : (med.quantity > 0 ? 'Low Stock'
+                                    : 'Out of Stock') }} </span>
                         </td>
                         <td class="p-3 text-gray-700">{{ med.dosage }}</td>
                         <td class="p-3 text-gray-700">{{ med.unit }}</td>
@@ -353,6 +350,87 @@ onMounted(() => {
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <div class="mt-4 max-h-162 space-y-3 overflow-y-auto 2xl:hidden">
+            <template v-if="isLoading">
+                <div v-for="row in 4" :key="row"
+                    class="animate-pulse rounded-xl border border-gray-100 bg-white p-4">
+                    <div class="h-4 w-2/3 rounded bg-gray-200"></div>
+                    <div class="mt-4 grid grid-cols-2 gap-3">
+                        <div v-for="column in 4" :key="column" class="h-10 rounded bg-gray-100"></div>
+                    </div>
+                </div>
+            </template>
+            <div v-else-if="fetchError" role="alert"
+                class="rounded-xl border border-red-100 bg-white p-5 text-center text-sm text-red-600">
+                {{ fetchError }}
+            </div>
+            <div v-else-if="searchfilter.length === 0"
+                class="rounded-xl border border-gray-100 bg-white p-6 text-center text-sm text-gray-500">
+                Walang nakitang gamot na tumutugma sa iyong hinahanap.
+            </div>
+            <template v-else>
+                <article v-for="med in paginatedMedicines" :key="med.id"
+                    class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                    <div class="flex items-start gap-3">
+                        <img v-if="med.image_url" :src="med.image_url" :alt="`${med.medicine_name} image`"
+                            class="h-12 w-12 shrink-0 rounded-lg object-cover">
+                        <div v-else
+                            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-lg font-semibold text-blue-700">
+                            {{ med.medicine_name?.charAt(0) || '?' }}
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h2 class="break-words font-semibold text-gray-800">{{ med.medicine_name }}</h2>
+                            <p class="mt-0.5 break-all text-xs text-gray-500">{{ med.medicine_id || 'N/A' }}</p>
+                        </div>
+                        <span :class="{
+                            'bg-green-100 text-green-700': med.quantity > med.restock_level,
+                            'bg-yellow-100 text-yellow-700': med.quantity > 0 && med.quantity <= med.restock_level,
+                            'bg-red-100 text-red-700': med.quantity === 0
+                        }" class="shrink-0 rounded-full px-2 py-1 text-[11px] font-medium">
+                            {{ med.quantity > med.restock_level ? 'Available' : (med.quantity > 0 ? 'Low Stock' : 'Out of Stock') }}
+                        </span>
+                    </div>
+
+                    <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-gray-100 pt-4 text-sm">
+                        <div class="min-w-0">
+                            <dt class="text-xs text-gray-500">Category</dt>
+                            <dd class="mt-0.5 break-words font-medium text-gray-700">{{ med.category || '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-gray-500">Quantity</dt>
+                            <dd class="mt-0.5 font-medium text-gray-700">{{ med.quantity }} {{ med.unit }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-gray-500">Price</dt>
+                            <dd class="mt-0.5 font-medium text-gray-700">₱{{ Number(med.price || 0).toFixed(2) }}</dd>
+                        </div>
+                        <div class="min-w-0">
+                            <dt class="text-xs text-gray-500">Dosage</dt>
+                            <dd class="mt-0.5 break-words font-medium text-gray-700">{{ med.dosage || '—' }}</dd>
+                        </div>
+                    </dl>
+
+                    <div class="mt-4 grid grid-cols-3 gap-2 border-t border-gray-100 pt-3">
+                        <button type="button" title="View" @click="selectedMedicine = med"
+                            class="flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 transition hover:bg-blue-50">
+                            <Eye :size="16" />
+                            <span>View</span>
+                        </button>
+                        <button type="button" title="Edit" @click="openEditMedicine(med)"
+                            class="flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 transition hover:bg-amber-50">
+                            <Pencil :size="16" />
+                            <span>Edit</span>
+                        </button>
+                        <button type="button" title="Archive" @click="archiveMedicine(med)"
+                            class="flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 transition hover:bg-gray-100">
+                            <Archive :size="16" />
+                            <span>Archive</span>
+                        </button>
+                    </div>
+                </article>
+            </template>
         </div>
 
         <div v-if="searchfilter.length > pageSize"
