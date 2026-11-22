@@ -15,6 +15,21 @@
   --radius-3xl: 0.625rem;
 }
 
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Panatilihing nasa ibabaw ang bagong state kapag nag-expand */
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
@@ -53,8 +68,8 @@ html.dark {
   --app-sidebar: #111112;
   --app-surface: #181818;
   --app-elevated: #212121;
-  --app-text-primary: #ffffffc5;
-  --app-text-secondary: #e5e5e5b1;
+  --app-text-primary: #ffffffac;
+  --app-text-secondary: #ffffff71;
   --app-border: #ffffff0e;
   --app-input: #1b2332;
 }

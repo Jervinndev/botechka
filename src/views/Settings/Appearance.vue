@@ -20,7 +20,8 @@ const { theme, setTheme } = useDark()
         <section class="grid max-w-3xl gap-4 sm:grid-cols-3">
             <!-- Light -->
             <label class="group block cursor-pointer">
-                <input v-model="theme" @change="setTheme($event.target.value)" type="radio" name="theme" value="light" class="peer sr-only" />
+                <input v-model="theme" @change="setTheme($event.target.value)" type="radio" name="theme" value="light"
+                    class="peer sr-only" />
                 <div
                     class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 transition group-hover:ring-blue-300 peer-checked:ring-2 peer-checked:ring-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-400">
                     <div class="relative h-24 w-full overflow-hidden">
@@ -62,7 +63,8 @@ const { theme, setTheme } = useDark()
 
             <!-- Dark -->
             <label class="group block cursor-pointer">
-                <input v-model="theme" @change="setTheme($event.target.value)" type="radio" name="theme" value="dark" class="peer sr-only" />
+                <input v-model="theme" @change="setTheme($event.target.value)" type="radio" name="theme" value="dark"
+                    class="peer sr-only" />
                 <div
                     class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 transition group-hover:ring-blue-300 peer-checked:ring-2 peer-checked:ring-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-400">
                     <div class="relative h-24 w-full overflow-hidden">
@@ -103,7 +105,8 @@ const { theme, setTheme } = useDark()
 
             <!-- System -->
             <label class="group block cursor-pointer">
-                <input v-model="theme" @change="setTheme($event.target.value)" type="radio" name="theme" value="system" class="peer sr-only" />
+                <input v-model="theme" @change="setTheme($event.target.value)" type="radio" name="theme" value="system"
+                    class="peer sr-only" />
                 <div
                     class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 transition group-hover:ring-blue-300 peer-checked:ring-2 peer-checked:ring-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-400">
                     <div class="relative h-24 w-full overflow-hidden">
