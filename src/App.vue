@@ -33,7 +33,7 @@ onMounted(async () => {
     </div>
     <template v-else-if="isRouterReady">
       <Header v-if="showcomponents" />
-      <div class="app-page-background bg-white">
+      <div class="app-page-background min-h-screen bg-white dark:!bg-white dark:!text-[#404040]">
         <router-view />
       </div>
       <Footer v-if="showcomponents" />
