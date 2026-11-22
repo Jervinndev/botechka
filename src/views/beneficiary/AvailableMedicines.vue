@@ -4,13 +4,14 @@ import { Pill, Search, RotateCcw, ArrowRight } from '@lucide/vue'
 import { useRouter } from 'vue-router'
 import { getMedicines } from '../../services/Fetches'
 import BeneficiaryTopActions from '../../components/beneficiary/BeneficiaryTopActions.vue'
+import ViewSkeliton from '../../Skelitonloader/ViewSkeliton.vue'
 
 
 const router = useRouter()
 const medicines = ref([])
 const searchQuery = ref('')
 const selectedCategory = ref('All')
-const isLoading = ref(false)
+const isLoading = ref(true)
 const errorMessage = ref('')
 
 const categories = computed(() => [
@@ -93,10 +94,7 @@ onMounted(loadMedicines)
         <p v-if="errorMessage" role="alert" class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
             {{ errorMessage }}
         </p>
-        <p v-else-if="isLoading && !medicines.length"
-            class="rounded-xl bg-white p-10 text-center text-sm text-gray-500">
-            Loading available medicines...
-        </p>
+        <ViewSkeliton v-else-if="isLoading && !medicines.length" variant="grid" />
         <p v-else-if="!filteredMedicines.length" class="rounded-xl bg-white p-10 text-center text-sm text-gray-500">
             No available medicines match your search.
         </p>

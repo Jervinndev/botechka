@@ -24,6 +24,7 @@ onMounted(async () => {
     const [profileResult, activityResult] = await Promise.allSettled([
         getMyProfile(),
         getMyActivityLog()
+        
     ])
     if (profileResult.status === 'fulfilled' && profileResult.value.success) {
         profile.value = profileResult.value.data

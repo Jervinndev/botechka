@@ -4,6 +4,7 @@ import Requestbeneficiarymodal from '../../components/modals/Requestbeneficiarym
 import { cancelMedicineRequest, getMyMedicineRequests } from '../../services/MedicineRequests'
 import BeneficiaryTopActions from '../../components/beneficiary/BeneficiaryTopActions.vue'
 import { useRoute } from 'vue-router'
+import ViewSkeliton from '../../Skelitonloader/ViewSkeliton.vue'
 
 const Ismodalopen = ref(false)
 const route = useRoute()
@@ -250,7 +251,9 @@ onMounted(() => {
                             </td>
                         </tr>
                         <tr v-if="loading">
-                            <td colspan="7" class="py-10 text-center text-sm text-gray-500">Loading your requests...</td>
+                            <td colspan="7" class="p-0">
+                                <ViewSkeliton variant="table" />
+                            </td>
                         </tr>
                         <tr v-else-if="filteredRequests.length === 0">
                             <td colspan="7" class="py-10 text-center text-sm text-gray-500">No medicine requests found.</td>

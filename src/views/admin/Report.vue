@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { ChartColumn, Printer, Download, Search } from '@lucide/vue'
 import { supabase } from '../../supabase/supabase'
 import AdminTopActions from '../../components/admin/AdminTopActions.vue'
+import ViewSkeliton from '../../Skelitonloader/ViewSkeliton.vue'
 
 const reportTypes = ['Category', 'Inventory', 'Dispensing', 'Beneficiary', 'Supplier', 'Audit Trail', 'Return']
 const selectedReport = ref('Category')
@@ -268,7 +269,8 @@ onMounted(() => {
                     <tbody class="divide-y divide-gray-100">
                         <tr v-if="isLoading || errorMessage || !reportRows.length">
                             <td :colspan="reportColumns.length" class="px-4 py-8 text-center text-slate-500">
-                                {{ errorMessage || (isLoading ? 'Loading report...' : 'No records found.') }}
+                                <ViewSkeliton v-if="isLoading" variant="table" />
+                                <span v-else>{{ errorMessage || 'No records found.' }}</span>
                             </td>
                         </tr>
                         <tr v-for="(row, index) in reportRows" :key="row.id || index"

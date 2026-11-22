@@ -27,6 +27,7 @@ import { getMedicines } from '../../services/Fetches'
 import AdminTopActions from '../../components/admin/AdminTopActions.vue'
 import TablePagination from '../../components/TablePagination.vue'
 import { usePagination } from '../../composable/usePagination.js'
+import ViewSkeliton from '../../Skelitonloader/ViewSkeliton.vue'
 import { isWithinDateRange } from '../../utils/dateRange.js'
 
 const route = useRoute()
@@ -763,7 +764,8 @@ watch(() => route.query.requestId, (requestId) => {
                         <tbody class="divide-y divide-gray-100">
                             <tr v-if="isLoadingTransactions || transactionsError">
                                 <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-500">
-                                    {{ transactionsError || 'Loading distributions...' }}
+                                    <ViewSkeliton v-if="isLoadingTransactions" variant="table" />
+                                    <span v-else>{{ transactionsError }}</span>
                                 </td>
                             </tr>
                             <tr v-else-if="filteredTransactions.length === 0">

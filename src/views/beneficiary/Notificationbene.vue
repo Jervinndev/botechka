@@ -3,10 +3,11 @@ import { computed, onMounted, ref } from 'vue'
 import { Bell, Check, CheckCheck, RotateCcw } from '@lucide/vue'
 import { getMyProfile } from '../../services/Authservices'
 import { getMyMedicineRequests } from '../../services/MedicineRequests'
+import ViewSkeliton from '../../Skelitonloader/ViewSkeliton.vue'
 
 const requests = ref([])
 const readIds = ref([])
-const isLoading = ref(false)
+const isLoading = ref(true)
 const errorMessage = ref('')
 const storageKey = ref('botechka_beneficiary_notifications_read')
 
@@ -99,10 +100,7 @@ onMounted(async () => {
 
         <p class="mb-3 text-xs text-gray-500">{{ unreadCount }} unread</p>
         <p v-if="errorMessage" role="alert" class="rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ errorMessage }}</p>
-        <p v-else-if="isLoading && !notifications.length"
-            class="rounded-xl bg-white p-10 text-center text-sm text-gray-500">
-            Loading your notifications...
-        </p>
+        <ViewSkeliton v-else-if="isLoading && !notifications.length" variant="list" />
         <p v-else-if="!notifications.length" class="rounded-xl bg-white p-10 text-center text-sm text-gray-500">
             No request updates yet.
         </p>

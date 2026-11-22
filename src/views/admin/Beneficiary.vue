@@ -7,6 +7,7 @@ import { setRecordArchived } from '../../services/Archive'
 import AdminTopActions from '../../components/admin/AdminTopActions.vue'
 import TablePagination from '../../components/TablePagination.vue'
 import { usePagination } from '../../composable/usePagination.js'
+import ViewSkeliton from '../../Skelitonloader/ViewSkeliton.vue'
 
 const isModalOpen = ref(false)
 const isEditModalOpen = ref(false)
@@ -14,7 +15,7 @@ const selectedBeneficiary = ref(null)
 const beneficiaries = ref([])
 const searchQuery = ref('')
 const selectedType = ref('All')
-const isLoading = ref(false)
+const isLoading = ref(true)
 const errorMessage = ref('')
 
 const filteredBeneficiaries = computed(() => {
@@ -109,7 +110,8 @@ onMounted(fetchBeneficiaries)
 </script>
 
 <template>
-    <section class="w-full">
+    <ViewSkeliton v-if="isLoading" variant="table" />
+    <section v-else class="w-full">
         <div class="flex items-start justify-between gap-4">
             <div>
                 <h1 class="font-inter font-bold text-[#404040] text-lg">Beneficiaries</h1>

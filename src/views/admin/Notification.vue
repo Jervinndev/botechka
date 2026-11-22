@@ -5,6 +5,7 @@ import {
     ClipboardList, CalendarClock, ShieldCheck, EllipsisVertical, Check
 } from '@lucide/vue'
 import { supabase } from '../../supabase/supabase'
+import ViewSkeliton from '../../Skelitonloader/ViewSkeliton.vue'
 
 const notifications = ref([])
 const searchQuery = ref('')
@@ -236,9 +237,7 @@ onMounted(() => {
                 <p class="text-xs text-[#2638ff]">{{ unreadCount }} unread</p>
             </div>
 
-            <p v-if="isLoading && !notifications.length" class="px-6 py-10 text-center text-sm text-slate-500">
-                Loading notifications...
-            </p>
+            <ViewSkeliton v-if="isLoading && !notifications.length" variant="list" />
             <p v-else-if="!visibleNotifications.length" class="px-6 py-10 text-center text-sm text-slate-500">
                 No notifications found.
             </p>

@@ -1,6 +1,7 @@
 <script setup>
 import { ShieldCheck, ChevronsRight, AlignVerticalSpaceAround, TriangleAlert, BookPlus } from '@lucide/vue'
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import gsap from 'gsap'
 import {
     Chart as ChartJS,
     Title,
@@ -25,6 +26,8 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, LineElement, PointElement, 
 
 const { isDark } = useDark()
 const loading = ref(true)
+const dashboardRoot = ref(null)
+let gsapContext
 const medicines = ref([])
 const distributionTransactions = ref([])
 const totalDistributionCount = ref(0)
@@ -296,13 +299,41 @@ onMounted(async () => {
         fetchDashboardData()
     ])
     loading.value = false
+    await nextTick()
+    gsapContext = gsap.context(() => {
+        gsap.from(dashboardRoot.value.querySelectorAll('[data-dashboard-header]'), {
+            y: -12,
+            opacity: 0,
+            duration: 0.55,
+            ease: 'power2.out'
+        })
+        gsap.from(dashboardRoot.value.querySelectorAll('[data-dashboard-card]'), {
+            y: 18,
+            opacity: 0,
+            duration: 0.65,
+            stagger: 0.08,
+            ease: 'power2.out'
+        })
+        gsap.from(dashboardRoot.value.querySelectorAll('[data-dashboard-section]'), {
+            y: 20,
+            opacity: 0,
+            duration: 0.7,
+            stagger: 0.1,
+            delay: 0.18,
+            ease: 'power2.out'
+        })
+    }, dashboardRoot.value)
+})
+
+onBeforeUnmount(() => {
+    gsapContext?.revert()
 })
 </script>
 
 <template>
     <Dashboardskeliton v-if="loading" />
-    <section v-else class="w-full">
-        <div class="flex justify-between items-center ">
+    <section v-else ref="dashboardRoot" class="w-full">
+        <div data-dashboard-header class="flex justify-between items-center ">
             <div>
                 <h1 class="font-inter font-bold text-[#404040] text-lg">Dashboard</h1>
                 <p class="text-sm text-[#808080]">Manage your medicine resources</p>
@@ -310,7 +341,7 @@ onMounted(async () => {
             <AdminTopActions />
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-            <div class="bg-blue-700 p-4 text-white rounded-xl">
+            <div data-dashboard-card class="bg-blue-700 p-4 text-white rounded-xl">
                 <div class="flex items-center gap-2">
                     <ShieldCheck size="35" />
                     <p class="text-sm font-medium">Inventory Status</p>
@@ -326,7 +357,7 @@ onMounted(async () => {
                     </router-link>
                 </div>
             </div>
-            <div class="bg-white p-4 text-black rounded-xl">
+            <div data-dashboard-card class="bg-white p-4 text-black rounded-xl">
                 <div class="flex items-center gap-2">
                     <div class="p-2 bg-blue-100/70 rounded-lg">
                         <BookPlus size="22" class="text-blue-700" />
@@ -341,7 +372,7 @@ onMounted(async () => {
                     </router-link>
                 </div>
             </div>
-            <div class="bg-white p-4 text-black rounded-xl">
+            <div data-dashboard-card class="bg-white p-4 text-black rounded-xl">
                 <div class="flex items-center gap-2">
                     <div class="p-2 bg-blue-100/70 rounded-lg">
                         <AlignVerticalSpaceAround size="22" class="text-blue-700" />
@@ -356,7 +387,7 @@ onMounted(async () => {
                     </router-link>
                 </div>
             </div>
-            <div class="bg-white p-4 text-black rounded-xl">
+            <div data-dashboard-card class="bg-white p-4 text-black rounded-xl">
                 <div class="flex items-center gap-2">
                     <div class="p-2 bg-blue-100/70 rounded-lg">
                         <TriangleAlert size="22" class="text-blue-700" />
@@ -374,7 +405,7 @@ onMounted(async () => {
         </div>
 
         <!-- CHARTS BABY -->
-        <div class="font-poppins mt-4">
+        <div data-dashboard-section class="font-poppins mt-4">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <!-- Total Distribution (Line Chart) -->
 
@@ -413,7 +444,7 @@ onMounted(async () => {
         </div>
 
         <!-- TABLE -->
-        <div class="mt-4 font-poppins">
+        <div data-dashboard-section class="mt-4 font-poppins">
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div class="bg-white p-6 rounded-2xl border border-gray-100 flex flex-col justify-between">
