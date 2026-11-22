@@ -1,21 +1,25 @@
 <script setup>
 import { BookPlus, AlignVerticalSpaceAround, TriangleAlert, Plus } from '@lucide/vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, nextTick, ref } from 'vue'
+import gsap from 'gsap'
 import BeneficiaryTopActions from '../../components/beneficiary/BeneficiaryTopActions.vue'
 import Requestbeneficiarymodal from '../../components/modals/Requestbeneficiarymodal.vue'
 import { getMyBeneficiaryDashboardData } from '../../services/BeneficiaryDashboard.js'
 import { getMyMedicineRequests } from '../../services/MedicineRequests.js'
 import { getMedicines } from '../../services/Fetches.js'
+import ViewSkeliton from '../../Skelitonloader/ViewSkeliton.vue'
 
 const med = ref([])
 const requests = ref([])
 const beneficiary = ref(null)
 const history = ref([])
-const isLoading = ref(false)
+const isLoading = ref(true)
 const fetchError = ref('')
 const requestSuccess = ref('')
 const isRequestModalOpen = ref(false)
 const searchQuery = ref('')
+const dashboardRoot = ref(null)
+let gsapContext
 
 const filteredHistory = computed(() => {
     const query = searchQuery.value.trim().toLowerCase()
@@ -84,7 +88,38 @@ async function loadDashboard() {
         history.value = []
     } finally {
         isLoading.value = false
+        await nextTick()
+        animateDashboard()
     }
+}
+
+function animateDashboard() {
+    gsapContext?.revert()
+    if (!dashboardRoot.value) return
+
+    gsapContext = gsap.context(() => {
+        gsap.from(dashboardRoot.value.querySelectorAll('[data-dashboard-header]'), {
+            y: -12,
+            opacity: 0,
+            duration: 0.55,
+            ease: 'power2.out'
+        })
+        gsap.from(dashboardRoot.value.querySelectorAll('[data-dashboard-card]'), {
+            y: 18,
+            opacity: 0,
+            duration: 0.65,
+            stagger: 0.08,
+            ease: 'power2.out'
+        })
+        gsap.from(dashboardRoot.value.querySelectorAll('[data-dashboard-section]'), {
+            y: 20,
+            opacity: 0,
+            duration: 0.7,
+            stagger: 0.1,
+            delay: 0.18,
+            ease: 'power2.out'
+        })
+    }, dashboardRoot.value)
 }
 
 async function handleRequestSaved() {
@@ -99,12 +134,18 @@ function openRequestModal() {
 }
 
 onMounted(loadDashboard)
+
+onBeforeUnmount(() => {
+    gsapContext?.revert()
+})
 </script>
 
 
 <template>
+    <ViewSkeliton v-if="isLoading" variant="cards" />
+    <main v-else ref="dashboardRoot">
     <div>
-        <div class="flex items-center justify-between gap-3">
+        <div data-dashboard-header class="flex items-center justify-between gap-3">
             <div>
                 <h1 class="font-inter font-bold text-[#404040] text-lg">My Dashboard</h1>
                 <p class="text-sm text-[#808080]">Hello po! Jervin Kamusta!</p>
@@ -115,7 +156,7 @@ onMounted(loadDashboard)
         </div>
     </div>
     <div class="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <div
+        <div data-dashboard-card
             class="relative flex flex-col items-start gap-3 overflow-hidden rounded-xl border border-gray-100 bg-white p-4 ">
             <span
                 class="pointer-events-none absolute -right-5 -top-5 h-20 w-20 rounded-full border-[14px] border-blue-100"></span>
@@ -128,7 +169,7 @@ onMounted(loadDashboard)
             </div>
         </div>
 
-        <div
+        <div data-dashboard-card
             class="relative flex flex-col items-start gap-3 overflow-hidden rounded-xl border border-gray-100 bg-white p-4 ">
             <span
                 class="pointer-events-none absolute -right-5 -top-5 h-20 w-20 rounded-full border-[14px] border-blue-100"></span>
@@ -143,7 +184,7 @@ onMounted(loadDashboard)
             </div>
         </div>
 
-        <div
+        <div data-dashboard-card
             class="relative flex flex-col items-start gap-3 overflow-hidden rounded-xl border border-gray-100 bg-white p-4 ">
             <span
                 class="pointer-events-none absolute -right-5 -top-5 h-20 w-20 rounded-full border-[14px] border-blue-100"></span>
@@ -157,7 +198,7 @@ onMounted(loadDashboard)
             </div>
         </div>
 
-        <div
+        <div data-dashboard-card
             class="relative flex flex-col items-start gap-3 overflow-hidden rounded-xl border border-gray-100 bg-white p-4 ">
             <span
                 class="pointer-events-none absolute -right-5 -top-5 h-20 w-20 rounded-full border-[14px] border-blue-100"></span>
@@ -185,7 +226,7 @@ onMounted(loadDashboard)
     </p>
 
     <!-- Table -->
-    <div class="mt-6 font-inter text-gray-800 bg-white p-4 rounded-lg">
+    <div data-dashboard-section class="mt-6 font-inter text-gray-800 bg-white p-4 rounded-lg">
         <div class="flex items-center gap-3 mb-4">
             <div>
                 <h1 class="2xl:text-xl text-md font-bold text-black/80 tracking-tight">Medicine Release History</h1>
@@ -311,6 +352,7 @@ onMounted(loadDashboard)
             </div>
         </div>
     </div>
+    </main>
     <Requestbeneficiarymodal :IsOpen="isRequestModalOpen" @close="isRequestModalOpen = false"
         @saved="handleRequestSaved" />
 </template>

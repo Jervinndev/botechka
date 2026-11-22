@@ -14,6 +14,7 @@ import {
 import AdminTopActions from '../../components/admin/AdminTopActions.vue'
 import TablePagination from '../../components/TablePagination.vue'
 import { usePagination } from '../../composable/usePagination.js'
+import ViewSkeliton from '../../Skelitonloader/ViewSkeliton.vue'
 
 const requests = ref([])
 const loading = ref(true)
@@ -352,7 +353,9 @@ onMounted(loadRequests)
             </td>
           </tr>
           <tr v-if="loading">
-            <td colspan="7" class="px-6 py-10 text-center text-sm text-slate-500">Loading beneficiary requests...</td>
+            <td colspan="7" class="p-0">
+              <ViewSkeliton variant="table" />
+            </td>
           </tr>
           <tr v-else-if="filteredRequests.length === 0">
             <td colspan="7" class="px-6 py-10 text-center text-sm text-slate-500">No beneficiary requests found.</td>
